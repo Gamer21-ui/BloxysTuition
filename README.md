@@ -17,7 +17,7 @@ Think Google Classroom + Duolingo + a pinch of Roblox: lessons, quizzes, XP, lev
 | +0.25× XP per level studied above your own (O→AS 1.25×, O→A 1.5×) | Attendance (40 XP present, 20 late) |
 | Live quiz battles with round-by-round reveals | Bonus XP / coins with a reason |
 | Homework hand-in (photos, PDFs, Word…) with feedback | Announcements (in-app + Discord) and custom challenges |
-| Leaderboards: all-time, monthly, speedrun, battles, attendance | **Receipt-style parent progress reports** (print / save as PDF) |
+| Leaderboards: all-time, monthly, speedrun, battles, attendance | **Parent progress reports** in plain language (print / save as PDF) |
 | Installable app (PWA) with offline page | Discord webhook posts: level-ups, battle results, new homework |
 
 **Not yet (later phases):** coin shop and cosmetics, Discord role bot, AS/A Level courses, push notifications.

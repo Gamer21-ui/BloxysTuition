@@ -71,14 +71,12 @@ export async function deleteNote(fd: FormData) {
   revalidatePath(`/tutor/students/${str(fd, "student")}`);
 }
 
-export async function setTopic(fd: FormData) {
+export async function setTopicLabel(student: string, chapter: string, label: "weak" | "average" | "strong" | "none") {
   await requireTutor();
-  const student = uuid.parse(str(fd, "student"));
-  const chapter = uuid.parse(str(fd, "chapter"));
-  const label = str(fd, "label");
+  uuid.parse(student); uuid.parse(chapter);
   const admin = createAdminClient();
   if (label === "none") await admin.from("student_topics").delete().eq("student_id", student).eq("chapter_id", chapter);
-  else await admin.from("student_topics").upsert({ student_id: student, chapter_id: chapter, label: z.enum(["weak", "strong"]).parse(label) });
+  else await admin.from("student_topics").upsert({ student_id: student, chapter_id: chapter, label: z.enum(["weak", "average", "strong"]).parse(label) });
   revalidatePath(`/tutor/students/${student}`);
 }
 
@@ -95,6 +93,12 @@ export async function awardBonus(fd: FormData) {
 }
 
 // ---------------------------------------------------------------- parent reports
+const rating = (pct: number | null) =>
+  pct === null ? "Not assessed" : pct >= 80 ? "Excellent" : pct >= 65 ? "Good" : pct >= 50 ? "Satisfactory" : "Needs improvement";
+const pctOf = (s: number, t: number) => (t ? Math.round((100 * s) / t) : null);
+const muDate = (iso: string) => new Date(new Date(iso).getTime() + 4 * 3600_000).toISOString().slice(0, 10);
+
+/** Builds a parent-friendly snapshot (no XP / levels) and saves it as a report. */
 export async function createReport(fd: FormData) {
   await requireTutor();
   const id = uuid.parse(str(fd, "id"));
@@ -103,36 +107,63 @@ export async function createReport(fd: FormData) {
   const days = z.number().int().min(7).max(365).parse(num(fd, "days", 30));
   const since = new Date(Date.now() - days * 86400_000).toISOString();
   const admin = createAdminClient();
-  const [{ data: p }, { data: att }, { data: q }, { data: subs }, { data: xp }, { data: topics }, { data: ach }] = await Promise.all([
-    admin.from("profiles").select("display_name, parent_name, xp, streak, best_streak, tier").eq("id", id).single(),
+  const [{ data: p }, { data: att }, { data: q }, { data: subs }, { data: set }, { data: act }, { data: topics }] = await Promise.all([
+    admin.from("profiles").select("display_name, parent_name, tier").eq("id", id).single(),
     admin.from("attendance").select("status, session:class_sessions!inner(held_on)").eq("user_id", id).gte("session.held_on", since.slice(0, 10)),
-    admin.from("quiz_attempts").select("score, total, quiz:quizzes(course:courses(title))").eq("user_id", id).not("finished_at", "is", null).gte("started_at", since),
-    admin.from("submissions").select("score, graded_at, submitted_at, assignment:assignments(max_score, due_at)").eq("user_id", id).gte("submitted_at", since),
-    admin.from("xp_events").select("amount").eq("user_id", id).gte("created_at", since),
-    admin.from("student_topics").select("label, chapter:chapters(title, number)").eq("student_id", id),
-    admin.from("user_achievements").select("id").eq("user_id", id).gte("earned_at", since),
+    admin.from("quiz_attempts").select("score, total, quiz:quizzes(course:courses(title, sort))").eq("user_id", id).not("finished_at", "is", null).gte("started_at", since),
+    admin.from("submissions").select("score, graded_at, submitted_at, assignment:assignments(max_score, due_at, course:courses(title))").eq("user_id", id).gte("submitted_at", since),
+    admin.from("assignments").select("id").eq("status", "published").gte("created_at", since),
+    admin.from("xp_events").select("created_at").eq("user_id", id).gte("created_at", since),
+    admin.from("student_topics").select("label, chapter:chapters(number, title, sort, course:courses(title, sort))").eq("student_id", id),
   ]);
   if (!p) await fail("Student not found");
+
   const a = att || [];
-  const present = a.filter((r) => r.status === "present" || r.status === "late").length;
-  const bySubject: Record<string, { s: number; t: number; n: number }> = {};
+  const count = (k: string) => a.filter((r) => r.status === k).length;
+  const attended = count("present") + count("late");
+
+  type Subj = { subject: string; sort: number; qs: number; qt: number; quizzes: number; hs: number; hn: number };
+  const subj: Record<string, Subj> = {};
+  const get = (name: string, sort = 99) => (subj[name] ??= { subject: name, sort, qs: 0, qt: 0, quizzes: 0, hs: 0, hn: 0 });
   for (const r of q || []) {
-    const name = (r.quiz as unknown as { course: { title: string } | null })?.course?.title || "Other";
-    bySubject[name] ??= { s: 0, t: 0, n: 0 };
-    bySubject[name].s += r.score ?? 0; bySubject[name].t += r.total ?? 0; bySubject[name].n++;
+    const c = (r.quiz as unknown as { course: { title: string; sort: number } | null })?.course;
+    const s = get(c?.title || "Other", c?.sort);
+    s.qs += r.score ?? 0; s.qt += r.total ?? 0; s.quizzes++;
   }
-  const graded = (subs || []).filter((s) => s.graded_at);
-  const hwPct = graded.length ? Math.round(100 * graded.reduce((s, x) => s + (x.score ?? 0) / ((x.assignment as unknown as { max_score: number })?.max_score || 1), 0) / graded.length) : null;
-  const onTime = (subs || []).filter((s) => { const d = (s.assignment as unknown as { due_at: string | null })?.due_at; return !d || s.submitted_at <= d; }).length;
+  let hwSum = 0, hwN = 0, onTime = 0;
+  for (const r of subs || []) {
+    const as = r.assignment as unknown as { max_score: number; due_at: string | null; course: { title: string } | null };
+    if (!as?.due_at || r.submitted_at <= as.due_at) onTime++;
+    if (r.graded_at && as?.max_score) {
+      const frac = (r.score ?? 0) / as.max_score;
+      hwSum += frac; hwN++;
+      const s = get(as.course?.title || "Other"); s.hs += frac; s.hn++;
+    }
+  }
+  const subjects = Object.values(subj).sort((x, y) => x.sort - y.sort).map((s) => {
+    const quiz = pctOf(s.qs, s.qt);
+    const hw = s.hn ? Math.round((100 * s.hs) / s.hn) : null;
+    const overall = quiz !== null && hw !== null ? Math.round((quiz + hw) / 2) : quiz ?? hw;
+    return { subject: s.subject, quizzes: s.quizzes, quiz_pct: quiz, homework_pct: hw, rating: rating(overall) };
+  });
+
+  type T = { label: string; chapter: { number: string; title: string; sort: number; course: { title: string; sort: number } } | null };
+  const byCourse: Record<string, { subject: string; sort: number; strong: string[]; average: string[]; weak: string[] }> = {};
+  for (const t of ((topics as unknown as T[]) || []).filter((t) => t.chapter).sort((x, y) => x.chapter!.sort - y.chapter!.sort)) {
+    const c = t.chapter!;
+    const g = (byCourse[c.course.title] ??= { subject: c.course.title, sort: c.course.sort, strong: [], average: [], weak: [] });
+    g[t.label as "strong" | "average" | "weak"]?.push(`${c.number}. ${c.title}`);
+  }
+
+  const allQs = (q || []).reduce((s, r) => s + (r.score ?? 0), 0), allQt = (q || []).reduce((s, r) => s + (r.total ?? 0), 0);
   const stats = {
-    student: p!.display_name, tier: p!.tier, days,
-    attendance: { sessions: a.length, present, pct: a.length ? Math.round((100 * present) / a.length) : null },
-    quizzes: { count: (q || []).length, subjects: Object.entries(bySubject).map(([k, v]) => ({ subject: k, quizzes: v.n, pct: v.t ? Math.round((100 * v.s) / v.t) : 0 })) },
-    homework: { handed_in: (subs || []).length, on_time: onTime, avg_pct: hwPct },
-    xp_gained: (xp || []).reduce((s, r) => s + r.amount, 0), total_xp: p!.xp, streak: p!.streak, best_streak: p!.best_streak,
-    achievements: (ach || []).length,
-    strong: (topics || []).filter((t) => t.label === "strong").map((t) => (t.chapter as unknown as { title: string })?.title),
-    weak: (topics || []).filter((t) => t.label === "weak").map((t) => (t.chapter as unknown as { title: string })?.title),
+    version: 2, student: p!.display_name, tier: p!.tier, days,
+    attendance: { sessions: a.length, present: count("present"), late: count("late"), absent: count("absent"), excused: count("excused"), pct: pctOf(attended, a.length) },
+    quizzes: { count: (q || []).length, avg_pct: pctOf(allQs, allQt) },
+    homework: { set: (set || []).length, handed_in: (subs || []).length, on_time: onTime, avg_pct: hwN ? Math.round((100 * hwSum) / hwN) : null },
+    study_days: new Set((act || []).map((e) => muDate(e.created_at))).size,
+    subjects,
+    topics: Object.values(byCourse).sort((x, y) => x.sort - y.sort).map(({ sort: _s, ...g }) => g),
   };
   const { data: rep, error } = await admin.from("reports").insert({
     student_id: id, period_label: period, parent_name: opt(fd, "parent_name") || p!.parent_name, comment, stats,

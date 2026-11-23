@@ -1,6 +1,6 @@
 # Database schema
 
-Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime).
+Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating.
 
 ## People
 
@@ -8,7 +8,7 @@ Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functi
 |---|---|---|---|
 | `profiles` | One row per Discord account: role, status, tier (O/AS/A), avatar, theme, XP, coins, streak, parent info | own row | display name, theme, avatar, contact |
 | `tutor_notes` | Private notes about a student | ❌ never | ❌ |
-| `student_topics` | Weak/strong chapters per student | own | ❌ |
+| `student_topics` | Per-chapter rating: weak / average / strong | own | ❌ |
 | `reports` | Parent progress reports (stats snapshot + comment) | own, if shared | ❌ |
 
 ## Content

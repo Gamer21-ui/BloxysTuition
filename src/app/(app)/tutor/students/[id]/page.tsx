@@ -8,7 +8,8 @@ import { Card, SectionTitle, StatusChip } from "@/components/ui";
 import { levelFromXp, rankName } from "@/lib/xp";
 import { fmtDate, timeAgo } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
-import { addNote, awardBonus, createReport, deleteNote, setTopic, updateStudent } from "../../actions";
+import { addNote, awardBonus, createReport, deleteNote, updateStudent } from "../../actions";
+import { TopicEditor } from "./topic-editor";
 import { StatusButtons } from "../status-buttons";
 
 export const metadata: Metadata = { title: "Student" };
@@ -24,15 +25,32 @@ export default async function Student({ params }: { params: Promise<{ id: string
   const [{ data: notes }, { data: topics }, { data: chapters }, { data: attempts }, { data: att }, { data: subs }, { data: reports }] = await Promise.all([
     admin.from("tutor_notes").select("id, body, created_at").eq("student_id", id).order("created_at", { ascending: false }),
     admin.from("student_topics").select("chapter_id, label").eq("student_id", id),
-    admin.from("chapters").select("id, number, title, course:courses(code, sort)").order("sort"),
+    admin.from("chapters").select("id, number, title, sort, course:courses(id, title, code, color, sort)").order("sort"),
     admin.from("quiz_attempts").select("score, total, flagged, finished_at, xp_awarded, quiz:quizzes(title)").eq("user_id", id).not("finished_at", "is", null).order("finished_at", { ascending: false }).limit(12),
     admin.from("attendance").select("status").eq("user_id", id),
     admin.from("submissions").select("score, graded_at, assignment:assignments(title, max_score)").eq("user_id", id).order("submitted_at", { ascending: false }).limit(8),
     admin.from("reports").select("id, period_label, created_at, shared_with_student").eq("student_id", id).order("created_at", { ascending: false }),
   ]);
+  const { data: allAttempts } = await admin.from("quiz_attempts").select("score, total, quiz:quizzes!inner(kind, chapter_id)")
+    .eq("user_id", id).eq("quiz.kind", "quiz").not("finished_at", "is", null);
   const topicOf = new Map((topics || []).map((t) => [t.chapter_id, t.label]));
-  const chs = ((chapters || []) as unknown as { id: string; number: string; title: string; course: { code: string; sort: number } }[])
-    .sort((a, b) => a.course.sort - b.course.sort);
+  const perChapter = new Map<string, { s: number; t: number; n: number }>();
+  for (const at of allAttempts || []) {
+    const cid = (at.quiz as unknown as { chapter_id: string | null })?.chapter_id;
+    if (!cid) continue;
+    const v = perChapter.get(cid) || { s: 0, t: 0, n: 0 };
+    v.s += at.score ?? 0; v.t += at.total ?? 0; v.n++;
+    perChapter.set(cid, v);
+  }
+  type ChRow = { id: string; number: string; title: string; sort: number; course: { id: string; title: string; code: string; color: string; sort: number } };
+  const topicCourses: { id: string; title: string; code: string; color: string; sort: number; chapters: { id: string; number: string; title: string; label: "weak" | "average" | "strong" | "none"; quizPct: number | null; tries: number }[] }[] = [];
+  for (const c of ((chapters || []) as unknown as ChRow[])) {
+    let g = topicCourses.find((x) => x.id === c.course.id);
+    if (!g) { g = { ...c.course, chapters: [] }; topicCourses.push(g); }
+    const v = perChapter.get(c.id);
+    g.chapters.push({ id: c.id, number: c.number, title: c.title, label: (topicOf.get(c.id) as "weak" | "average" | "strong") || "none", quizPct: v?.t ? Math.round((100 * v.s) / v.t) : null, tries: v?.n || 0 });
+  }
+  topicCourses.sort((x, y) => x.sort - y.sort);
   const a = att || [];
   const pres = a.filter((x) => x.status === "present" || x.status === "late").length;
   const lvl = levelFromXp(p.xp);
@@ -98,22 +116,8 @@ export default async function Student({ params }: { params: Promise<{ id: string
         ))}
       </Card>
 
-      <SectionTitle>Weak / strong topics <span className="text-sm font-normal text-muted">(they see these on their courses page)</span></SectionTitle>
-      <Card className="max-h-[420px] divide-y divide-line overflow-y-auto p-0">
-        {chs.map((c) => {
-          const cur = topicOf.get(c.id) || "none";
-          return (
-            <form key={c.id} action={setTopic} className="flex items-center gap-2 px-4 py-2 text-sm">
-              <input type="hidden" name="student" value={p.id} /><input type="hidden" name="chapter" value={c.id} />
-              <span className="w-14 text-xs text-muted">{c.course.code}</span>
-              <span className="flex-1">{c.number}. {c.title}</span>
-              {(["weak", "none", "strong"] as const).map((l) => (
-                <button key={l} name="label" value={l} className={`chip ${cur === l ? (l === "weak" ? "bg-bad text-white" : l === "strong" ? "bg-good text-white" : "bg-surface2") : "opacity-60"}`}>{l === "none" ? "–" : l}</button>
-              ))}
-            </form>
-          );
-        })}
-      </Card>
+      <SectionTitle>Topic ratings <span className="text-sm font-normal text-muted">(used in the parent report)</span></SectionTitle>
+      <TopicEditor studentId={p.id} courses={topicCourses} />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div>
@@ -140,7 +144,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
         </div>
       </div>
 
-      <SectionTitle>🧾 Parent progress report</SectionTitle>
+      <SectionTitle>Parent progress report</SectionTitle>
       <Card>
         <form action={createReport} className="grid gap-3 sm:grid-cols-3">
           <input type="hidden" name="id" value={p.id} />
@@ -148,13 +152,13 @@ export default async function Student({ params }: { params: Promise<{ id: string
           <div><label className="label">Covering the last</label>
             <select name="days" className="input" defaultValue="30"><option value="14">2 weeks</option><option value="30">month</option><option value="90">3 months</option><option value="180">6 months</option></select></div>
           <div><label className="label">Parent name</label><input name="parent_name" className="input" defaultValue={p.parent_name || ""} /></div>
-          <div className="sm:col-span-3"><label className="label">Your comment</label><textarea name="comment" required className="input min-h-[110px]" placeholder="Strong month overall. Ledgers are now confident…" /></div>
+          <div className="sm:col-span-3"><label className="label">Your comment</label><textarea name="comment" required className="input min-h-[110px]" placeholder="Written for the parent: progress this period, what is going well, what to work on next, and how they can help at home." /></div>
           <label className="flex items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" name="share" /> Let {p.display_name} see it too</label>
-          <button className="btn btn-primary btn-sm">Generate receipt</button>
+          <button className="btn btn-primary btn-sm">Create report</button>
         </form>
         {!!reports?.length && (
           <div className="mt-4 flex flex-wrap gap-2">
-            {reports.map((r) => <Link key={r.id} href={`/reports/${r.id}`} className="chip hover:underline">🧾 {r.period_label} {r.shared_with_student && "· shared"}</Link>)}
+            {reports.map((r) => <Link key={r.id} href={`/reports/${r.id}`} className="chip hover:underline">📄 {r.period_label} {r.shared_with_student && "· shared"}</Link>)}
           </div>
         )}
       </Card>
