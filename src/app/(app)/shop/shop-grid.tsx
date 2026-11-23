@@ -9,7 +9,7 @@ import { NameTag } from "@/components/name-tag";
 import type { BlockyConfig, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export type Item = { id: string; code: string; kind: string; name: string; description: string | null; price: number; rarity: string; min_level: number; data: { text?: string }; sort: number };
+export type Item = { id: string; code: string; kind: string; name: string; description: string | null; price: number; rarity: string; min_level: number; data: { text?: string }; sort: number; tutor_only?: boolean };
 type Me = {
   id: string; name: string; coins: number; level: number; title: string | null; nameStyle: string | null; frame: string | null;
   blocky: BlockyConfig; avatarMode: Profile["avatar_mode"]; discordUrl: string | null; robloxUrl: string | null; freezes: number; streak: number;
@@ -26,7 +26,7 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
   const [tab, setTab] = useState("hat");
   const [busy, setBusy] = useState<string | null>(null);
   const [msg, setMsg] = useState<{ text: string; bad?: boolean } | null>(null);
-  const has = (it: Item) => owned.includes(it.id);
+  const has = (it: Item) => owned.includes(it.id) || !!it.tutor_only; // owner exclusives are free for the tutor
   const equipped = (it: Item) =>
     it.kind === "title" ? me.title === it.data.text : it.kind === "name_style" ? me.nameStyle === it.code : it.kind === "frame" ? me.frame === it.code
       : it.kind === "hat" ? me.blocky?.hat === it.code : it.kind === "pattern" ? me.blocky?.pattern === it.code : false;
@@ -70,10 +70,10 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
           const poor = me.coins < it.price;
           const freeze = it.kind === "streak_freeze";
           return (
-            <div key={it.id} className={cn("card flex flex-col items-center gap-2 text-center", on && "ring-2 ring-good")}>
+            <div key={it.id} className={cn("card flex flex-col items-center gap-2 text-center", on && "ring-2 ring-good", it.tutor_only && !on && "ring-2 ring-xp")}>
               <div className="relative">{preview(it)}{locked && <span className="absolute inset-0 grid place-items-center rounded bg-black/55 text-xs font-bold text-white"><span className="flex items-center gap-1"><Lock size={14} aria-hidden="true" /> Lv {it.min_level}</span></span>}</div>
               <div className="font-bold leading-tight">{it.name}</div>
-              <div className={cn("text-xs font-bold uppercase", RARITY[it.rarity])}>{it.rarity}</div>
+              <div className={cn("text-xs font-bold uppercase", it.tutor_only ? "fb-owner-name" : RARITY[it.rarity])}>{it.tutor_only ? "👑 Owner exclusive" : it.rarity}</div>
               {it.description && <div className="text-xs text-muted">{it.description}</div>}
               <div className="mt-auto w-full pt-1">
                 {freeze || !own ? (

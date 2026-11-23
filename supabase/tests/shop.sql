@@ -36,3 +36,22 @@ update profiles set streak = 6, last_study_date = today_local() - 4 where displa
 select award_xp('00000000-0000-0000-0000-000000000002', 10, 'test') ->> 'xp' as xp;
 select streak as streak_should_be_1, streak_freezes as freezes_still_1 from profiles where display_name = 'Ava';
 select sum(coins) as shop_spend_logged_should_be_neg460 from xp_events where reason = 'shop';
+-- owner exclusives
+set role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
+select count(*) as student_sees_owner_items_should_be_0 from shop_items where tutor_only;
+do $$ begin perform equip_item('frame', 'owner'); raise exception 'student equipped owner frame!';
+exception when others then if sqlerrm like '%do not own%' then raise notice 'ok: student cannot equip owner frame'; else raise; end if; end $$;
+reset role;
+do $$ begin
+  perform set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000002',false);
+  set local role authenticated;
+  perform buy_item((select id from shop_items where tutor_only limit 1));
+  raise exception 'student bought owner item!';
+exception when others then if sqlerrm like '%not available%' then raise notice 'ok: owner items not for sale'; else raise; end if; end $$;
+set role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000001',false);
+select count(*) as tutor_sees_owner_items_should_be_5 from shop_items where tutor_only;
+select equip_item('frame', 'owner'), equip_item('name_style', 'owner'), equip_item('hat', 'owner_crown'), equip_item('title', 't-owner');
+select frame, name_style, blocky->>'hat' as hat, title from profiles where id = auth.uid();
+reset role;

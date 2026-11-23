@@ -35,6 +35,12 @@ export const SHOP_ITEMS = [
   { code: "t-tycoon", kind: "title", name: "Business Tycoon", price: 120, rarity: "common", data: { text: "Business Tycoon" } },
   { code: "t-exam", kind: "title", name: "Exam Destroyer", price: 300, rarity: "rare", min_level: 5, data: { text: "Exam Destroyer" } },
   { code: "t-comeback", kind: "title", name: "The Comeback Kid", price: 500, rarity: "epic", min_level: 8, data: { text: "The Comeback Kid" } },
+  // owner exclusives: never sold, only the tutor can see and equip them
+  { code: "owner_crown", kind: "hat", name: "Owner Crown", price: 0, rarity: "legendary", tutor_only: true, description: "Owner exclusive." },
+  { code: "owner", kind: "pattern", name: "Throne Room", price: 0, rarity: "legendary", tutor_only: true, description: "Owner exclusive." },
+  { code: "owner", kind: "frame", name: "Owner Frame", price: 0, rarity: "legendary", tutor_only: true, description: "Owner exclusive. It spins." },
+  { code: "owner", kind: "name_style", name: "Owner Name", price: 0, rarity: "legendary", tutor_only: true, description: "Owner exclusive, with a 👑 tag." },
+  { code: "t-owner", kind: "title", name: "Owner", price: 0, rarity: "legendary", tutor_only: true, data: { text: "👑 Owner" }, description: "Owner exclusive." },
   // power-ups
   { code: "streak-freeze", kind: "streak_freeze", name: "Streak Freeze", price: 80, rarity: "rare", description: "Saves your streak if you miss a day. Hold up to 2." },
 ];

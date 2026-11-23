@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Profile" };
 
 export default async function Profile() {
   const me = await requireApproved();
-  const owned = await ownedCodes(me.id);
+  const owned = await ownedCodes(me.id, me.role === "tutor");
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="page-title">Profile</h1>

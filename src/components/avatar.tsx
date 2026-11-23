@@ -30,8 +30,15 @@ function Frame({ children, size, ring, className }: { children: React.ReactNode;
 /** Wraps an avatar in a shop frame (a gradient ring) when one is equipped. */
 export function Avatar(props: Props) {
   const f = props.frame ? FRAMES[props.frame] : undefined;
-  if (!f) return <AvatarInner {...props} />;
   const pad = Math.max(2, Math.round((props.size || 48) / 16));
+  if (props.frame === "owner") {
+    return (
+      <div className={cn("fb-owner-frame shrink-0", props.className)} style={{ padding: pad + 1, borderRadius: `calc(var(--radius) * 0.7 + ${pad + 1}px)` }}>
+        <AvatarInner {...props} className={undefined} size={(props.size || 48) - (pad + 1) * 2} />
+      </div>
+    );
+  }
+  if (!f) return <AvatarInner {...props} />;
   return (
     <div className={cn("shrink-0", props.className)} style={{ padding: pad, background: f, borderRadius: `calc(var(--radius) * 0.7 + ${pad}px)` }}>
       <AvatarInner {...props} className={undefined} size={(props.size || 48) - pad * 2} />

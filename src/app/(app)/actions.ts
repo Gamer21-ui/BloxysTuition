@@ -39,8 +39,8 @@ const blockySchema = z.object({
   pants: z.string().regex(/^#[0-9a-f]{6}$/i),
   bg: z.string().regex(/^#[0-9a-f]{6}$/i),
   face: z.enum(["smile", "cool", "wink", "grin", "focused"]),
-  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking", "wizard", "cowboy", "beanie", "party", "chef", "ninja"]),
-  pattern: z.enum(["none", "stars", "checker", "stripes", "grass", "galaxy"]).default("none"),
+  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking", "wizard", "cowboy", "beanie", "party", "chef", "ninja", "owner_crown"]),
+  pattern: z.enum(["none", "stars", "checker", "stripes", "grass", "galaxy", "owner"]).default("none"),
 });
 
 export async function saveAvatar(input: { mode: string; blocky: unknown; displayName: string }) {
@@ -48,7 +48,7 @@ export async function saveAvatar(input: { mode: string; blocky: unknown; display
   const blocky = blockySchema.parse(input.blocky);
   const mode = z.enum(["discord", "roblox", "blocky", "both"]).parse(input.mode);
   const displayName = z.string().trim().min(2).max(32).parse(input.displayName);
-  const owned = await ownedCodes(me.id);
+  const owned = await ownedCodes(me.id, me.role === "tutor");
   const levelHat = HAT_UNLOCKS[blocky.hat];
   if (levelHat !== undefined ? levelFromXp(me.xp) < levelHat : !owned.some((o) => o.kind === "hat" && o.code === blocky.hat)) {
     throw new Error("That hat is still locked");

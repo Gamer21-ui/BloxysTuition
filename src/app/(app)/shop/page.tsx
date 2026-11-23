@@ -11,7 +11,7 @@ export default async function Shop() {
   const me = await requireApproved();
   const sb = await createClient();
   const [{ data: items }, { data: mine }] = await Promise.all([
-    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort").eq("active", true).order("sort"),
+    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only").eq("active", true).order("sort"),
     sb.from("user_items").select("item_id").eq("user_id", me.id),
   ]);
   return (

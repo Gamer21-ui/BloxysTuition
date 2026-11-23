@@ -37,8 +37,8 @@ export interface BlockyConfig {
   shirt?: string;
   pants?: string;
   face?: "smile" | "cool" | "wink" | "grin" | "focused";
-  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking" | "wizard" | "cowboy" | "beanie" | "party" | "chef" | "ninja";
-  pattern?: "none" | "stars" | "checker" | "stripes" | "grass" | "galaxy";
+  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking" | "wizard" | "cowboy" | "beanie" | "party" | "chef" | "ninja" | "owner_crown";
+  pattern?: "none" | "stars" | "checker" | "stripes" | "grass" | "galaxy" | "owner";
   bg?: string;
 }
 

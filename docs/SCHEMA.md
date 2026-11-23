@@ -1,6 +1,6 @@
 # Database schema
 
-Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating, 0005 = exam mode + mistakes deck, 0006 = coin shop.
+Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating, 0005 = exam mode + mistakes deck, 0006 = coin shop, 0007 = owner-only cosmetics (`shop_items.tutor_only`).
 
 ## People
 

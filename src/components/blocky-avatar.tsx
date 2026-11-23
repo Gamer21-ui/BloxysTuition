@@ -37,6 +37,16 @@ function Hat({ hat }: { hat: BlockyConfig["hat"] }) {
       return (<g><path d="M24 34 q0 -30 26 -30 q26 0 26 30" stroke="#111827" strokeWidth="5" fill="none" /><rect x="18" y="28" width="10" height="16" rx="3" fill="#a855f7" /><rect x="72" y="28" width="10" height="16" rx="3" fill="#a855f7" /></g>);
     case "halo":
       return (<ellipse cx="50" cy="6" rx="18" ry="5" fill="none" stroke="#fde047" strokeWidth="4" />);
+    case "owner_crown":
+      return (<g>
+        <path d="M24 24 L27 4 L38 14 L50 0 L62 14 L73 4 L76 24 Z" fill="#facc15" stroke="#a16207" strokeWidth="2" strokeLinejoin="round" />
+        <rect x="24" y="20" width="52" height="6" fill="#eab308" stroke="#a16207" strokeWidth="1.5" />
+        <circle cx="50" cy="12" r="3.6" fill="#ef4444" stroke="#7f1d1d" />
+        <circle cx="36" cy="18" r="2.6" fill="#3b82f6" stroke="#1e3a8a" />
+        <circle cx="64" cy="18" r="2.6" fill="#22c55e" stroke="#14532d" />
+        <circle cx="27" cy="4" r="2.2" fill="#fef9c3" /><circle cx="50" cy="1.5" r="2.2" fill="#fef9c3" /><circle cx="73" cy="4" r="2.2" fill="#fef9c3" />
+        <path d="M84 8 l1.5 4 l4 1.5 l-4 1.5 l-1.5 4 l-1.5 -4 l-4 -1.5 l4 -1.5 z" fill="#fde68a" />
+      </g>);
     case "wizard":
       return (<g><path d="M30 22 L52 0 L70 22 Z" fill="#6d28d9" /><rect x="24" y="18" width="52" height="6" rx="2" fill="#4c1d95" /><circle cx="50" cy="12" r="3" fill="#facc15" /><circle cx="58" cy="17" r="1.6" fill="#fde68a" /></g>);
     case "cowboy":
@@ -66,6 +76,12 @@ function Pattern({ pattern }: { pattern: BlockyConfig["pattern"] }) {
       return (<g stroke="#fff" strokeWidth="6" opacity="0.2">{Array.from({ length: 10 }, (_, i) => <line key={i} x1={i * 22 - 100} y1="0" x2={i * 22} y2="100" />)}</g>);
     case "grass":
       return (<g><rect width="100" height="100" fill="#7dd3fc" /><rect y="74" width="100" height="26" fill="#8b5a2b" /><rect y="70" width="100" height="8" fill="#4ade80" />{[4, 18, 30, 44, 58, 72, 88].map((x) => <rect key={x} x={x} y="78" width="6" height="5" fill="#4ade80" />)}<rect x="10" y="10" width="14" height="8" fill="#fff" opacity="0.9" /><rect x="66" y="18" width="18" height="8" fill="#fff" opacity="0.9" /></g>);
+    case "owner":
+      return (<g><defs><radialGradient id="fb-owner-bg" cx="50%" cy="35%" r="75%"><stop offset="0" stopColor="#9333ea" /><stop offset="0.6" stopColor="#581c87" /><stop offset="1" stopColor="#2e1065" /></radialGradient></defs>
+        <rect width="100" height="100" fill="url(#fb-owner-bg)" />
+        <rect x="2" y="2" width="96" height="96" fill="none" stroke="#facc15" strokeWidth="3" />
+        {[[12, 14], [86, 12], [84, 46], [14, 52], [90, 84], [8, 86], [24, 32], [76, 28]].map(([x, y], i) => <path key={i} d={`M${x} ${y - 3.5} L${x + 1} ${y - 1} L${x + 3.5} ${y} L${x + 1} ${y + 1} L${x} ${y + 3.5} L${x - 1} ${y + 1} L${x - 3.5} ${y} L${x - 1} ${y - 1} Z`} fill="#fde68a" />)}
+      </g>);
     case "galaxy":
       return (<g><defs><radialGradient id="fb-galaxy" cx="35%" cy="30%" r="80%"><stop offset="0" stopColor="#7c3aed" /><stop offset="0.55" stopColor="#1e1b4b" /><stop offset="1" stopColor="#020617" /></radialGradient></defs><rect width="100" height="100" fill="url(#fb-galaxy)" />{[[10, 12], [84, 8], [76, 36], [18, 46], [92, 66], [6, 80], [64, 92], [40, 6]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={i % 3 ? 1 : 1.8} fill="#fff" />)}</g>);
     default:

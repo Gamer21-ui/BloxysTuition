@@ -218,3 +218,24 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
+
+/* ---------------------------------------------------------------- owner-exclusive cosmetics */
+@keyframes fb-shine { to { background-position: 200% center; } }
+@keyframes fb-spin { to { transform: rotate(360deg); } }
+.fb-owner-name {
+  background-image: linear-gradient(90deg, #92400e, #d97706, #facc15, #d97706, #92400e);
+  background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: fb-shine 2.5s linear infinite; font-weight: 800;
+}
+.fb-owner-tag {
+  display: inline-flex; align-items: center; gap: 2px; margin-left: 6px; padding: 1px 6px; border-radius: 999px;
+  font-size: 0.6em; font-weight: 800; letter-spacing: 0.06em; vertical-align: middle; line-height: 1.5;
+  color: #422006; background: linear-gradient(90deg, #facc15, #fde68a);
+  -webkit-background-clip: border-box; background-clip: border-box;
+}
+.fb-owner-frame { position: relative; overflow: hidden; isolation: isolate; }
+.fb-owner-frame::before {
+  content: ""; position: absolute; inset: -60%; z-index: -1;
+  background: conic-gradient(#facc15, #f97316, #ec4899, #a855f7, #3b82f6, #22c55e, #facc15);
+  animation: fb-spin 3s linear infinite;
+}
