@@ -20,7 +20,10 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
+  // getClaims() checks the login token's signature locally (keys are cached), refreshing it when
+  // it expires, instead of asking the Supabase Auth server on every click like getUser() does.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? data.claims : null;
   const path = request.nextUrl.pathname;
   const isPublic = PUBLIC_PATHS.some((p) => (p === "/" ? path === "/" : path === p || path.startsWith(p + "/")));
 
