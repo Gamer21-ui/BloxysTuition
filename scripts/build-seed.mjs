@@ -3,6 +3,22 @@
 import { createHash } from "node:crypto";
 import { writeFileSync } from "node:fs";
 import { COURSES, ACHIEVEMENTS, CHALLENGES } from "./seed-data.mjs";
+import accounting from "./questions/accounting.mjs";
+import business from "./questions/business.mjs";
+import economics from "./questions/economics.mjs";
+import computerScience from "./questions/computer-science.mjs";
+
+// extra questions + improved explanations, keyed by course slug then chapter number
+const EXTRA = { "o-accounting": accounting, "o-business": business, "o-economics": economics, "o-computer-science": computerScience };
+
+// timed practice per course. Accounting & Economics match the real Paper 1 (2027 syllabus);
+// Business & CS have no multiple-choice paper, so they get a mixed topic test instead.
+const EXAMS = {
+  "o-accounting": { title: "Paper 1 practice (40 questions, 1h 30m)", count: 40, secs: 5400, xp: 150 },
+  "o-economics": { title: "Paper 1 practice (40 questions, 1h)", count: 40, secs: 3600, xp: 150 },
+  "o-business": { title: "Mixed topic test (25 questions, 30m)", count: 25, secs: 1800, xp: 100 },
+  "o-computer-science": { title: "Mixed topic test (25 questions, 30m)", count: 25, secs: 1800, xp: 100 },
+};
 
 const uid = (key) => {
   const h = createHash("sha1").update("funnybloxy:" + key).digest("hex");
@@ -26,6 +42,9 @@ COURSES.forEach((c, ci) => {
   out.push(`insert into courses (id, slug, code, title, tier, exam_label, description, color, icon, sort) values (${q(cid)}, ${q(c.slug)}, ${q(c.code)}, ${q(c.title)}, ${q(c.tier)}, ${q(c.exam_label)}, ${q(c.description)}, ${q(c.color)}, ${q(c.icon)}, ${ci}) on conflict (id) do nothing;`);
   const sp = uid("speedrun:" + c.slug);
   out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, sort) values (${q(sp)}, ${q(cid)}, null, ${q(c.title + " Speedrun")}, 'speedrun', 60, 150, 999) on conflict (id) do nothing;`);
+  const ex = EXAMS[c.slug];
+  if (ex) out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort) values (${q(uid("exam:" + c.slug))}, ${q(cid)}, null, ${q(ex.title)}, 'exam', ${ex.xp}, ${ex.secs}, ${ex.count}, 1000) on conflict (id) do nothing;`);
+  out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values (${q(uid("review:" + c.slug))}, ${q(cid)}, null, ${q("Fix my mistakes")}, 'review', 0, 1001) on conflict (id) do nothing;`);
   c.chapters.forEach((ch, hi) => {
     const chid = uid(`chapter:${c.slug}:${ch.n}`);
     out.push(`insert into chapters (id, course_id, number, title, sort) values (${q(chid)}, ${q(cid)}, ${q(ch.n)}, ${q(ch.t)}, ${hi}) on conflict (id) do nothing;`);
@@ -35,13 +54,20 @@ COURSES.forEach((c, ci) => {
     });
     const qzid = uid(`quiz:${c.slug}:${ch.n}`);
     out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values (${q(qzid)}, ${q(cid)}, ${q(chid)}, ${q(`Chapter ${ch.n} quiz`)}, 'quiz', 60, ${hi}) on conflict (id) do nothing;`);
-    ch.q.forEach((item, qi) => {
-      const [prompt, opts, correct, expl] = item;
+    const extra = EXTRA[c.slug]?.[ch.n];
+    if (extra && extra.fix.length !== ch.q.length) throw new Error(`fix count mismatch for ${c.slug} ${ch.n}`);
+    const all = [...ch.q, ...(extra?.add || [])];
+    all.forEach((item, qi) => {
+      let [prompt, opts, correct, expl] = item;
+      const fix = qi < ch.q.length ? extra?.fix[qi] : undefined;
+      if (typeof fix === "string") expl = fix;
+      else if (fix) { prompt = fix.p; expl = fix.e; }
       const qid = uid(`q:${c.slug}:${ch.n}:${qi}`);
       const sh = shuffle(opts, qid);
       const newOpts = sh.map((x) => x.v);
       const newCorrect = sh.findIndex((x) => x.i === correct);
-      out.push(`insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values (${q(qid)}, ${q(cid)}, ${q(chid)}, ${q(qzid)}, ${q(prompt)}, ${j(newOpts)}, ${q(expl)}) on conflict (id) do nothing;`);
+      // starter questions get their improved prompt/explanation; anything else about them is left as is
+      out.push(`insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values (${q(qid)}, ${q(cid)}, ${q(chid)}, ${q(qzid)}, ${q(prompt)}, ${j(newOpts)}, ${q(expl)}) on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;`);
       out.push(`insert into question_keys (question_id, correct) values (${q(qid)}, ${newCorrect}) on conflict (question_id) do nothing;`);
     });
   });
@@ -54,4 +80,4 @@ CHALLENGES.forEach((c, i) => {
 });
 out.push("commit;");
 writeFileSync(new URL("../supabase/seed.sql", import.meta.url), out.join("\n") + "\n");
-console.log(`seed.sql written: ${COURSES.length} courses, ${COURSES.reduce((s, c) => s + c.chapters.length, 0)} chapters, ${COURSES.reduce((s, c) => s + c.chapters.reduce((t, ch) => t + ch.q.length, 0), 0)} questions`);
+console.log(`seed.sql written: ${COURSES.length} courses, ${COURSES.reduce((s, c) => s + c.chapters.length, 0)} chapters, ${COURSES.reduce((s, c) => s + c.chapters.reduce((t, ch) => t + ch.q.length + (EXTRA[c.slug]?.[ch.n]?.add.length || 0), 0), 0)} questions`);

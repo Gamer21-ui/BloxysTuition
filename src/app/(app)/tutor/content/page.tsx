@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function Content() {
   await requireTutor();
   const { data: courses } = await createAdminClient().from("courses")
-    .select("id, title, code, exam_label, color, chapters(id, number, title, status, release_at, sort, parts(count), resources(count))").order("sort");
+    .select("id, title, code, exam_label, color, chapters(id, number, title, status, release_at, sort, parts(count), resources(count)), quizzes(id, title, kind, status, release_at, chapter_id)").order("sort");
   type Ch = { id: string; number: string; title: string; status: string; release_at: string | null; sort: number; parts: { count: number }[]; resources: { count: number }[] };
   return (
     <div className="mx-auto max-w-5xl">
@@ -28,6 +28,17 @@ export default async function Content() {
                   <span className="ml-2 text-xs font-normal text-muted">{ch.parts?.[0]?.count ?? 0} parts · {ch.resources?.[0]?.count ?? 0} files</span></Link>
                 <StatusChip status={ch.status} />
                 <StatusForm table="chapters" id={ch.id} status={ch.status} releaseAt={ch.release_at} />
+              </div>
+            ))}
+          </Card>
+          <Card className="mt-2 divide-y divide-line p-0">
+            {((c.quizzes as { id: string; title: string; kind: string; status: string; release_at: string | null; chapter_id: string | null }[]) || [])
+              .filter((z) => !z.chapter_id).map((z) => (
+              <div key={z.id} className="flex flex-wrap items-center gap-3 px-4 py-2 text-sm">
+                <span className="chip">{z.kind === "exam" ? "timed test" : z.kind === "review" ? "mistakes deck" : z.kind}</span>
+                <span className="flex-1 font-bold">{z.title}</span>
+                <StatusChip status={z.status} />
+                <StatusForm table="quizzes" id={z.id} status={z.status} releaseAt={z.release_at} />
               </div>
             ))}
           </Card>

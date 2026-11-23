@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarCheck, ChevronRight, Coins, Flame, Megaphone, NotebookPen, Sparkles, Swords } from "lucide-react";
+import { CalendarCheck, ChevronRight, Coins, Flame, GraduationCap, Megaphone, NotebookPen, Sparkles, Swords } from "lucide-react";
 import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getChallenges, getCourseProgress } from "@/lib/data";
@@ -27,6 +27,8 @@ export default async function Dashboard() {
       sb.from("notifications").select("*").order("created_at", { ascending: false }).limit(5),
       sb.from("announcements").select("*").order("created_at", { ascending: false }).limit(2),
     ]);
+  const { count: dueMistakes } = await sb.from("review_items").select("question_id", { count: "exact", head: true })
+    .eq("user_id", me.id).lte("due_at", new Date().toISOString());
   const lp = levelProgress(me.xp);
   const submitted = new Set((subs || []).map((s) => s.assignment_id));
   const upcoming = (assignments || []).filter((a) => !submitted.has(a.id)).slice(0, 4);
@@ -116,6 +118,13 @@ export default async function Dashboard() {
         <div>
           <SectionTitle>Up next</SectionTitle>
           <div className="space-y-2">
+            {!!dueMistakes && (
+              <Link href="/practice" className="card flex items-center gap-3 py-3 ring-2 ring-warn">
+                <GraduationCap className="shrink-0 text-warn" size={20} aria-hidden="true" />
+                <div className="min-w-0 flex-1"><div className="font-bold">Fix {dueMistakes} mistake{dueMistakes === 1 ? "" : "s"}</div><div className="text-xs text-muted">Questions you got wrong are back for another go</div></div>
+                <ChevronRight size={18} className="text-muted" aria-hidden="true" />
+              </Link>
+            )}
             {upcoming.length === 0 && <Card className="text-sm text-muted">No homework waiting. Nice.</Card>}
             {upcoming.map((a) => (
               <Link key={a.id} href="/homework" className="card flex items-center gap-3 py-3">

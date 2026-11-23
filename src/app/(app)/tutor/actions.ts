@@ -252,6 +252,22 @@ export async function addQuestion(fd: FormData) {
   revalidatePath("/tutor/content", "layout");
 }
 
+export async function updateQuestion(fd: FormData) {
+  await requireTutor();
+  const id = uuid.parse(str(fd, "id"));
+  const options = [0, 1, 2, 3].map((i) => str(fd, `o${i}`)).filter(Boolean);
+  if (options.length < 2) await fail("Give at least 2 options");
+  const correct = z.number().int().min(0).max(options.length - 1).parse(num(fd, "correct"));
+  const admin = createAdminClient();
+  const { error } = await admin.from("questions").update({
+    prompt: z.string().min(3).max(1000).parse(str(fd, "prompt")), options, explanation: opt(fd, "explanation"),
+    battle_ok: fd.get("battle_ok") === "on",
+  }).eq("id", id);
+  if (error) await fail(error.message);
+  await admin.from("question_keys").upsert({ question_id: id, correct });
+  revalidatePath("/tutor/content", "layout");
+}
+
 export async function deleteQuestion(fd: FormData) {
   await requireTutor();
   await createAdminClient().from("questions").delete().eq("id", uuid.parse(str(fd, "id")));

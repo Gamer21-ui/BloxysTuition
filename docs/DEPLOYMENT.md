@@ -96,3 +96,7 @@ The free Supabase plan has no automatic backups. Once a month, run `pg_dump "<co
 * Every table has row-level security. Students can only change their own name, theme, avatar and contact; XP and scores are only ever written by database functions.
 * Quiz answers live in a table students can't read; battle answers stay hidden until the round reveal.
 * Files are in private buckets; links are generated per request and expire after 2 minutes.
+
+## Keeping the database awake
+
+`vercel.json` runs `/api/keepalive` once a day (Vercel Cron, allowed on the free plan). It does one tiny database read so Supabase sees activity and doesn't pause the project during quiet weeks. Optional: add an environment variable `CRON_SECRET` (any long random text) in Vercel so only Vercel's cron can call it.

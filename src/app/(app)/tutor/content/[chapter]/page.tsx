@@ -7,6 +7,7 @@ import { Card, SectionTitle, StatusChip } from "@/components/ui";
 import { StatusForm } from "../../status-form";
 import { addPart, addQuestion, deleteQuestion, deleteResource, savePart } from "../../actions";
 import { ResourceUploader } from "./resource-uploader";
+import { QuestionEditor } from "./question-editor";
 
 export const metadata: Metadata = { title: "Edit chapter" };
 export const dynamic = "force-dynamic";
@@ -20,10 +21,10 @@ export default async function EditChapter({ params }: { params: Promise<{ chapte
   const course = ch.course as unknown as { id: string; title: string; slug: string };
   const [{ data: parts }, { data: quizzes }, { data: resources }] = await Promise.all([
     admin.from("parts").select("*").eq("chapter_id", id).order("sort"),
-    admin.from("quizzes").select("id, title, kind, status, release_at, xp_reward, questions(id, prompt, options, question_keys(correct))").eq("chapter_id", id).order("sort"),
+    admin.from("quizzes").select("id, title, kind, status, release_at, xp_reward, questions(id, prompt, options, explanation, battle_ok, question_keys(correct))").eq("chapter_id", id).order("sort"),
     admin.from("resources").select("id, title, section, kind, file_path, url, status, release_at").eq("chapter_id", id).order("created_at"),
   ]);
-  type Q = { id: string; prompt: string; options: string[]; question_keys: { correct: number } | { correct: number }[] | null };
+  type Q = { id: string; prompt: string; options: string[]; explanation: string | null; battle_ok: boolean; question_keys: { correct: number } | { correct: number }[] | null };
   const correctOf = (q: Q) => (Array.isArray(q.question_keys) ? q.question_keys[0]?.correct : q.question_keys?.correct);
 
   return (
@@ -89,6 +90,8 @@ export default async function EditChapter({ params }: { params: Promise<{ chapte
                   <div className="flex gap-2"><span className="flex-1">{q.prompt}</span>
                     <form action={deleteQuestion}><input type="hidden" name="id" value={q.id} /><button className="text-xs text-bad hover:underline">delete</button></form></div>
                   <div className="text-muted">{q.options.map((o, i) => <span key={i} className={i === correctOf(q) ? "font-bold text-good" : ""}>{i > 0 && " · "}{o}</span>)}</div>
+                  {q.explanation && <div className="text-xs text-muted">💡 {q.explanation}</div>}
+                  <QuestionEditor q={q} correct={correctOf(q)} />
                 </li>
               ))}
             </ol>
@@ -105,7 +108,7 @@ export default async function EditChapter({ params }: { params: Promise<{ chapte
                 ))}
                 <input name="explanation" className="input" placeholder="Why the answer is right (shown after)" />
                 <button className="btn btn-primary btn-sm">Add question</button>
-                <p className="text-xs text-muted">Tick the circle next to the correct option. Options are shuffled for students.</p>
+                <p className="text-xs text-muted">Tick the circle next to the correct option. Students see the options in this order, so don't always put the right answer first.</p>
               </form>
             </details>
           </Card>

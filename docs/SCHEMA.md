@@ -1,6 +1,6 @@
 # Database schema
 
-Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating.
+Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating, 0005 = exam mode + mistakes deck.
 
 ## People
 
@@ -19,10 +19,11 @@ Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functi
 | `chapters` | Syllabus chapter, with `status` (draft/locked/scheduled/published) and `release_at` |
 | `parts` | Lesson notes inside a chapter (Markdown body, optional video) |
 | `resources` | Files/links, `section` = `library` (ready-made) or `class` (your lecture notes) |
-| `quizzes` | `quiz` (per chapter) or `speedrun` (per course) |
+| `quizzes` | `quiz` (per chapter), `speedrun`, `exam` (timed, draws `question_count` from released chapters) or `review` (mistakes deck), the last three per course |
 | `questions` | Prompt + options (no answer!) |
 | `question_keys` | The correct option index. Tutor-only. |
 | `quiz_attempts` | One per play: questions served, answers, score, time, XP, flagged |
+| `review_items` | Mistakes deck: a question a student got wrong, its box (0/1/2) and when it's next due |
 
 ## Game
 

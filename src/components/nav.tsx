@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, House, Medal, Megaphone, NotebookPen, Settings,
+  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, NotebookPen, Settings,
   Swords, Target, Trophy, Users, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ type Item = { href: string; label: string; icon: LucideIcon };
 const STUDENT: Item[] = [
   { href: "/dashboard", label: "Home", icon: House },
   { href: "/courses", label: "Courses", icon: BookOpen },
+  { href: "/practice", label: "Exam prep", icon: GraduationCap },
   { href: "/challenges", label: "Challenges", icon: Target },
   { href: "/battles", label: "Battles", icon: Swords },
   { href: "/homework", label: "Homework", icon: NotebookPen },
@@ -31,7 +32,7 @@ const TUTOR: Item[] = [
   { href: "/tutor/challenges", label: "Challenges", icon: Gamepad2 },
 ];
 
-const MOBILE = ["/dashboard", "/courses", "/battles", "/challenges", "/profile"];
+const MOBILE = ["/dashboard", "/courses", "/practice", "/battles", "/profile"];
 
 export function Sidebar({ isTutor }: { isTutor: boolean }) {
   const path = usePathname();

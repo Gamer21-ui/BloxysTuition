@@ -12,7 +12,9 @@ Think Google Classroom + Duolingo + a pinch of Roblox: lessons, quizzes, XP, lev
 | 3 themes: **Bloxy**, **Dark Gamer**, **Retro** | Overview charts: engagement, scores, weak chapters, attendance, retention |
 | Avatar: Roblox headshot, built-in blocky avatar (hats unlock by level), or both | Private notes per student (students can never read them) |
 | Courses → chapters → parts, plus **Library** and **Class notes** files | Mark chapters, parts, quizzes and files as draft / locked / scheduled / published |
-| Chapter quizzes, course speedruns, full answer review | Edit lesson notes (Markdown), upload files, add quiz questions |
+| Chapter quizzes (15 questions each), course speedruns, full answer review |
+| **Exam prep:** timed Paper 1 practice (Accounting 40 Q / 1h30, Economics 40 Q / 1h), mixed tests for Business & CS, score history | Edit any question, answer and explanation in the app |
+| **Mistakes deck:** wrong answers come back after 1, 3 and 7 days until mastered | See each student's mistakes count | Edit lesson notes (Markdown), upload files, add quiz questions |
 | XP, levels, ranks, streaks, coins, 15 badges, quests | Set homework, mark it, release worked solutions / mark schemes |
 | +0.25× XP per level studied above your own (O→AS 1.25×, O→A 1.5×) | Attendance (40 XP present, 20 late) |
 | Live quiz battles with round-by-round reveals | Bonus XP / coins with a reason |

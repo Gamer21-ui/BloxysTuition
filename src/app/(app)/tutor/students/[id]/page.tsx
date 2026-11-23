@@ -31,6 +31,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
     admin.from("submissions").select("score, graded_at, assignment:assignments(title, max_score)").eq("user_id", id).order("submitted_at", { ascending: false }).limit(8),
     admin.from("reports").select("id, period_label, created_at, shared_with_student").eq("student_id", id).order("created_at", { ascending: false }),
   ]);
+  const { count: deckSize } = await admin.from("review_items").select("question_id", { count: "exact", head: true }).eq("user_id", id);
   const { data: allAttempts } = await admin.from("quiz_attempts").select("score, total, quiz:quizzes!inner(kind, chapter_id)")
     .eq("user_id", id).eq("quiz.kind", "quiz").not("finished_at", "is", null);
   const topicOf = new Map((topics || []).map((t) => [t.chapter_id, t.label]));
@@ -92,10 +93,11 @@ export default async function Student({ params }: { params: Promise<{ id: string
             <div className="sm:col-span-3"><label className="label">Reason (they see this)</label><input name="reason" required className="input" placeholder="Extra past paper done 💪" /></div>
             <button className="btn btn-accent btn-sm sm:col-span-3">Award</button>
           </form>
-          <div className="mt-4 grid grid-cols-3 gap-2 text-center text-sm">
+          <div className="mt-4 grid grid-cols-2 gap-2 text-center text-sm sm:grid-cols-4">
             <div className="card p-2"><div className="font-display text-xl">{a.length ? Math.round((100 * pres) / a.length) : "–"}{a.length ? "%" : ""}</div>attendance</div>
             <div className="card p-2"><div className="font-display text-xl">{attempts?.length || 0}</div>recent quizzes</div>
             <div className="card p-2"><div className="font-display text-xl">{subs?.filter((x) => x.graded_at).length || 0}</div>marked HW</div>
+            <div className="card p-2"><div className="font-display text-xl">{deckSize || 0}</div>mistakes to fix</div>
           </div>
         </Card>
       </div>
