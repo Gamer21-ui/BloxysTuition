@@ -29,6 +29,13 @@ alter table battle_rounds enable row level security;
 alter table battle_answers enable row level security;
 
 -- profiles: you see yourself; the tutor sees everyone. Other students' public cards come from profile_cards().
+-- Explicit table access, so the app works whether or not "Grant API access to new tables
+-- automatically" was ticked when the project was created. RLS below still decides which ROWS.
+grant usage on schema public to anon, authenticated, service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;
+grant select on all tables in schema public to authenticated;
+
 create policy profiles_select on profiles for select using (id = auth.uid() or is_tutor());
 create policy profiles_update_self on profiles for update using (id = auth.uid()) with check (id = auth.uid());
 -- students may only change these columns themselves (everything else goes through the server)
