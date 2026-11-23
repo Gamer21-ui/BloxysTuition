@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { BlockyAvatar } from "@/components/blocky-avatar";
+import { FRAMES } from "@/lib/cosmetics";
 import type { BlockyConfig } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +13,7 @@ type Props = {
   size?: number;
   className?: string;
   ring?: string;
+  frame?: string | null;
 };
 
 function Frame({ children, size, ring, className }: { children: React.ReactNode; size: number; ring?: string; className?: string }) {
@@ -25,7 +27,19 @@ function Frame({ children, size, ring, className }: { children: React.ReactNode;
   );
 }
 
-export function Avatar({ name, mode, discordUrl, robloxUrl, blocky, size = 48, className, ring }: Props) {
+/** Wraps an avatar in a shop frame (a gradient ring) when one is equipped. */
+export function Avatar(props: Props) {
+  const f = props.frame ? FRAMES[props.frame] : undefined;
+  if (!f) return <AvatarInner {...props} />;
+  const pad = Math.max(2, Math.round((props.size || 48) / 16));
+  return (
+    <div className={cn("shrink-0", props.className)} style={{ padding: pad, background: f, borderRadius: `calc(var(--radius) * 0.7 + ${pad}px)` }}>
+      <AvatarInner {...props} className={undefined} size={(props.size || 48) - pad * 2} />
+    </div>
+  );
+}
+
+function AvatarInner({ name, mode, discordUrl, robloxUrl, blocky, size = 48, className, ring }: Props) {
   const initials = name.split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   const img = (src: string, alt: string) => <img src={src} alt={alt} width={size} height={size} className="h-full w-full object-cover" />;
 

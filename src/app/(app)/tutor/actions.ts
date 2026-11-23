@@ -383,3 +383,14 @@ export async function toggleChallenge(fd: FormData) {
   await createAdminClient().from("challenges").update({ active: str(fd, "active") === "1" }).eq("id", uuid.parse(str(fd, "id")));
   revalidatePath("/tutor/challenges");
 }
+
+// ---------------------------------------------------------------- shop
+export async function updateShopItem(fd: FormData) {
+  await requireTutor();
+  await createAdminClient().from("shop_items").update({
+    price: z.number().int().min(0).max(100000).parse(num(fd, "price")),
+    min_level: z.number().int().min(1).max(100).parse(num(fd, "min_level", 1)),
+    active: fd.get("active") === "on",
+  }).eq("id", uuid.parse(str(fd, "id")));
+  revalidatePath("/tutor/shop");
+}

@@ -25,7 +25,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
   const [{ data: notes }, { data: topics }, { data: chapters }, { data: attempts }, { data: att }, { data: subs }, { data: reports }] = await Promise.all([
     admin.from("tutor_notes").select("id, body, created_at").eq("student_id", id).order("created_at", { ascending: false }),
     admin.from("student_topics").select("chapter_id, label").eq("student_id", id),
-    admin.from("chapters").select("id, number, title, sort, course:courses(id, title, code, color, sort)").order("sort"),
+    admin.from("chapters").select("id, number, title, sort, course:courses(id, title, code, color, sort, tier)").order("sort"),
     admin.from("quiz_attempts").select("score, total, flagged, finished_at, xp_awarded, quiz:quizzes(title)").eq("user_id", id).not("finished_at", "is", null).order("finished_at", { ascending: false }).limit(12),
     admin.from("attendance").select("status").eq("user_id", id),
     admin.from("submissions").select("score, graded_at, assignment:assignments(title, max_score)").eq("user_id", id).order("submitted_at", { ascending: false }).limit(8),
@@ -43,8 +43,8 @@ export default async function Student({ params }: { params: Promise<{ id: string
     v.s += at.score ?? 0; v.t += at.total ?? 0; v.n++;
     perChapter.set(cid, v);
   }
-  type ChRow = { id: string; number: string; title: string; sort: number; course: { id: string; title: string; code: string; color: string; sort: number } };
-  const topicCourses: { id: string; title: string; code: string; color: string; sort: number; chapters: { id: string; number: string; title: string; label: "weak" | "average" | "strong" | "none"; quizPct: number | null; tries: number }[] }[] = [];
+  type ChRow = { id: string; number: string; title: string; sort: number; course: { id: string; title: string; code: string; color: string; sort: number; tier: string } };
+  const topicCourses: { id: string; title: string; code: string; color: string; sort: number; tier: string; chapters: { id: string; number: string; title: string; label: "weak" | "average" | "strong" | "none"; quizPct: number | null; tries: number }[] }[] = [];
   for (const c of ((chapters || []) as unknown as ChRow[])) {
     let g = topicCourses.find((x) => x.id === c.course.id);
     if (!g) { g = { ...c.course, chapters: [] }; topicCourses.push(g); }

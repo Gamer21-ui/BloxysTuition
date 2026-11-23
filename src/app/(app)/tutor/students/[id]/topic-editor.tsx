@@ -5,7 +5,7 @@ import { setTopicLabel } from "../../actions";
 
 type Label = "weak" | "average" | "strong" | "none";
 type Chapter = { id: string; number: string; title: string; label: Label; quizPct: number | null; tries: number };
-type Course = { id: string; title: string; code: string; color: string; chapters: Chapter[] };
+type Course = { id: string; title: string; code: string; color: string; tier?: string; chapters: Chapter[] };
 
 const OPTIONS: { id: Exclude<Label, "none">; text: string; on: string }[] = [
   { id: "weak", text: "Needs work", on: "bg-bad text-white border-bad" },
@@ -35,7 +35,7 @@ export function TopicEditor({ studentId, courses }: { studentId: string; courses
         {courses.map((c) => (
           <button key={c.id} role="tab" aria-selected={c.id === course.id} onClick={() => setTab(c.id)}
             className={cn("btn btn-sm", c.id === course.id ? "btn-primary" : "btn-ghost")}>
-            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: c.color }} /> {c.title.replace(/^O Level /, "")}
+            <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: c.color }} /> <span className="text-xs opacity-70">{c.tier === "AS" || c.tier === "A" ? "AS/A" : "O"}</span> {c.title.replace(/^(O|AS|A) Level /, "")}
           </button>
         ))}
       </div>

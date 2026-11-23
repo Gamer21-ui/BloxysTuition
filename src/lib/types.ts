@@ -26,6 +26,9 @@ export interface Profile {
   best_streak: number;
   last_study_date: string | null;
   announced_level: number;
+  name_style: string | null;
+  frame: string | null;
+  streak_freezes: number;
   created_at: string;
 }
 
@@ -34,7 +37,8 @@ export interface BlockyConfig {
   shirt?: string;
   pants?: string;
   face?: "smile" | "cool" | "wink" | "grin" | "focused";
-  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking";
+  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking" | "wizard" | "cowboy" | "beanie" | "party" | "chef" | "ninja";
+  pattern?: "none" | "stars" | "checker" | "stripes" | "grass" | "galaxy";
   bg?: string;
 }
 
@@ -47,4 +51,6 @@ export interface Card {
   blocky: BlockyConfig;
   title: string | null;
   level: number;
+  name_style?: string | null;
+  frame?: string | null;
 }

@@ -7,6 +7,7 @@ import accounting from "./questions/accounting.mjs";
 import business from "./questions/business.mjs";
 import economics from "./questions/economics.mjs";
 import computerScience from "./questions/computer-science.mjs";
+import { SHOP_ITEMS } from "./shop-items.mjs";
 
 // extra questions + improved explanations, keyed by course slug then chapter number
 const EXTRA = { "o-accounting": accounting, "o-business": business, "o-economics": economics, "o-computer-science": computerScience };
@@ -77,6 +78,9 @@ ACHIEVEMENTS.forEach((a) => {
 });
 CHALLENGES.forEach((c, i) => {
   out.push(`insert into challenges (id, title, description, period, type, target, xp_reward, coin_reward) values (${q(uid("challenge:" + i))}, ${q(c.title)}, ${q(c.description)}, ${q(c.period)}, ${q(c.type)}, ${c.target}, ${c.xp}, ${c.coins}) on conflict (id) do nothing;`);
+});
+SHOP_ITEMS.forEach((it, i) => {
+  out.push(`insert into shop_items (id, code, kind, name, description, price, rarity, min_level, data, sort) values (${q(uid("shop:" + it.kind + ":" + it.code))}, ${q(it.code)}, ${q(it.kind)}, ${q(it.name)}, ${q(it.description)}, ${it.price}, ${q(it.rarity)}, ${it.min_level || 1}, ${j(it.data || {})}, ${i}) on conflict (kind, code) do update set name = excluded.name, description = excluded.description, rarity = excluded.rarity, min_level = excluded.min_level, data = excluded.data, sort = excluded.sort;`);
 });
 out.push("commit;");
 writeFileSync(new URL("../supabase/seed.sql", import.meta.url), out.join("\n") + "\n");

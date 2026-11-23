@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 import { createAssignment, releaseAnswers, tutorUploadUrl } from "../actions";
+import { groupByLevel } from "@/lib/levels";
 
 async function upload(bucket: "resources" | "solutions", folder: string, file: File) {
   const { path, token } = await tutorUploadUrl(bucket, folder, file.name);
@@ -12,7 +13,7 @@ async function upload(bucket: "resources" | "solutions", folder: string, file: F
   return path;
 }
 
-export function NewAssignment({ courses, chapters }: { courses: { id: string; title: string }[]; chapters: { id: string; course_id: string; number: string; title: string }[] }) {
+export function NewAssignment({ courses, chapters }: { courses: { id: string; title: string; tier: string }[]; chapters: { id: string; course_id: string; number: string; title: string }[] }) {
   const router = useRouter();
   const [course, setCourse] = useState(courses[0]?.id || "");
   const [msg, setMsg] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export function NewAssignment({ courses, chapters }: { courses: { id: string; ti
       <h2 className="mb-3 text-lg">Set new work</h2>
       <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
         <div><label className="label">Subject</label>
-          <select className="input" value={course} onChange={(e) => setCourse(e.target.value)}>{courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
+          <select className="input" value={course} onChange={(e) => setCourse(e.target.value)}>{groupByLevel(courses).map((g) => <optgroup key={g.level.id} label={g.level.label}>{g.items.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}</optgroup>)}</select></div>
         <div><label className="label">Chapter (optional)</label>
           <select name="chapter" className="input"><option value="">–</option>{chapters.filter((c) => c.course_id === course).map((c) => <option key={c.id} value={c.id}>{c.number}. {c.title}</option>)}</select></div>
         <div className="sm:col-span-2"><label className="label">Title</label><input name="title" required className="input" placeholder="Ch 3 ledgers worksheet" /></div>

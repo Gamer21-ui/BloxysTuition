@@ -6,32 +6,37 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, SectionTitle } from "@/components/ui";
 import { fmtDate, isLive, timeUntil } from "@/lib/utils";
 import { ScoreChart } from "./score-chart";
+import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
+import { inLevel, pickLevel } from "@/lib/levels";
+
 
 export const metadata: Metadata = { title: "Exam prep" };
 export const dynamic = "force-dynamic";
 
 const EXAMS_START = new Date("2027-10-01T00:00:00+04:00"); // Cambridge Oct/Nov series
 
-type Course = { id: string; title: string; color: string; sort: number };
+type Course = { id: string; title: string; color: string; sort: number; tier: string };
 type Quiz = { id: string; course_id: string; kind: string; title: string; status: string; release_at: string | null; time_limit_sec: number | null; question_count: number | null };
 
-export default async function Practice() {
+export default async function Practice({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const me = await requireApproved();
+  const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
   const [{ data: courses }, { data: quizzes }, { data: deck }, { data: attempts }] = await Promise.all([
-    sb.from("courses").select("id, title, color, sort").eq("active", true).order("sort"),
+    sb.from("courses").select("id, title, color, sort, tier").eq("active", true).order("sort"),
     sb.from("quizzes").select("id, course_id, kind, title, status, release_at, time_limit_sec, question_count").in("kind", ["exam", "review"]),
     sb.from("review_items").select("course_id, due_at, box").eq("user_id", me.id),
     sb.from("quiz_attempts").select("quiz_id, score, total, finished_at, time_ms, flagged, quiz:quizzes!inner(kind, course_id)")
       .eq("user_id", me.id).eq("quiz.kind", "exam").not("finished_at", "is", null).order("finished_at"),
   ]);
-  const cs = (courses as Course[]) || [];
+  const allCourses = (courses as Course[]) || [];
+  const cs = allCourses.filter((c) => inLevel(c.tier, level));
   const qz = ((quizzes as Quiz[]) || []).filter((q) => isLive(q.status, q.release_at));
   const now = Date.now();
-  const items = deck || [];
+  const items = (deck || []).filter((d) => cs.some((c) => c.id === d.course_id));
   const dueTotal = items.filter((d) => +new Date(d.due_at) <= now).length;
   type Att = { score: number; total: number; finished_at: string; time_ms: number; flagged: boolean; quiz: { course_id: string } };
-  const exams = ((attempts as unknown as Att[]) || []).filter((a) => !a.flagged);
+  const exams = ((attempts as unknown as Att[]) || []).filter((a) => !a.flagged && cs.some((c) => c.id === a.quiz.course_id));
   const weeks = Math.max(0, Math.ceil((+EXAMS_START - now) / (7 * 86400_000)));
 
   // chart: one row per attempt, value in that subject's column
@@ -48,6 +53,9 @@ export default async function Practice() {
         <span className="chip text-base"><Clock size={16} aria-hidden="true" /> about {weeks} weeks to the Oct–Nov 2027 exams</span>
       </div>
 
+      <LevelTabs current={level} base="/practice" counts={{ O: allCourses.filter((c) => inLevel(c.tier, "O")).length, A: allCourses.filter((c) => inLevel(c.tier, "A")).length }} />
+      {!cs.length && <LevelEmpty level={level} />}
+      {cs.length > 0 && <>
       <SectionTitle>🔁 Fix my mistakes {dueTotal > 0 && <span className="chip ml-2 bg-warn text-white">{dueTotal} due</span>}</SectionTitle>
       <p className="-mt-1 mb-3 text-sm text-muted">Every question you get wrong comes back the next day. Get it right and it returns after 3 days, then 7. Right three times in a row and it&apos;s mastered.</p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -100,6 +108,7 @@ export default async function Practice() {
 
       <SectionTitle>📈 Your exam scores over time</SectionTitle>
       {rows.length ? <Card><ScoreChart rows={rows} series={series} /></Card> : <Empty>Sit your first timed test and your scores will show up here.</Empty>}
+      </>}
     </div>
   );
 }

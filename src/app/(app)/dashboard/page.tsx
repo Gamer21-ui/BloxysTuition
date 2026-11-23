@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getChallenges, getCourseProgress } from "@/lib/data";
 import { levelProgress, rankName } from "@/lib/xp";
 import { Avatar } from "@/components/avatar";
+import { NameTag } from "@/components/name-tag";
 import { AchievementBadge } from "@/components/badge";
 import { Icon } from "@/components/icon";
 import { Bar, Card, SectionTitle } from "@/components/ui";
@@ -43,11 +44,11 @@ export default async function Dashboard() {
         <div className="h-20 w-full" style={{ background: "linear-gradient(90deg, rgb(var(--primary)), rgb(var(--accent)))" }} />
         <div className="flex flex-col gap-4 p-5 pt-0 sm:flex-row sm:items-end">
           <div className="-mt-10 w-fit">
-            <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={96} ring="rgb(var(--surface))" />
+            <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={96} ring="rgb(var(--surface))" frame={me.frame} />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl">{me.display_name}</h1>
+              <h1 className="text-3xl"><NameTag name={me.display_name} style={me.name_style} /></h1>
               <span className="chip text-accent">{me.title || rankName(lp.level)}</span>
               <span className="chip">{me.tier} Level</span>
             </div>

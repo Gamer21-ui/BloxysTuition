@@ -7,6 +7,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { postToDiscord, siteUrl } from "@/lib/discord";
 import { levelFromXp, rankName } from "@/lib/xp";
 import { HAT_UNLOCKS } from "@/components/blocky-avatar";
+import { ownedCodes } from "@/lib/shop";
 
 /** Posts a level-up to Discord once per level. The level is read from the database, never trusted from the browser. */
 export async function announceLevelUp() {
@@ -38,7 +39,8 @@ const blockySchema = z.object({
   pants: z.string().regex(/^#[0-9a-f]{6}$/i),
   bg: z.string().regex(/^#[0-9a-f]{6}$/i),
   face: z.enum(["smile", "cool", "wink", "grin", "focused"]),
-  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking"]),
+  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking", "wizard", "cowboy", "beanie", "party", "chef", "ninja"]),
+  pattern: z.enum(["none", "stars", "checker", "stripes", "grass", "galaxy"]).default("none"),
 });
 
 export async function saveAvatar(input: { mode: string; blocky: unknown; displayName: string }) {
@@ -46,9 +48,14 @@ export async function saveAvatar(input: { mode: string; blocky: unknown; display
   const blocky = blockySchema.parse(input.blocky);
   const mode = z.enum(["discord", "roblox", "blocky", "both"]).parse(input.mode);
   const displayName = z.string().trim().min(2).max(32).parse(input.displayName);
-  if (levelFromXp(me.xp) < HAT_UNLOCKS[blocky.hat]) throw new Error("That hat is still locked");
-  const sb = await createClient();
-  const { error } = await sb.from("profiles").update({ blocky, avatar_mode: mode, display_name: displayName }).eq("id", me.id);
+  const owned = await ownedCodes(me.id);
+  const levelHat = HAT_UNLOCKS[blocky.hat];
+  if (levelHat !== undefined ? levelFromXp(me.xp) < levelHat : !owned.some((o) => o.kind === "hat" && o.code === blocky.hat)) {
+    throw new Error("That hat is still locked");
+  }
+  if (blocky.pattern !== "none" && !owned.some((o) => o.kind === "pattern" && o.code === blocky.pattern)) throw new Error("You don't own that background");
+  // students can't write the avatar columns directly, so the server saves them after the checks above
+  const { error } = await createAdminClient().from("profiles").update({ blocky, avatar_mode: mode, display_name: displayName }).eq("id", me.id);
   if (error) throw new Error(error.message);
   revalidatePath("/", "layout");
 }

@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, Copy, Crown, Swords, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Avatar } from "@/components/avatar";
+import { NameTag } from "@/components/name-tag";
 import { Confetti } from "@/components/confetti";
 import type { Card as PCard } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -126,9 +127,9 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
     return (
       <div className={cn("card relative flex items-center gap-3 p-3", side === 2 && "flex-row-reverse text-right", p.user_id === meId && "ring-2 ring-accent")}>
         {won && <Crown className="absolute -top-3 left-1/2 -translate-x-1/2 text-xp" size={22} fill="currentColor" />}
-        <Avatar name={c?.display_name || "?"} mode={(c?.avatar_mode as PCard["avatar_mode"]) || "discord"} discordUrl={c?.discord_avatar_url} robloxUrl={c?.roblox_headshot_url} blocky={c?.blocky} size={52} />
+        <Avatar name={c?.display_name || "?"} mode={(c?.avatar_mode as PCard["avatar_mode"]) || "discord"} discordUrl={c?.discord_avatar_url} robloxUrl={c?.roblox_headshot_url} blocky={c?.blocky} size={52} frame={c?.frame} />
         <div className="min-w-0 flex-1">
-          <div className="truncate font-bold">{c?.display_name || "…"}</div>
+          <div className="truncate font-bold"><NameTag name={c?.display_name || "…"} style={c?.name_style} /></div>
           <div className="text-xs text-muted">Lv {c?.level ?? "?"} {p.user_id === b.host_id && "· host"}</div>
         </div>
         <div className="font-display text-2xl tabular-nums">{p.score}</div>

@@ -4,21 +4,26 @@ import { requireTutor } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, SectionTitle, StatusChip } from "@/components/ui";
 import { StatusForm } from "../status-form";
+import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
+import { inLevel, pickLevel } from "@/lib/levels";
 import { ResourceUploader } from "./[chapter]/resource-uploader";
 
 export const metadata: Metadata = { title: "Content" };
 export const dynamic = "force-dynamic";
 
-export default async function Content() {
+export default async function Content({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   await requireTutor();
+  const level = pickLevel((await searchParams).level);
   const { data: courses } = await createAdminClient().from("courses")
-    .select("id, title, code, exam_label, color, chapters(id, number, title, status, release_at, sort, parts(count), resources(count)), quizzes(id, title, kind, status, release_at, chapter_id)").order("sort");
+    .select("id, title, code, tier, exam_label, color, chapters(id, number, title, status, release_at, sort, parts(count), resources(count)), quizzes(id, title, kind, status, release_at, chapter_id)").order("sort");
   type Ch = { id: string; number: string; title: string; status: string; release_at: string | null; sort: number; parts: { count: number }[]; resources: { count: number }[] };
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="page-title">Content</h1>
       <p className="text-muted"><b>Draft</b> is hidden, <b>locked</b> shows a padlock, <b>scheduled</b> opens by itself at the time you set (Mauritius time), <b>published</b> is open now.</p>
-      {(courses || []).map((c) => (
+      <LevelTabs current={level} base="/tutor/content" counts={{ O: (courses || []).filter((c) => inLevel(c.tier, "O")).length, A: (courses || []).filter((c) => inLevel(c.tier, "A")).length }} />
+      {!(courses || []).some((c) => inLevel(c.tier, level)) && <LevelEmpty level={level} />}
+      {(courses || []).filter((c) => inLevel(c.tier, level)).map((c) => (
         <div key={c.id}>
           <SectionTitle><span style={{ color: c.color }}>■</span> {c.title} <span className="text-sm font-normal text-muted">{c.exam_label}</span></SectionTitle>
           <Card className="divide-y divide-line p-0">

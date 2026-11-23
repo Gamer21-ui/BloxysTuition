@@ -12,7 +12,7 @@ import { saveAvatar } from "../actions";
 const SKINS = ["#f5c89a", "#e0ac69", "#c68642", "#8d5524", "#ffdbac", "#f1c27d", "#fde047", "#a3e635"];
 const COLORS = ["#1cb0f6", "#58cc02", "#ff4b4b", "#ffc800", "#a855f7", "#f97316", "#111827", "#f8fafc", "#334155", "#0ea5e9", "#ec4899", "#14b8a6"];
 const FACES = ["smile", "cool", "wink", "grin", "focused"] as const;
-const HATS = Object.keys(HAT_UNLOCKS) as NonNullable<BlockyConfig["hat"]>[];
+const LEVEL_HATS = Object.keys(HAT_UNLOCKS) as NonNullable<BlockyConfig["hat"]>[];
 const MODES: { id: Profile["avatar_mode"]; label: string }[] = [
   { id: "blocky", label: "Blocky" }, { id: "roblox", label: "Roblox" }, { id: "both", label: "Both" }, { id: "discord", label: "Discord pic" },
 ];
@@ -34,7 +34,8 @@ function Swatches({ value, options, onPick, label }: { value?: string; options: 
   );
 }
 
-export function AvatarEditor({ level, initial }: { level: number; initial: Init }) {
+export function AvatarEditor({ level, initial, ownedHats = [], ownedPatterns = [], frame }: { level: number; initial: Init; ownedHats?: string[]; ownedPatterns?: string[]; frame?: string | null }) {
+  const HATS = [...LEVEL_HATS, ...(ownedHats as NonNullable<BlockyConfig["hat"]>[])];
   const [mode, setMode] = useState(initial.mode);
   const [b, setB] = useState<Required<BlockyConfig>>({ ...BLOCKY_DEFAULT, ...(initial.blocky || {}) });
   const [name, setName] = useState(initial.displayName);
@@ -69,7 +70,7 @@ export function AvatarEditor({ level, initial }: { level: number; initial: Init 
   return (
     <Card className="grid gap-6 md:grid-cols-[220px_1fr]">
       <div className="flex flex-col items-center gap-3">
-        <Avatar name={name} mode={mode} blocky={b} robloxUrl={robloxImg} discordUrl={initial.discordImg} size={168} />
+        <Avatar name={name} mode={mode} blocky={b} robloxUrl={robloxImg} discordUrl={initial.discordImg} size={168} frame={frame} />
         <div className="flex flex-wrap justify-center gap-1.5">
           {MODES.map((m) => (
             <button key={m.id} type="button" onClick={() => setMode(m.id)} disabled={(m.id === "roblox" || m.id === "both") && !robloxImg}
@@ -109,15 +110,26 @@ export function AvatarEditor({ level, initial }: { level: number; initial: Init 
           <div className="label">Hat <span className="text-muted">(more unlock as you level up)</span></div>
           <div className="flex flex-wrap gap-2">
             {HATS.map((h) => {
-              const locked = level < HAT_UNLOCKS[h];
+              const need = HAT_UNLOCKS[h] ?? 1;
+              const locked = level < need;
               return (
-                <button key={h} type="button" disabled={locked} onClick={() => set("hat", h)} title={locked ? `Unlocks at level ${HAT_UNLOCKS[h]}` : h}
+                <button key={h} type="button" disabled={locked} onClick={() => set("hat", h)} title={locked ? `Unlocks at level ${need}` : h}
                   className={cn("relative overflow-hidden border-2 border-line", b.hat === h && "ring-2 ring-accent", locked && "opacity-50")} style={{ borderRadius: 8 }}>
                   <BlockyAvatar config={{ ...b, hat: h }} size={48} />
-                  {locked && <span className="absolute inset-0 grid place-items-center bg-black/50 text-[10px] font-bold text-white"><Lock size={14} />Lv {HAT_UNLOCKS[h]}</span>}
+                  {locked && <span className="absolute inset-0 grid place-items-center bg-black/50 text-[10px] font-bold text-white"><Lock size={14} />Lv {need}</span>}
                 </button>
               );
             })}
+          </div>
+        </div>
+        <div>
+          <div className="label">Background pattern {ownedPatterns.length === 0 && <span className="text-muted">(buy more in the <a className="underline" href="/shop">shop</a>)</span>}</div>
+          <div className="flex flex-wrap gap-2">
+            {(["none", ...ownedPatterns] as NonNullable<BlockyConfig["pattern"]>[]).map((pt) => (
+              <button key={pt} type="button" onClick={() => set("pattern", pt)} title={pt} className={cn("overflow-hidden border-2 border-line", b.pattern === pt && "ring-2 ring-accent")} style={{ borderRadius: 8 }}>
+                <BlockyAvatar config={{ ...b, pattern: pt }} size={48} />
+              </button>
+            ))}
           </div>
         </div>
         <div className="flex items-center gap-3">

@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, SectionTitle } from "@/components/ui";
 import { fmtDateTime } from "@/lib/utils";
 import { SubmitBox } from "./submit-box";
+import { LevelTabs } from "@/components/level-tabs";
+import { inLevel, pickLevel } from "@/lib/levels";
+
 
 export const metadata: Metadata = { title: "Homework" };
 export const dynamic = "force-dynamic";
@@ -11,21 +14,24 @@ export const dynamic = "force-dynamic";
 type A = {
   id: string; title: string; kind: string; instructions: string | null; file_path: string | null; due_at: string | null;
   max_score: number; xp_reward: number; answers_released: boolean; solution_path: string | null; mark_scheme_path: string | null;
-  solution_video_url: string | null; course: { title: string; color: string } | null;
+  solution_video_url: string | null; course: { title: string; color: string; tier: string } | null;
 };
 type S = { assignment_id: string; file_paths: string[]; text_answer: string | null; submitted_at: string; score: number | null; feedback: string | null; graded_at: string | null };
 
 const f = (bucket: string, path: string) => `/api/files?bucket=${bucket}&path=${encodeURIComponent(path)}`;
 
-export default async function Homework() {
+export default async function Homework({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const me = await requireApproved();
+  const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
   const [{ data: as }, { data: subs }] = await Promise.all([
-    sb.from("assignments").select("id, title, kind, instructions, file_path, due_at, max_score, xp_reward, answers_released, solution_path, mark_scheme_path, solution_video_url, course:courses(title, color)").order("due_at", { ascending: true, nullsFirst: false }),
+    sb.from("assignments").select("id, title, kind, instructions, file_path, due_at, max_score, xp_reward, answers_released, solution_path, mark_scheme_path, solution_video_url, course:courses(title, color, tier)").order("due_at", { ascending: true, nullsFirst: false }),
     sb.from("submissions").select("assignment_id, file_paths, text_answer, submitted_at, score, feedback, graded_at").eq("user_id", me.id),
   ]);
   const byA = new Map((subs as S[] | null || []).map((s) => [s.assignment_id, s]));
-  const list = (as as unknown as A[]) || [];
+  const all = (as as unknown as A[]) || [];
+  const list = all.filter((a) => inLevel(a.course?.tier || "O", level));
+  const count = (l: "O" | "A") => all.filter((a) => inLevel(a.course?.tier || "O", l) && !byA.has(a.id)).length;
   const todo = list.filter((a) => !byA.has(a.id));
   const done = list.filter((a) => byA.has(a.id));
 
@@ -66,6 +72,7 @@ export default async function Homework() {
     <div className="mx-auto max-w-3xl">
       <h1 className="page-title">Homework</h1>
       <p className="text-muted">Hand in before the deadline to count for the “on time” quests. Photos of written work are fine.</p>
+      <LevelTabs current={level} base="/homework" counts={{ O: count("O"), A: count("A") }} />
       <SectionTitle>To do ({todo.length})</SectionTitle>
       {todo.length ? <div className="space-y-4">{todo.map((a) => <Item key={a.id} a={a} />)}</div> : <Empty>All caught up 🎉</Empty>}
       <SectionTitle>Handed in ({done.length})</SectionTitle>

@@ -14,7 +14,7 @@ export default async function Battles() {
   const sb = await createClient();
   const since = new Date(Date.now() - 3 * 3600_000).toISOString();
   const [{ data: courses }, { data: open }, { data: mine }] = await Promise.all([
-    sb.from("courses").select("id, title, code").eq("active", true).order("sort"),
+    sb.from("courses").select("id, title, code, tier").eq("active", true).order("sort"),
     sb.from("battles").select("id, code, mode, status, created_at, round_count, course:courses(title), players:battle_players(user_id, team)")
       .in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
     sb.from("battle_players").select("score, team, battle:battles!inner(code, mode, status, winner_team, created_at, course:courses(title))")

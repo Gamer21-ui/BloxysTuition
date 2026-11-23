@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, NotebookPen, Settings,
+  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, NotebookPen, Settings, ShoppingBag,
   Swords, Target, Trophy, Users, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,7 @@ const STUDENT: Item[] = [
   { href: "/homework", label: "Homework", icon: NotebookPen },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/achievements", label: "Achievements", icon: Medal },
+  { href: "/shop", label: "Shop", icon: ShoppingBag },
   { href: "/profile", label: "Profile", icon: Settings },
 ];
 
@@ -30,6 +31,7 @@ const TUTOR: Item[] = [
   { href: "/tutor/attendance", label: "Attendance", icon: CalendarDays },
   { href: "/tutor/announcements", label: "Announce", icon: Megaphone },
   { href: "/tutor/challenges", label: "Challenges", icon: Gamepad2 },
+  { href: "/tutor/shop", label: "Shop", icon: ShoppingBag },
 ];
 
 const MOBILE = ["/dashboard", "/courses", "/practice", "/battles", "/profile"];

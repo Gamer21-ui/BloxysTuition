@@ -5,11 +5,15 @@ import { getCourseProgress } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { Icon } from "@/components/icon";
 import { Bar } from "@/components/ui";
+import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
+import { inLevel, pickLevel } from "@/lib/levels";
+
 
 export const metadata: Metadata = { title: "Courses" };
 
-export default async function Courses() {
+export default async function Courses({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const me = await requireApproved();
+  const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
   const [courses, { data: topics }] = await Promise.all([
     getCourseProgress(me.id),
@@ -34,8 +38,10 @@ export default async function Courses() {
           ))}
         </div>
       )}
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {courses.map((c) => (
+      <LevelTabs current={level} base="/courses" counts={{ O: courses.filter((c) => inLevel(c.tier, "O")).length, A: courses.filter((c) => inLevel(c.tier, "A")).length }} />
+      {!courses.some((c) => inLevel(c.tier, level)) && <LevelEmpty level={level} />}
+      <div className="grid gap-4 sm:grid-cols-2">
+        {courses.filter((c) => inLevel(c.tier, level)).map((c) => (
           <Link key={c.id} href={`/courses/${c.slug}`} className="card block transition hover:-translate-y-1">
             <div className="flex items-start gap-4">
               <div className="grid h-14 w-14 shrink-0 place-items-center text-white" style={{ background: c.color, borderRadius: "calc(var(--radius)*.7)" }}><Icon name={c.icon} size={28} /></div>

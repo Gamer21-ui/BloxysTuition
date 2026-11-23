@@ -5,19 +5,22 @@ import { Card, Empty, SectionTitle } from "@/components/ui";
 import { fmtDateTime } from "@/lib/utils";
 import { deleteAssignment, grade } from "../actions";
 import { NewAssignment, ReleaseAnswers } from "./forms";
+import { LevelTabs } from "@/components/level-tabs";
+import { inLevel, pickLevel } from "@/lib/levels";
 
 export const metadata: Metadata = { title: "Homework (tutor)" };
 export const dynamic = "force-dynamic";
 
 const f = (bucket: string, path: string) => `/api/files?bucket=${bucket}&path=${encodeURIComponent(path)}`;
 
-export default async function TutorHomework() {
+export default async function TutorHomework({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   await requireTutor();
+  const level = pickLevel((await searchParams).level);
   const admin = createAdminClient();
   const [{ data: courses }, { data: chapters }, { data: as }, { count: studentCount }] = await Promise.all([
-    admin.from("courses").select("id, title").order("sort"),
+    admin.from("courses").select("id, title, tier").order("sort"),
     admin.from("chapters").select("id, course_id, number, title").order("sort"),
-    admin.from("assignments").select("*, course:courses(title), submissions(id, file_paths, text_answer, submitted_at, score, feedback, graded_at, student:profiles(display_name))").order("created_at", { ascending: false }),
+    admin.from("assignments").select("*, course:courses(title, tier), submissions(id, file_paths, text_answer, submitted_at, score, feedback, graded_at, student:profiles(display_name))").order("created_at", { ascending: false }),
     admin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student").eq("status", "approved"),
   ]);
   type Sub = { id: string; file_paths: string[]; text_answer: string | null; submitted_at: string; score: number | null; feedback: string | null; graded_at: string | null; student: { display_name: string } | null };
@@ -27,9 +30,10 @@ export default async function TutorHomework() {
       <h1 className="page-title">Homework</h1>
       <NewAssignment courses={courses || []} chapters={chapters || []} />
       <SectionTitle>Set work</SectionTitle>
+      <LevelTabs current={level} base="/tutor/homework" counts={{ O: (as || []).filter((a) => inLevel((a.course as { tier: string })?.tier || "O", "O")).length, A: (as || []).filter((a) => inLevel((a.course as { tier: string })?.tier || "O", "A")).length }} />
       {!as?.length && <Empty>Nothing set yet.</Empty>}
       <div className="space-y-4">
-        {(as || []).map((a) => {
+        {(as || []).filter((a) => inLevel((a.course as { tier: string })?.tier || "O", level)).map((a) => {
           const subs = (a.submissions as Sub[]) || [];
           const toMark = subs.filter((s) => !s.graded_at).length;
           return (

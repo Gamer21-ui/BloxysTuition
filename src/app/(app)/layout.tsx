@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { MobileNav, Sidebar } from "@/components/nav";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar } from "@/components/avatar";
+import { NameTag } from "@/components/name-tag";
 import { levelProgress } from "@/lib/xp";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -22,9 +23,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
             <Link href="/profile" className="flex min-w-0 items-center gap-2" aria-label="Your profile">
-              <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={38} />
+              <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={38} frame={me.frame} />
               <div className="hidden min-w-0 sm:block">
-                <div className="truncate font-display leading-tight">{me.display_name}</div>
+                <div className="truncate font-display leading-tight"><NameTag name={me.display_name} style={me.name_style} /></div>
                 <div className="text-xs text-muted">Lv {lp.level}</div>
               </div>
             </Link>
@@ -33,7 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
             <div className="ml-auto flex items-center gap-2">
               <span className="chip text-warn" title="Day streak"><Flame size={14} aria-hidden="true" /> {me.streak}</span>
-              <span className="chip text-coin" title="Coins"><Coins size={14} aria-hidden="true" /> {me.coins}</span>
+              <Link href="/shop" className="chip text-coin hover:underline" title="Coins: spend them in the shop"><Coins size={14} aria-hidden="true" /> {me.coins}</Link>
               <span className="chip md:hidden" title="Level">Lv {lp.level}</span>
               <NotificationBell userId={me.id} initial={count ?? 0} />
             </div>

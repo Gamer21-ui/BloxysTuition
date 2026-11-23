@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
+import { groupByLevel } from "@/lib/levels";
 
-export function BattleLobbyForms({ courses }: { courses: { id: string; title: string; code: string }[] }) {
+export function BattleLobbyForms({ courses }: { courses: { id: string; title: string; code: string; tier: string }[] }) {
   const router = useRouter();
   const [mode, setMode] = useState<"1v1" | "2v2">("1v1");
   const [course, setCourse] = useState("");
@@ -46,7 +47,9 @@ export function BattleLobbyForms({ courses }: { courses: { id: string; title: st
             <label className="label" htmlFor="bc">Subject</label>
             <select id="bc" className="input" value={course} onChange={(e) => setCourse(e.target.value)}>
               <option value="">Mixed (all subjects)</option>
-              {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+              {groupByLevel(courses).map((g) => (
+                <optgroup key={g.level.id} label={g.level.label}>{g.items.map((c) => <option key={c.id} value={c.id}>{c.title.replace(/^(O|AS|A) Level /, "")}</option>)}</optgroup>
+              ))}
             </select>
           </div>
           <div>
