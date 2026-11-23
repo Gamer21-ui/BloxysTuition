@@ -1,0 +1,84 @@
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, House, Medal, Megaphone, NotebookPen, Settings,
+  Swords, Target, Trophy, Users, type LucideIcon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { BRAND } from "@/lib/brand";
+
+type Item = { href: string; label: string; icon: LucideIcon };
+
+const STUDENT: Item[] = [
+  { href: "/dashboard", label: "Home", icon: House },
+  { href: "/courses", label: "Courses", icon: BookOpen },
+  { href: "/challenges", label: "Challenges", icon: Target },
+  { href: "/battles", label: "Battles", icon: Swords },
+  { href: "/homework", label: "Homework", icon: NotebookPen },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/achievements", label: "Achievements", icon: Medal },
+  { href: "/profile", label: "Profile", icon: Settings },
+];
+
+const TUTOR: Item[] = [
+  { href: "/tutor", label: "Overview", icon: BarChart3 },
+  { href: "/tutor/students", label: "Students", icon: Users },
+  { href: "/tutor/content", label: "Content", icon: BookOpen },
+  { href: "/tutor/homework", label: "Homework", icon: ClipboardList },
+  { href: "/tutor/attendance", label: "Attendance", icon: CalendarDays },
+  { href: "/tutor/announcements", label: "Announce", icon: Megaphone },
+  { href: "/tutor/challenges", label: "Challenges", icon: Gamepad2 },
+];
+
+const MOBILE = ["/dashboard", "/courses", "/battles", "/challenges", "/profile"];
+
+export function Sidebar({ isTutor }: { isTutor: boolean }) {
+  const path = usePathname();
+  const active = (h: string) => path === h || (h !== "/tutor" && path.startsWith(h + "/")) || (h === "/tutor" && path === "/tutor");
+  const link = (i: Item) => (
+    <Link
+      key={i.href}
+      href={i.href}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 font-bold transition",
+        active(i.href) ? "bg-primary/15 text-primary" : "text-muted hover:bg-surface2 hover:text-ink",
+      )}
+      style={{ borderRadius: "calc(var(--radius) * 0.7)" }}
+      aria-current={active(i.href) ? "page" : undefined}
+    >
+      <i.icon size={20} aria-hidden="true" /> {i.label}
+    </Link>
+  );
+  return (
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r-2 border-line bg-surface p-3 lg:flex">
+      <Link href="/dashboard" className="mb-4 px-2 pt-2 font-display text-xl leading-tight text-primary">{BRAND.short}<span className="block text-xs text-muted font-body">Academic Comeback</span></Link>
+      <nav aria-label="Main" className="flex flex-col gap-1">{STUDENT.map(link)}</nav>
+      {isTutor && (
+        <>
+          <div className="mt-5 px-3 text-xs font-bold uppercase tracking-wider text-muted">Tutor</div>
+          <nav aria-label="Tutor" className="flex flex-col gap-1">{TUTOR.map(link)}</nav>
+        </>
+      )}
+    </aside>
+  );
+}
+
+export function MobileNav({ isTutor }: { isTutor: boolean }) {
+  const path = usePathname();
+  const items = STUDENT.filter((i) => MOBILE.includes(i.href));
+  if (isTutor) items.splice(3, 1, TUTOR[0]);
+  return (
+    <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t-2 border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
+      {items.map((i) => {
+        const on = path === i.href || path.startsWith(i.href + "/");
+        return (
+          <Link key={i.href} href={i.href} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold", on ? "text-primary" : "text-muted")} aria-current={on ? "page" : undefined}>
+            <i.icon size={22} aria-hidden="true" />
+            {i.label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}

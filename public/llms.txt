@@ -1,0 +1,15 @@
+# FunnyBloxy's Academic Comeback!
+
+> Small private tuition in Mauritius for Cambridge O Level Accounting (7707), Business (7081), Economics (2281) and Computer Science (2210), preparing students for the November 2027 exams. AS and A Level coming later.
+
+The public part of the site is the home page only. Lessons, quizzes, homework and progress are behind a Discord sign-in and need the tutor's approval.
+
+## What students get
+- Chapter-by-chapter notes that follow the syllabus, plus the tutor's own class notes
+- Practice quizzes, speedruns, daily and weekly challenges, streaks and badges
+- Live 1v1 / 2v2 quiz battles
+- Homework hand-in with marks, feedback and worked solutions
+- Parent progress reports
+
+## Join
+Ask in the Discord server (link on the home page).
