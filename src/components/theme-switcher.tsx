@@ -47,7 +47,7 @@ export function ThemeSwitcher({ userId, initial }: { userId: string; initial: Th
           </button>
         ))}
       </div>
-      {theme === "bloxy" && (
+      {(theme === "bloxy" || theme === "retro") && (
         <button className="btn btn-ghost btn-sm" onClick={toggleMode}>
           {mode === "dark" ? <Sun size={16} /> : <Moon size={16} />} {mode === "dark" ? "Light mode" : "Dark mode"}
         </button>

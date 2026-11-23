@@ -91,6 +91,24 @@
   color-scheme: light;
 }
 
+/* retro night: classic-Roblox greys with the same black outlines and hard shadows */
+[data-theme="retro"][data-mode="dark"] {
+  --bg: 30 30 34;
+  --surface: 48 48 54;
+  --surface2: 62 62 70;
+  --ink: 235 235 235;
+  --muted: 165 165 172;
+  --line: 10 10 12;
+  --primary: 52 142 214;
+  --accent: 232 72 60;
+  --good: 98 186 98;
+  --bad: 232 72 60;
+  --shadow-chunky: 3px 3px 0 rgb(0 0 0);
+  --shadow-soft: 3px 3px 0 rgb(0 0 0);
+  --pattern: radial-gradient(circle at 50% 50%, rgb(255 255 255 / 0.05) 0 5px, rgb(0 0 0 / 0.25) 5px 6px, transparent 6px) 0 0 / 18px 18px;
+  color-scheme: dark;
+}
+
 /* ============================================================ base */
 html { -webkit-text-size-adjust: 100%; }
 body {
