@@ -3,46 +3,73 @@ import Link from "next/link";
 import { Coins, Flame } from "lucide-react";
 import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { MobileNav, Sidebar } from "@/components/nav";
+import { MobileNav, Sidebar, type Badges } from "@/components/nav";
+import { MobileMenu } from "@/components/mobile-menu";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar } from "@/components/avatar";
 import { NameTag } from "@/components/name-tag";
-import { levelProgress } from "@/lib/xp";
+import { BRAND } from "@/lib/brand";
+import { levelProgress, rankName } from "@/lib/xp";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const me = await requireApproved();
   const sb = await createClient();
-  const { count } = await sb.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null);
+  const tutor = me.role === "tutor";
+  const now = new Date().toISOString();
+  const [{ count }, { data: asg }, { data: subs }, { count: due }, pending, toMark] = await Promise.all([
+    sb.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
+    sb.from("assignments").select("id"),
+    sb.from("submissions").select("assignment_id").eq("user_id", me.id),
+    sb.from("review_items").select("question_id", { count: "exact", head: true }).eq("user_id", me.id).lte("due_at", now),
+    tutor ? sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending") : Promise.resolve({ count: 0 }),
+    tutor ? sb.from("submissions").select("id", { count: "exact", head: true }).is("graded_at", null) : Promise.resolve({ count: 0 }),
+  ]);
+  const handedIn = new Set((subs || []).map((s) => s.assignment_id));
+  const badges: Badges = {
+    "/homework": tutor ? 0 : (asg || []).filter((a) => !handedIn.has(a.id)).length,
+    "/practice": due || 0,
+    "/tutor/students": pending.count || 0,
+    "/tutor/homework": toMark.count || 0,
+  };
   const lp = levelProgress(me.xp);
+  const avatar = (size: number) => (
+    <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={size} frame={me.frame} />
+  );
+
   return (
     <div className="flex min-h-dvh">
-      <Sidebar isTutor={me.role === "tutor"} />
+      <Sidebar isTutor={tutor} badges={badges} />
       <div className="min-w-0 flex-1 pb-24 lg:pb-8">
-        <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
-            <Link href="/profile" className="flex min-w-0 items-center gap-2" aria-label="Your profile">
-              <Avatar name={me.display_name} mode={me.avatar_mode} discordUrl={me.discord_avatar_url} robloxUrl={me.roblox_headshot_url} blocky={me.blocky} size={38} frame={me.frame} />
-              <div className="hidden min-w-0 sm:block">
+            <MobileMenu
+              isTutor={tutor} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
+              handle={me.discord_username} level={lp.level} rank={rankName(lp.level)} xpInto={lp.into} xpNeeded={lp.needed} xpPct={lp.pct}
+              coins={me.coins} streak={me.streak} freezes={me.streak_freezes ?? 0}
+            />
+            <Link href="/dashboard" className="font-display text-xl text-primary lg:hidden">{BRAND.short}</Link>
+            <Link href="/profile" className="hidden min-w-0 items-center gap-2 lg:flex" aria-label="Your profile">
+              {avatar(38)}
+              <div className="min-w-0">
                 <div className="truncate font-display leading-tight"><NameTag name={me.display_name} style={me.name_style} /></div>
                 <div className="text-xs text-muted">Lv {lp.level}</div>
               </div>
             </Link>
-            <div className="ml-1 hidden w-40 md:block" title={`${lp.into} / ${lp.needed} XP to next level`}>
+            <div className="ml-1 hidden w-40 lg:block" title={`${lp.into} / ${lp.needed} XP to next level`}>
               <div className="bar h-2.5"><i style={{ width: `${lp.pct}%`, background: "rgb(var(--xp))" }} /></div>
             </div>
             <div className="ml-auto flex items-center gap-2">
               <span className="chip text-warn" title="Day streak"><Flame size={14} aria-hidden="true" /> {me.streak}</span>
               <Link href="/shop" className="chip text-coin hover:underline" title="Coins: spend them in the shop"><Coins size={14} aria-hidden="true" /> {me.coins}</Link>
-              <span className="chip md:hidden" title="Level">Lv {lp.level}</span>
               <NotificationBell userId={me.id} initial={count ?? 0} />
             </div>
           </div>
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
       </div>
-      <MobileNav isTutor={me.role === "tutor"} />
+      <MobileNav isTutor={tutor} me={avatar(28)} />
     </div>
   );
 }

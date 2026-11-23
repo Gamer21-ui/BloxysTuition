@@ -10,11 +10,11 @@ import { BRAND } from "@/lib/brand";
 
 type Item = { href: string; label: string; icon: LucideIcon };
 
-const STUDENT: Item[] = [
+export const STUDENT: Item[] = [
   { href: "/dashboard", label: "Home", icon: House },
   { href: "/courses", label: "Courses", icon: BookOpen },
   { href: "/practice", label: "Exam prep", icon: GraduationCap },
-  { href: "/challenges", label: "Challenges", icon: Target },
+  { href: "/challenges", label: "Quests", icon: Target },
   { href: "/battles", label: "Battles", icon: Swords },
   { href: "/homework", label: "Homework", icon: NotebookPen },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
@@ -23,7 +23,7 @@ const STUDENT: Item[] = [
   { href: "/profile", label: "Profile", icon: Settings },
 ];
 
-const TUTOR: Item[] = [
+export const TUTOR: Item[] = [
   { href: "/tutor", label: "Overview", icon: BarChart3 },
   { href: "/tutor/students", label: "Students", icon: Users },
   { href: "/tutor/content", label: "Content", icon: BookOpen },
@@ -36,7 +36,9 @@ const TUTOR: Item[] = [
 
 const MOBILE = ["/dashboard", "/courses", "/practice", "/battles", "/profile"];
 
-export function Sidebar({ isTutor }: { isTutor: boolean }) {
+export type Badges = Partial<Record<string, number>>;
+
+export function Sidebar({ isTutor, badges = {} }: { isTutor: boolean; badges?: Badges }) {
   const path = usePathname();
   const active = (h: string) => path === h || (h !== "/tutor" && path.startsWith(h + "/")) || (h === "/tutor" && path === "/tutor");
   const link = (i: Item) => (
@@ -51,6 +53,7 @@ export function Sidebar({ isTutor }: { isTutor: boolean }) {
       aria-current={active(i.href) ? "page" : undefined}
     >
       <i.icon size={20} aria-hidden="true" /> {i.label}
+      {!!badges[i.href] && <span className="ml-auto rounded-full bg-accent px-2 text-xs text-white">{badges[i.href]! > 99 ? "99+" : badges[i.href]}</span>}
     </Link>
   );
   return (
@@ -67,21 +70,27 @@ export function Sidebar({ isTutor }: { isTutor: boolean }) {
   );
 }
 
-export function MobileNav({ isTutor }: { isTutor: boolean }) {
+/** Bottom tab bar on phones (like Roblox): four sections plus "Me" with your avatar. Everything else is in the ☰ menu. */
+export function MobileNav({ isTutor, me }: { isTutor: boolean; me: React.ReactNode }) {
   const path = usePathname();
-  const items = STUDENT.filter((i) => MOBILE.includes(i.href));
-  if (isTutor) items.splice(3, 1, TUTOR[0]);
+  const tabs: Item[] = [
+    STUDENT[0], STUDENT[1], STUDENT[2],
+    isTutor ? TUTOR[0] : STUDENT.find((i) => i.href === "/battles")!,
+  ];
+  const on = (h: string) => path === h || (h !== "/tutor" && path.startsWith(h + "/")) || (h === "/tutor" && path.startsWith("/tutor"));
+  const meOn = path === "/profile";
   return (
     <nav aria-label="Main" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t-2 border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden">
-      {items.map((i) => {
-        const on = path === i.href || path.startsWith(i.href + "/");
-        return (
-          <Link key={i.href} href={i.href} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold", on ? "text-primary" : "text-muted")} aria-current={on ? "page" : undefined}>
-            <i.icon size={22} aria-hidden="true" />
-            {i.label}
-          </Link>
-        );
-      })}
+      {tabs.map((i) => (
+        <Link key={i.href} href={i.href} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px] font-bold", on(i.href) ? "text-primary" : "text-muted")} aria-current={on(i.href) ? "page" : undefined}>
+          <i.icon size={24} aria-hidden="true" />
+          {i.label}
+        </Link>
+      ))}
+      <Link href="/profile" className={cn("flex flex-col items-center gap-0.5 py-1.5 text-[11px] font-bold", meOn ? "text-primary" : "text-muted")} aria-current={meOn ? "page" : undefined}>
+        <span className={cn("rounded-full", meOn && "ring-2 ring-primary ring-offset-1 ring-offset-surface")}>{me}</span>
+        Me
+      </Link>
     </nav>
   );
 }
