@@ -5,8 +5,47 @@ insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_lim
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('6fc981d3-81e2-546b-abcb-f97ed0c43825', '8b591152-0acf-5fe4-a902-2af189f81c0f', null, 'Paper 1 practice (40 questions, 1h 30m)', 'exam', 150, 5400, 40, 1000, 'locked') on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('74451a1d-5001-54df-afb0-c2be0f0051dd', '8b591152-0acf-5fe4-a902-2af189f81c0f', null, 'Fix my mistakes', 'review', 0, 1001) on conflict (id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('d4411962-e41d-5055-a836-3c45b7ee20dd', '8b591152-0acf-5fe4-a902-2af189f81c0f', '1', 'The fundamentals of accounting', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e8708e14-eef7-54f0-a6e7-b85e25fe0608', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '1.1', 'The purpose of accounting', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('2dc56758-e9af-5f4f-ad6e-3f475d5dccae', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '1.2', 'The accounting equation', 1) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('e8708e14-eef7-54f0-a6e7-b85e25fe0608', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '1.1', 'The purpose of accounting', 0, '## Why businesses keep accounts
+**Book-keeping** is recording every financial transaction in the books. **Accounting** goes further: it summarises, presents and interprets that information so people can make decisions.
+
+## What accounting is for
+- Recording transactions accurately and in date order
+- Working out **profit or loss** for a period
+- Showing what the business **owns** (assets) and **owes** (liabilities)
+- Helping the owner **plan and control** the business
+- Giving information to others who need it (lenders, tax authorities, partners)
+
+## Who uses the information
+| User | What they want to know |
+|---|---|
+| Owner | Is it profitable? How much can I take as drawings? |
+| Bank / lender | Can the business repay a loan? |
+| Suppliers | Will we be paid on time? |
+| Government | How much tax is due? |
+| Employees | Is my job secure? |
+
+> Exam tip: when asked "why does the owner keep accounting records?", give a reason AND explain it, e.g. "to calculate profit, so he knows whether the business is worth continuing".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2dc56758-e9af-5f4f-ad6e-3f475d5dccae', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '1.2', 'The accounting equation', 1, '## The accounting equation
+**Assets = Capital + Liabilities**
+
+- **Assets**: resources the business owns or controls (premises, vehicles, inventory, trade receivables, bank, cash)
+- **Liabilities**: amounts the business owes to outsiders (trade payables, loans, bank overdraft)
+- **Capital**: the owner''s investment in the business (what the business "owes" the owner)
+
+Rearranged: **Capital = Assets − Liabilities** and **Liabilities = Assets − Capital**.
+
+## Every transaction keeps it balanced
+| Transaction | Effect |
+|---|---|
+| Owner pays $5 000 into the business bank | Assets +5 000, Capital +5 000 |
+| Buys a van on credit $8 000 | Assets +8 000, Liabilities +8 000 |
+| Pays a supplier $1 200 by bank | Assets −1 200, Liabilities −1 200 |
+| Customer pays $400 into the bank | Bank +400, Trade receivables −400 (no total change) |
+| Owner takes goods for personal use $300 | Assets −300, Capital −300 (drawings) |
+
+**Profit increases capital**; **losses and drawings reduce capital**.
+
+> Exam tip: always check the equation still balances after each change. If it doesn''t, you''ve missed one side of the transaction.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('51780471-a63a-5445-aeff-15f6e054e372', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'd4411962-e41d-5055-a836-3c45b7ee20dd', 'Chapter 1 quiz', 'quiz', 60, 0) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('93fbf93e-3e59-53cc-a0c2-957f87ae1a37', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '51780471-a63a-5445-aeff-15f6e054e372', 'What is the accounting equation?', '["Liabilities = Assets + Capital","Assets = Capital − Liabilities","Capital = Assets + Liabilities","Assets = Capital + Liabilities"]'::jsonb, 'Assets = Capital + Liabilities. Everything the business owns (assets) was paid for either by the owner (capital) or by outsiders (liabilities), so the two sides always balance.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('93fbf93e-3e59-53cc-a0c2-957f87ae1a37', 3) on conflict (question_id) do nothing;
@@ -39,9 +78,70 @@ insert into question_keys (question_id, correct) values ('cd343f4b-d7ec-584b-a12
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('d21f3de1-e69b-5f6c-a3ec-c1b263206605', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'd4411962-e41d-5055-a836-3c45b7ee20dd', '51780471-a63a-5445-aeff-15f6e054e372', 'Which user of accounting information mainly wants to know the profit to decide whether to keep running the business?', '["The owner","A competitor","A supplier","A customer"]'::jsonb, 'The owner bears the risk and takes the profit, so they use the accounts to judge whether the business is worth continuing.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('d21f3de1-e69b-5f6c-a3ec-c1b263206605', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '8b591152-0acf-5fe4-a902-2af189f81c0f', '2', 'Sources and recording of data', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('fa043514-7ae6-533f-acad-7f5d215cd77d', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.1', 'The double entry system of book-keeping', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('dab609c3-a346-5254-a608-c7124f563f2a', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.2', 'Business documents', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3695686b-9c36-5efe-a24f-5b0382053f4a', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.3', 'Books of prime entry', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('fa043514-7ae6-533f-acad-7f5d215cd77d', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.1', 'The double entry system of book-keeping', 0, '## The double entry rule
+Every transaction affects **two accounts**: one is **debited**, the other **credited**, with the same amount.
+
+| Increase on the debit side | Increase on the credit side |
+|---|---|
+| Assets | Liabilities |
+| Expenses | Capital |
+| Drawings | Income (revenue) |
+
+Decreases go on the opposite side.
+
+## Examples
+- Cash sales $250 → **Dr Cash, Cr Sales**
+- Credit purchases from Ali $600 → **Dr Purchases, Cr Ali**
+- Rent paid by cheque $500 → **Dr Rent, Cr Bank**
+- Owner takes $100 cash → **Dr Drawings, Cr Cash**
+- Goods returned to Ali $60 → **Dr Ali, Cr Purchases returns**
+
+## Balancing an account
+1. Add up both sides.
+2. Put the difference on the smaller side as **Balance c/d** (carried down).
+3. Total both sides (they now match).
+4. Bring the balance down on the other side as **Balance b/d**.
+
+A debit balance on an asset or expense account is normal; a credit balance on a liability, capital or income account is normal.
+
+> Exam tip: name the account in the narrative. For a debit entry in Ali''s account you write "Purchases returns", the name of the *other* account.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('dab609c3-a346-5254-a608-c7124f563f2a', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.2', 'Business documents', 1, '## Business documents (source documents)
+Transactions are recorded from documents, which are the evidence.
+
+| Document | Sent by → to | Purpose | Recorded in |
+|---|---|---|---|
+| **Invoice** | Seller → buyer | Bills for goods sold on credit | Sales / purchases journal |
+| **Credit note** | Seller → buyer | Reduces the amount owed (returns, overcharge) | Returns journals |
+| **Debit note** | Buyer → seller | Asks for a credit note | (Not recorded) |
+| **Statement of account** | Seller → buyer | Summary of the month and balance owed | (Checking only) |
+| **Receipt** | Receiver of cash → payer | Proof of payment | Cash book |
+| **Cheque counterfoil / bank slip** | Business | Record of bank payments / deposits | Cash book |
+| **Petty cash voucher** | Business | Small cash spending | Petty cash book |
+
+## Discounts
+- **Trade discount**: reduction off the list price for trade customers. Shown on the invoice, **never recorded** in the ledger.
+- **Cash discount**: reward for paying early. **Discount allowed** is an expense; **discount received** is income.
+
+> Exam tip: the net invoice value (after trade discount) is the amount entered in the books.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3695686b-9c36-5efe-a24f-5b0382053f4a', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', '2.3', 'Books of prime entry', 2, '## Books of prime entry
+Transactions are first listed in a book of prime entry, then **posted** to the ledger. This keeps the ledger tidy and gives a record of each type of transaction.
+
+| Book | Records | Posted to |
+|---|---|---|
+| **Sales journal** | Credit sales invoices | Dr each customer; Cr Sales (total) |
+| **Purchases journal** | Credit purchases invoices | Cr each supplier; Dr Purchases (total) |
+| **Sales returns journal** | Credit notes sent | Cr customers; Dr Sales returns |
+| **Purchases returns journal** | Credit notes received | Dr suppliers; Cr Purchases returns |
+| **Cash book** | All cash and bank receipts/payments | It is also a ledger account |
+| **Petty cash book** | Small cash payments (imprest system) | Expense accounts |
+| **General journal** | Anything else: opening entries, non-current assets on credit, corrections, write-offs | The accounts named |
+
+## Ledger divisions
+- **Sales ledger**: customers'' accounts (trade receivables)
+- **Purchases ledger**: suppliers'' accounts (trade payables)
+- **Nominal (general) ledger**: everything else (expenses, income, assets, capital)
+
+> Exam tip: a general journal entry needs a **narrative** (a short explanation) under it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('e47ac9b0-3045-5b22-af58-96132f88bbdb', '8b591152-0acf-5fe4-a902-2af189f81c0f', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', 'Chapter 2 quiz', 'quiz', 60, 1) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('a1c44493-a14e-5a23-a652-35ba9f3ca855', '8b591152-0acf-5fe4-a902-2af189f81c0f', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', 'e47ac9b0-3045-5b22-af58-96132f88bbdb', 'Goods bought on credit from Ali. Which entries are made?', '["Debit purchases, credit Ali","Debit Ali, credit purchases","Debit purchases, credit cash","Debit inventory, credit sales"]'::jsonb, 'Purchases (an expense) increase, so debit purchases. Ali is now owed money, so his account (a liability) is credited. No cash moves because it was on credit.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('a1c44493-a14e-5a23-a652-35ba9f3ca855', 0) on conflict (question_id) do nothing;
@@ -74,10 +174,99 @@ insert into question_keys (question_id, correct) values ('23982849-5728-5327-add
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('8b173dd1-5309-53cb-a7ba-6ac70313e5b3', '8b591152-0acf-5fe4-a902-2af189f81c0f', '7ad2ea29-cf48-56d2-a3d5-cde90e2c93aa', 'e47ac9b0-3045-5b22-af58-96132f88bbdb', 'Goods costing $300 are returned to a credit supplier, Leela. Which entries are made?', '["Debit purchases returns, credit Leela","Debit Leela, credit purchases returns","Debit Leela, credit sales returns","Debit purchases, credit Leela"]'::jsonb, 'We owe Leela less, so her (liability) account is debited. Purchases returns (returns outwards) is credited.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('8b173dd1-5309-53cb-a7ba-6ac70313e5b3', 1) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '8b591152-0acf-5fe4-a902-2af189f81c0f', '3', 'Verification of accounting records', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('fb3246be-6b89-55e8-a489-e62e4e30fb45', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.1', 'The trial balance', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a4f8c273-9edd-5eb6-a450-e263b7e4e37d', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.2', 'Corrections of errors', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('09598447-3a33-5cea-a02e-9b320f3f34ef', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.3', 'Bank reconciliation', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4e8ac218-4be4-5f3c-aa50-c0ca97289b48', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.4', 'Control accounts', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('fb3246be-6b89-55e8-a489-e62e4e30fb45', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.1', 'The trial balance', 0, '## The trial balance
+A list of all ledger balances on a date, debits in one column and credits in the other. If double entry is correct, **the totals agree**.
+
+| Usually debit | Usually credit |
+|---|---|
+| Assets, expenses, drawings, purchases, sales returns | Liabilities, capital, sales, purchases returns, income |
+
+## It proves arithmetic, not accuracy
+These errors **do not** stop it from balancing:
+- **Omission**: transaction left out completely
+- **Commission**: right type of account, wrong person (J. Lee instead of J. Leigh)
+- **Principle**: wrong class of account (a machine debited to purchases)
+- **Original entry**: wrong amount used in both entries
+- **Complete reversal**: debit and credit swapped
+- **Compensating**: two errors that cancel out
+
+Errors that **do** make it disagree: single entry, unequal amounts, two debits, adding mistakes, a balance missed off the trial balance.
+
+> Exam tip: learn the six "hidden" errors with an example of each. It''s a favourite MCQ topic.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a4f8c273-9edd-5eb6-a450-e263b7e4e37d', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.2', 'Corrections of errors', 1, '## Correcting errors
+Use the **general journal**, with a narrative.
+
+Example (commission): $200 credit sale to K. Ram was debited to K. Rao.
+| | Dr | Cr |
+|---|---|---|
+| K. Ram | 200 | |
+| K. Rao | | 200 |
+*Correction of sale posted to wrong customer.*
+
+## Suspense account
+If the trial balance doesn''t agree, put the difference in a **suspense account** so the totals match, then clear it as each error is found.
+- Debit total short by $90 → suspense has a **debit** balance of $90.
+- Find an error that affects only one side → one entry is to suspense.
+
+Example: discount allowed $40 was not posted to the discount allowed account.
+| | Dr | Cr |
+|---|---|---|
+| Discount allowed | 40 | |
+| Suspense | | 40 |
+
+## Effect on profit
+Ask: does the error change an **income or expense** account? If yes, profit changes. Errors only in assets/liabilities change the statement of financial position, not profit.
+
+> Exam tip: for "effect on profit" questions, make a small table: original profit, + / − each correction, corrected profit.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('09598447-3a33-5cea-a02e-9b320f3f34ef', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.3', 'Bank reconciliation', 2, '## Bank reconciliation
+The **cash book (bank column)** and the **bank statement** rarely show the same balance, because of timing differences and items only one side knows about.
+
+## Step 1: update the cash book
+Add items on the bank statement not yet in the cash book:
+- **Increase** (debit cash book): credit transfers, interest received, direct credits
+- **Decrease** (credit cash book): bank charges, standing orders, direct debits, dishonoured cheques
+
+## Step 2: reconcile to the bank statement
+Start with the **updated cash book balance**, then adjust for timing differences:
+| Updated cash book balance | X |
+|---|---|
+| Add: unpresented cheques (paid out, not yet cleared) | + |
+| Less: uncredited deposits (paid in, not yet on statement) | − |
+| **Balance per bank statement** | **X** |
+
+You can also start from the bank statement and reverse the signs.
+
+## Why it matters
+- Finds errors in the cash book or by the bank
+- Shows the correct bank figure for the statement of financial position
+- Helps detect fraud
+- Spots dishonoured cheques and stale cheques
+
+> Exam tip: on a bank statement, credits increase the balance; in the cash book, debits increase it. Don''t mix the two up.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4e8ac218-4be4-5f3c-aa50-c0ca97289b48', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '3.4', 'Control accounts', 3, '## Control accounts
+A **control account** is a summary account that checks the accuracy of a whole ledger.
+
+**Sales ledger control account** (trade receivables)
+| Debit | Credit |
+|---|---|
+| Balance b/d | Cash and cheques received |
+| Credit sales | Discounts allowed |
+| Dishonoured cheques | Sales returns |
+| Interest charged on overdue accounts | Irrecoverable debts written off |
+| | Contra (set-off) |
+| | Balance c/d |
+
+**Purchases ledger control account** (trade payables) is the mirror image: payments, discounts received, returns and contras on the debit side; credit purchases on the credit side.
+
+## Sources of the figures
+Totals come from the books of prime entry (sales journal, returns journals, cash book, general journal).
+
+## Uses
+- Locate errors quickly (to one ledger)
+- Give a fast total of receivables/payables for the statements
+- Help prevent fraud when kept by a different person
+
+> Exam tip: cash sales and cash purchases **never** go in a control account. Only credit transactions do.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('620884a0-3993-53da-aa32-bce763949081', '8b591152-0acf-5fe4-a902-2af189f81c0f', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', 'Chapter 3 quiz', 'quiz', 60, 2) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('67d205d5-c12f-5589-abe9-fc24a28ebafd', '8b591152-0acf-5fe4-a902-2af189f81c0f', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '620884a0-3993-53da-aa32-bce763949081', 'Which error does NOT affect the agreement of the trial balance?', '["Single entry","Wrong addition in one ledger account","Error of commission","Debit entry only"]'::jsonb, 'An error of commission posts to the right type of account but the wrong person (e.g. J. Lee instead of J. Leigh). Debit and credit are still equal, so the trial balance agrees. The other three make the totals unequal.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('67d205d5-c12f-5589-abe9-fc24a28ebafd', 2) on conflict (question_id) do nothing;
@@ -110,11 +299,106 @@ insert into question_keys (question_id, correct) values ('83a1cd6b-66c4-58e9-ac1
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('2c3b35bb-e278-5089-a915-f3f8fa6c5d69', '8b591152-0acf-5fe4-a902-2af189f81c0f', '08bbf3bc-ef3e-530c-ae33-2d912d1383bd', '620884a0-3993-53da-aa32-bce763949081', 'Why is a bank reconciliation statement prepared?', '["To explain differences between the cash book and bank statement balances","To value inventory","To record credit sales","To calculate profit"]'::jsonb, 'It checks both records and finds timing differences and errors, which helps to catch mistakes and fraud.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('2c3b35bb-e278-5089-a915-f3f8fa6c5d69', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('79c7c06e-66cb-5394-ab3e-180441e1f3e2', '8b591152-0acf-5fe4-a902-2af189f81c0f', '4', 'Accounting procedures', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d4b11fb9-4cc7-5934-a7d6-c67a2d45f90c', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.1', 'Capital and revenue expenditure and receipts', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('40b9e3e1-53e0-5da9-adc7-acdeedacbd07', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.2', 'Accounting for depreciation and disposal of non-current assets', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('6e855a69-d125-585a-a46c-e9871c0ebd58', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.3', 'Other payables and other receivables', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('2bc0aca1-a50c-555b-a478-8da3b031b3c8', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.4', 'Irrecoverable debts and allowance for irrecoverable debts', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('bec96fdf-f863-5954-a58f-8fafa1cb95a9', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.5', 'Valuation of inventory', 4) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('d4b11fb9-4cc7-5934-a7d6-c67a2d45f90c', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.1', 'Capital and revenue expenditure and receipts', 0, '## Capital vs revenue
+| | Capital | Revenue |
+|---|---|---|
+| **Expenditure** | Buying or improving non-current assets, including delivery, installation, legal fees | Running costs: repairs, wages, fuel, rent, insurance |
+| **Receipts** | Owner''s capital, loans, sale of non-current assets | Sales, rent received, commission received |
+
+- Capital expenditure goes on the **statement of financial position**.
+- Revenue expenditure is an **expense in the income statement**.
+
+## Why getting it right matters
+If capital expenditure is wrongly treated as revenue:
+- **profit is understated** (expense too high)
+- **non-current assets are understated**
+
+The reverse overstates profit and assets.
+
+Examples: painting a new building before it''s used is part of getting it ready → capital. Repainting later → revenue. Extending a building → capital.
+
+> Exam tip: "improves or adds to an asset" = capital; "maintains it" = revenue.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('40b9e3e1-53e0-5da9-adc7-acdeedacbd07', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.2', 'Accounting for depreciation and disposal of non-current assets', 1, '## Depreciation
+The loss in value of a non-current asset over its useful life, caused by **wear and tear, time, obsolescence, depletion**. It spreads the cost over the years that benefit (the **matching/accruals** concept).
+
+## Methods
+**Straight-line**: same amount each year
+> (Cost − residual value) ÷ useful life
+e.g. ($12 000 − $2 000) ÷ 5 = **$2 000 a year**
+
+**Reducing balance**: fixed % of the net book value (NBV)
+e.g. $20 000 at 25%: Year 1 $5 000 (NBV $15 000), Year 2 $3 750 (NBV $11 250)
+
+## Recording
+- Dr Depreciation (expense), Cr Provision for depreciation (accumulated depreciation)
+- On the statement of financial position: Cost − accumulated depreciation = **Net book value**
+
+## Disposal
+Use a **disposal account**:
+1. Dr Disposal, Cr Asset: cost
+2. Dr Provision for depreciation, Cr Disposal: accumulated depreciation
+3. Dr Bank, Cr Disposal: proceeds
+4. Balance = **profit** (credit side short) or **loss** (debit side short) on disposal → income statement
+
+> Exam tip: profit/loss on disposal = proceeds − NBV at the date of sale.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6e855a69-d125-585a-a46c-e9871c0ebd58', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.3', 'Other payables and other receivables', 2, '## Accruals and prepayments
+The **accruals concept**: income and expenses belong to the period they relate to, not when cash moves.
+
+| | Meaning | Income statement | Statement of financial position |
+|---|---|---|---|
+| **Accrued expense** | Expense owed at year end | Add to expense | Other payable (current liability) |
+| **Prepaid expense** | Expense paid in advance | Deduct from expense | Other receivable (current asset) |
+| **Accrued income** | Income earned, not yet received | Add to income | Other receivable |
+| **Income received in advance** | Received for next year | Deduct from income | Other payable |
+
+## Worked example
+Insurance $900 paid for 12 months from 1 October; year ends 31 December.
+- Monthly cost $75. This year: Oct–Dec = **$225** expense.
+- Prepaid: 9 months = **$675** (current asset).
+
+## Expense account layout
+Opening accrual on the credit side, opening prepayment on the debit side; cash paid on the debit; closing accrual c/d on the debit; closing prepayment c/d on the credit; the figure to the income statement balances it.
+
+> Exam tip: ask "how much belongs to THIS year?" first. That''s the income statement figure.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2bc0aca1-a50c-555b-a478-8da3b031b3c8', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.4', 'Irrecoverable debts and allowance for irrecoverable debts', 3, '## Irrecoverable debts
+A debt that will not be paid (customer bankrupt, disappeared). Write it off:
+- **Dr Irrecoverable debts, Cr Customer** (trade receivables)
+- It is an expense in the income statement.
+
+A debt later recovered: reinstate the debt, then record the cash.
+
+## Allowance for irrecoverable debts
+An estimate of debts that **might** not be paid (prudence). Often a % of trade receivables.
+- **Increase** in allowance → expense (Dr income statement, Cr allowance)
+- **Decrease** → income (Dr allowance, Cr income statement)
+- On the statement of financial position: trade receivables **less** allowance.
+
+## Worked example
+Trade receivables $20 000, allowance 3% = $600. Last year''s allowance was $450.
+- Increase = $150 → **expense $150**
+- SOFP: Trade receivables $20 000 − $600 = **$19 400**
+
+> Exam tip: write off irrecoverable debts **before** calculating the allowance %.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('bec96fdf-f863-5954-a58f-8fafa1cb95a9', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '4.5', 'Valuation of inventory', 4, '## Valuing inventory
+Inventory is valued at **the lower of cost and net realisable value (NRV)**, following **prudence**.
+
+- **Cost**: purchase price plus costs of getting it to its present location and condition (e.g. carriage inwards)
+- **NRV**: expected selling price − costs to complete and sell
+
+## Worked example
+Damaged goods cost $800. After $100 of repairs they can be sold for $600.
+NRV = $600 − $100 = **$500**. $500 < $800, so value at **$500**.
+
+Value each item or group separately, not the total.
+
+## Effect of errors
+- Closing inventory **overstated** → cost of sales too low → **profit overstated** (and next year''s profit understated).
+- Closing inventory **understated** → profit understated.
+
+## Inventory count adjustments
+If the count is done after the year end, adjust back: add goods sold after the year end (at cost), deduct goods bought after the year end.
+
+> Exam tip: never value inventory at selling price unless that''s below cost.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('23e98317-5b7b-50cf-a297-66766228a072', '8b591152-0acf-5fe4-a902-2af189f81c0f', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', 'Chapter 4 quiz', 'quiz', 60, 3) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('ef08db0d-3a04-5200-a7ae-16f4a80ecb85', '8b591152-0acf-5fe4-a902-2af189f81c0f', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '23e98317-5b7b-50cf-a297-66766228a072', 'Which is capital expenditure?', '["Repairs to a machine","Cost of installing a new machine","Wages of salespeople","Fuel for delivery vans"]'::jsonb, 'Costs of buying a non-current asset and getting it ready to use, including delivery and installation, are capital expenditure. Repairs, fuel and wages are running costs: revenue expenditure.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('ef08db0d-3a04-5200-a7ae-16f4a80ecb85', 1) on conflict (question_id) do nothing;
@@ -147,12 +431,132 @@ insert into question_keys (question_id, correct) values ('565e2b15-4a7e-50a2-a29
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('d72a9a0d-6f4a-52a2-a28a-ca33e475ff75', '8b591152-0acf-5fe4-a902-2af189f81c0f', '79c7c06e-66cb-5394-ab3e-180441e1f3e2', '23e98317-5b7b-50cf-a297-66766228a072', 'Rent receivable: $4 800 was received in the year, of which $400 is for next year. Rent income for this year is…', '["$400","$4 800","$5 200","$4 400"]'::jsonb, 'Income received in advance belongs to next year, so this year''s income is $4 800 − $400 = $4 400.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('d72a9a0d-6f4a-52a2-a28a-ca33e475ff75', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '8b591152-0acf-5fe4-a902-2af189f81c0f', '5', 'Preparation of financial statements', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('60254488-e8d9-526d-ac5c-d0b8af2d64d7', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.1', 'Sole traders', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('8131e823-69e0-5061-a181-e3d4263d694d', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.2', 'Partnerships', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3430df69-5d47-55cf-a195-f4f2d5231576', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.3', 'Limited companies', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('11cb49f9-48b8-5b65-aafb-6ebdca3e647b', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.4', 'Manufacturing accounts', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('94c9ee31-7301-51b6-a99b-1ada3386b422', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.5', 'Clubs and societies', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('60d88fc3-281e-58d6-a084-16c1c37ecdbc', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.6', 'Incomplete records', 5) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('60254488-e8d9-526d-ac5c-d0b8af2d64d7', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.1', 'Sole traders', 0, '## Sole trader financial statements
+**Income statement** (for the year ended …)
+| | $ | $ |
+|---|---|---|
+| Revenue | | 60 000 |
+| Less sales returns | | (1 000) |
+| | | 59 000 |
+| Opening inventory | 4 000 | |
+| Purchases (+ carriage inwards − purchases returns) | 26 000 | |
+| Less closing inventory | (5 000) | |
+| **Cost of sales** | | (25 000) |
+| **Gross profit** | | 34 000 |
+| Add other income (discount received, rent received) | | 500 |
+| Less expenses (wages, rent, depreciation, carriage outwards…) | | (20 500) |
+| **Profit for the year** | | 14 000 |
+
+**Statement of financial position** (at …)
+- Non-current assets (at NBV)
+- Current assets: inventory, trade receivables (less allowance), other receivables, bank, cash
+- Current liabilities: trade payables, other payables, overdraft
+- Non-current liabilities: long-term loans
+- **Capital**: opening + profit (or − loss) − drawings = closing capital
+
+> Exam tip: carriage inwards → cost of sales; carriage outwards → expenses.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8131e823-69e0-5061-a181-e3d4263d694d', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.2', 'Partnerships', 1, '## Partnerships
+Two or more people in business together. A **partnership agreement** sets out: profit-sharing ratio, interest on capital, interest on drawings, partners'' salaries.
+
+**Without an agreement**: share profits and losses **equally**, no interest on capital, no salaries.
+
+## Appropriation account
+Follows the income statement and shares out the profit.
+| | $ |
+|---|---|
+| Profit for the year | 18 000 |
+| Add interest on drawings | 300 |
+| Less partner''s salary | (6 000) |
+| Less interest on capital | (2 300) |
+| **Residual profit** shared in profit ratio | 10 000 |
+
+## Capital and current accounts
+- **Capital accounts**: fixed amounts invested.
+- **Current accounts**: salaries, interest and share of profit (credit); drawings and interest on drawings (debit). The balance may be debit or credit.
+
+> Exam tip: salaries and interest on capital are **not** expenses in the income statement. They''re appropriations of profit.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3430df69-5d47-55cf-a195-f4f2d5231576', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.3', 'Limited companies', 2, '## Limited companies
+Owned by **shareholders**, run by **directors**. A separate legal entity, so shareholders have **limited liability**.
+
+## Equity (capital)
+- **Ordinary share capital**: issued shares at nominal value
+- **Retained earnings**: profits kept in the business
+- **Reserves**, e.g. general reserve
+**Equity = share capital + reserves**
+
+## Key differences from a sole trader
+| Sole trader | Limited company |
+|---|---|
+| Capital account | Share capital + reserves |
+| Drawings | Dividends to shareholders |
+| Owner bears all losses personally | Limited liability |
+
+**Dividends** are paid out of retained earnings to shareholders. They are not an expense.
+
+## Loans
+Long-term borrowing (debentures/loans) is a **non-current liability**. Interest on loans **is** an expense.
+
+> Exam tip: retained earnings at the end = opening + profit for the year − dividends paid.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('11cb49f9-48b8-5b65-aafb-6ebdca3e647b', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.4', 'Manufacturing accounts', 3, '## Manufacturing accounts
+Used by businesses that make their own goods. Prepared before the trading section to find the **cost of production**.
+
+| | $ |
+|---|---|
+| Opening inventory of raw materials | 3 000 |
+| Purchases of raw materials (+ carriage inwards) | 20 000 |
+| Less closing inventory of raw materials | (4 000) |
+| **Cost of raw materials consumed** | 19 000 |
+| Direct labour (factory wages of production workers) | 15 000 |
+| Direct expenses (e.g. royalties) | 1 000 |
+| **Prime cost** | 35 000 |
+| Factory overheads: indirect wages, factory rent, power, depreciation of machinery | 8 000 |
+| Add opening WIP, less closing WIP | (500) |
+| **Cost of production** | 42 500 |
+
+The cost of production replaces "purchases" in the trading section (cost of sales of finished goods).
+
+> Exam tip: split shared costs (e.g. rent) between factory and office using the ratio given. Only the factory share is a factory overhead.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('94c9ee31-7301-51b6-a99b-1ada3386b422', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.5', 'Clubs and societies', 4, '## Clubs and societies
+Non-profit organisations. They use different names:
+| Business | Club |
+|---|---|
+| Cash book summary | **Receipts and payments account** |
+| Income statement | **Income and expenditure account** |
+| Profit / loss | **Surplus / deficit** |
+| Capital | **Accumulated fund** |
+
+## Receipts and payments account
+A summary of the cash book: opening balance, cash in, cash out, closing balance. It ignores accruals and depreciation.
+
+## Income and expenditure account
+Accruals basis: includes subscriptions for the year, depreciation, accrued and prepaid expenses.
+
+## Subscriptions
+Subscriptions in arrears (owed by members) → add to income, current asset. Subscriptions in advance → deduct from income, current liability.
+
+## Trading activities
+A bar or café is shown in a separate trading account; its profit goes to the income and expenditure account.
+
+> Exam tip: opening accumulated fund = opening assets − opening liabilities.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('60d88fc3-281e-58d6-a084-16c1c37ecdbc', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', '5.6', 'Incomplete records', 5, '## Incomplete records
+Many small traders don''t keep full double entry. You build the statements from what is known.
+
+## Method 1: statement of affairs
+Capital = assets − liabilities at each date.
+**Profit = closing capital − opening capital + drawings − capital introduced**
+e.g. 38 000 − 30 000 + 5 000 − 0 = **$13 000**
+
+## Method 2: reconstruct the accounts
+- **Credit sales**: use a total trade receivables account (receipts + closing − opening receivables)
+- **Credit purchases**: use a total trade payables account
+- **Missing figures**: from mark-up or margin
+
+## Mark-up and margin
+- Mark-up = gross profit ÷ cost of sales
+- Margin = gross profit ÷ revenue
+A 25% mark-up = 20% margin (25/125).
+
+> Exam tip: write the opening statement of affairs first. It gives opening capital, which you''ll need later.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('e2d87dce-ed22-50db-ad06-023648343f53', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', 'Chapter 5 quiz', 'quiz', 60, 4) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('f0dff246-a7e6-5dcd-ad5f-797ef428bf9b', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', 'e2d87dce-ed22-50db-ad06-023648343f53', 'Gross profit is…', '["Revenue − all expenses","Cost of sales − expenses","Assets − liabilities","Revenue − cost of sales"]'::jsonb, 'Gross profit = revenue − cost of sales, where cost of sales = opening inventory + purchases − closing inventory. Taking away all expenses gives profit for the year instead.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('f0dff246-a7e6-5dcd-ad5f-797ef428bf9b', 3) on conflict (question_id) do nothing;
@@ -185,11 +589,91 @@ insert into question_keys (question_id, correct) values ('8e71fd69-4757-50d5-a58
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b2fd1d4e-324d-5159-a33a-e6c38cef135f', '8b591152-0acf-5fe4-a902-2af189f81c0f', 'af7163b5-1592-5e86-a7c7-5abd6cc7fbcc', 'e2d87dce-ed22-50db-ad06-023648343f53', 'Revenue $60 000, cost of sales $36 000, expenses $14 000. Profit for the year is…', '["$46 000","$24 000","$10 000","$14 000"]'::jsonb, 'Gross profit = $60 000 − $36 000 = $24 000. Profit for the year = $24 000 − $14 000 = $10 000.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b2fd1d4e-324d-5159-a33a-e6c38cef135f', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('6ff30615-840a-50de-a460-6c7f1f276aa7', '8b591152-0acf-5fe4-a902-2af189f81c0f', '6', 'Analysis and interpretation', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('071fb888-61c6-58c3-a7b4-ae92d50b4b4b', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.1', 'Calculation and understanding of accounting ratios', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4c3dec5a-86b3-5411-a7bb-8d168519d7d2', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.2', 'Interpretation of accounting ratios', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e1aa14c8-1453-5246-ab22-1074595a2783', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.3', 'Inter-business comparison', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d38990a2-384e-5783-a24f-fbec363f09a1', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.4', 'Interested parties', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('95bd484c-baf4-5389-a5c8-c14adeaf6b05', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.5', 'Limitations of accounting statements', 4) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('071fb888-61c6-58c3-a7b4-ae92d50b4b4b', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.1', 'Calculation and understanding of accounting ratios', 0, '## Accounting ratios
+**Profitability**
+| Ratio | Formula |
+|---|---|
+| Gross margin | Gross profit ÷ revenue × 100 |
+| Mark-up | Gross profit ÷ cost of sales × 100 |
+| Profit margin | Profit for the year ÷ revenue × 100 |
+| Return on capital employed (ROCE) | Profit ÷ capital employed × 100 |
+
+**Liquidity**
+| Ratio | Formula |
+|---|---|
+| Current ratio | Current assets ÷ current liabilities |
+| Liquid (acid test) ratio | (Current assets − inventory) ÷ current liabilities |
+
+**Efficiency**
+| Ratio | Formula |
+|---|---|
+| Rate of inventory turnover | Cost of sales ÷ average inventory (times) |
+| Trade receivables turnover | Trade receivables ÷ credit sales × 365 (days) |
+| Trade payables turnover | Trade payables ÷ credit purchases × 365 (days) |
+
+Average inventory = (opening + closing) ÷ 2.
+
+> Exam tip: show the formula, the figures, then the answer with the right unit (%, : 1, times or days).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4c3dec5a-86b3-5411-a7bb-8d168519d7d2', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.2', 'Interpretation of accounting ratios', 1, '## Interpreting ratios
+A ratio means nothing alone. Compare it with **last year, a competitor or an industry average**, then explain *why* it changed and suggest an action.
+
+| Change | Possible causes | Possible actions |
+|---|---|---|
+| Gross margin falls | Higher purchase costs, price cuts, theft | Find cheaper suppliers, review prices |
+| Profit margin falls but gross margin same | Expenses grew | Control expenses |
+| Current ratio very low (< 1) | Too many payables, little cash | Raise cash, chase debtors, long-term loan |
+| Current ratio very high | Idle cash or too much inventory | Invest surplus, reduce inventory |
+| Inventory turnover slower | Overstocking, slow-selling goods | Reduce orders, promotions |
+| Receivables days rising | Customers paying late | Credit control, discounts for early payment |
+
+Guide only: a current ratio of about **1.5–2 : 1** and an acid test of about **1 : 1** are often seen as comfortable, but it depends on the business.
+
+> Exam tip: "evaluate" means give both sides and a conclusion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e1aa14c8-1453-5246-ab22-1074595a2783', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.3', 'Inter-business comparison', 2, '## Inter-business comparison
+Comparing with another business shows whether performance is good **for that kind of business**.
+
+## Problems with comparing
+- **Different accounting policies** (depreciation method, inventory valuation)
+- **Different sizes**: use ratios, not raw figures
+- **Different year ends** and seasons
+- **Different types of business** within the same industry (e.g. online vs high-street)
+- Financial statements are **historic**, so they may be out of date
+- Figures may not include non-financial factors
+
+## Making a fair comparison
+- Use businesses in the same industry and similar size
+- Use the same year and the same ratio formulas
+- Look at trends over several years, not one year
+
+> Exam tip: when asked to compare two businesses, pick the 2–3 most important ratios and explain what each difference means.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d38990a2-384e-5783-a24f-fbec363f09a1', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.4', 'Interested parties', 3, '## Who uses accounting information
+| User | Main interest | Useful ratios |
+|---|---|---|
+| Owner / shareholders | Profit, return on investment | Margins, ROCE |
+| Managers | Control and planning | All, especially efficiency |
+| Bank / lenders | Repayment ability, security | Liquidity ratios, profit |
+| Suppliers | Being paid on time | Current and acid test ratios, payables days |
+| Customers | Continued supply, warranties | Profit, liquidity |
+| Employees | Job security, pay rises | Profit |
+| Government / tax | Tax due, statistics | Profit |
+| Potential investors | Should I invest? | ROCE, profit trends |
+
+> Exam tip: link the user to the ratio. "A bank would look at the liquid ratio because it shows whether short-term debts can be paid without selling inventory."') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('95bd484c-baf4-5389-a5c8-c14adeaf6b05', '6ff30615-840a-50de-a460-6c7f1f276aa7', '6.5', 'Limitations of accounting statements', 4, '## Limitations of accounting statements
+- **Historic cost**: figures show the past and ignore inflation, so values may be out of date
+- **Only money items** are recorded (money measurement): staff skill, reputation and customer loyalty don''t appear
+- **Estimates and judgement**: depreciation, allowance for irrecoverable debts, inventory valuation
+- **Different policies** make comparison hard
+- **A snapshot**: the statement of financial position is true on one day only
+- Can be **window-dressed** to look better
+
+## Limitations of ratios
+- Based on the same historic figures
+- Don''t explain *why* something happened
+- Averages can hide problems
+- No single "correct" value
+
+> Exam tip: in a ''discuss the usefulness'' question, give the benefits first, then two or three limitations, then a conclusion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7b285833-be79-5a63-afbb-b105c4d8ca51', '8b591152-0acf-5fe4-a902-2af189f81c0f', '6ff30615-840a-50de-a460-6c7f1f276aa7', 'Chapter 6 quiz', 'quiz', 60, 5) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('39124183-1095-5a22-a7a8-af7e1957c05d', '8b591152-0acf-5fe4-a902-2af189f81c0f', '6ff30615-840a-50de-a460-6c7f1f276aa7', '7b285833-be79-5a63-afbb-b105c4d8ca51', 'Current ratio =', '["(Current assets − inventory) ÷ current liabilities","Current assets ÷ current liabilities","Current liabilities ÷ current assets","Profit ÷ revenue"]'::jsonb, 'Current ratio = current assets ÷ current liabilities. It shows how many times short-term debts are covered. Option C is the liquid (acid test) ratio.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('39124183-1095-5a22-a7a8-af7e1957c05d', 1) on conflict (question_id) do nothing;
@@ -222,9 +706,62 @@ insert into question_keys (question_id, correct) values ('520c5319-daaa-53d3-a03
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('4163f685-7586-503d-a106-9d655e23b421', '8b591152-0acf-5fe4-a902-2af189f81c0f', '6ff30615-840a-50de-a460-6c7f1f276aa7', '7b285833-be79-5a63-afbb-b105c4d8ca51', 'Which user is most interested in how profitable the business is?', '["The local newspaper","A customer buying one item","The owner or shareholders","A competitor''s employees"]'::jsonb, 'Owners and shareholders receive the profit (or dividends), so profitability matters most to them.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('4163f685-7586-503d-a106-9d655e23b421', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '8b591152-0acf-5fe4-a902-2af189f81c0f', '7', 'Accounting concepts and modern practice', 6) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('93108e21-c82a-5eb0-a90c-30cd3b9c8e20', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.1', 'Accounting concepts', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('8154a553-30c8-5999-aec6-249adf484847', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.2', 'Ethical considerations', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('92fbd970-3eaf-502e-ab8b-c60008e20b83', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.3', 'Technology and sustainability', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('93108e21-c82a-5eb0-a90c-30cd3b9c8e20', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.1', 'Accounting concepts', 0, '## Accounting concepts
+| Concept | Meaning | Example |
+|---|---|---|
+| **Business entity** | The business is separate from the owner | Owner''s personal shopping is drawings |
+| **Duality** | Every transaction has two aspects | Double entry |
+| **Money measurement** | Only items with a money value are recorded | Staff morale isn''t recorded |
+| **Historic cost** | Assets recorded at cost | Premises at purchase price |
+| **Going concern** | The business will continue for the foreseeable future | Assets at cost, not break-up value |
+| **Consistency** | Same methods every year | Same depreciation method |
+| **Materiality** | Small items needn''t be treated strictly | Stapler expensed, not capitalised |
+| **Prudence** | Don''t overstate assets or profit | Inventory at lower of cost and NRV |
+| **Realisation** | Revenue recognised when goods pass to the customer | Credit sale recorded at delivery |
+| **Accruals (matching)** | Income and expenses in the period they relate to | Accrued rent added to expense |
+
+> Exam tip: in "which concept?" questions, look for the key word: "separate" = entity, "same method" = consistency, "small" = materiality, "continue" = going concern.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8154a553-30c8-5999-aec6-249adf484847', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.2', 'Ethical considerations', 1, '## Ethics in accounting
+Users trust financial statements only if accountants act ethically.
+
+## Key principles
+- **Integrity**: honest and straightforward
+- **Objectivity**: not influenced by bias, pressure or conflicts of interest
+- **Professional competence and due care**: keep skills up to date, work carefully
+- **Confidentiality**: don''t share business information without permission
+- **Professional behaviour**: follow laws and regulations
+
+## Ethical dilemmas
+- An owner asks you to hide a loss or overstate inventory → breaks integrity
+- A friend runs a business you''re auditing → conflict of interest (objectivity)
+- Telling a competitor about a client''s results → breaks confidentiality
+
+## Why it matters
+- Lenders and investors make decisions on the figures
+- Fraud and misleading statements are illegal
+- The business''s reputation depends on it
+
+> Exam tip: name the principle AND explain how the situation breaks it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('92fbd970-3eaf-502e-ab8b-c60008e20b83', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '7.3', 'Technology and sustainability', 2, '## Technology in accounting
+**Accounting software** and cloud systems now do most book-keeping.
+
+| Benefits | Drawbacks |
+|---|---|
+| Fast, accurate calculations | Cost of software and training |
+| Automatic double entry and reports | Errors of principle/omission still possible |
+| Real-time information | Risk of hacking and data loss, so backups and passwords are needed |
+| Easy to share with accountants (cloud) | Depends on power and internet |
+| Less paper | Staff may resist change |
+
+Controls still matter: passwords, access levels, backups, checking reports.
+
+## Sustainability
+Businesses increasingly report on their **environmental and social impact**: carbon emissions, waste, energy use, fair treatment of workers.
+- Investors and customers want sustainable businesses
+- Can reduce costs (less energy, less waste)
+- Some costs (pollution, clean-up) may need to be recognised
+
+> Exam tip: in technology questions, balance benefits with risks and finish with a judgement.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('6ac9e97d-7d95-59b4-a6bb-75abb3c1887d', '8b591152-0acf-5fe4-a902-2af189f81c0f', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', 'Chapter 7 quiz', 'quiz', 60, 6) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('e32ae8ee-25af-5a00-a07c-5879125dd53c', '8b591152-0acf-5fe4-a902-2af189f81c0f', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '6ac9e97d-7d95-59b4-a6bb-75abb3c1887d', 'Recording a non-current asset at cost rather than market value follows which concept?', '["Materiality","Going concern","Historic cost","Realisation"]'::jsonb, 'Historic cost: assets are recorded at what they actually cost, which can be checked from documents. Market values are opinions and keep changing.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('e32ae8ee-25af-5a00-a07c-5879125dd53c', 2) on conflict (question_id) do nothing;
@@ -261,11 +798,92 @@ insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_lim
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('d7d9bfb8-4bc4-5523-ad96-9e59b9f0703c', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', null, 'Mixed topic test (25 questions, 30m)', 'exam', 100, 1800, 25, 1000, 'locked') on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7b2a7cdb-c9af-5fb8-a344-760937bab6a9', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', null, 'Fix my mistakes', 'review', 0, 1001) on conflict (id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('f4c81869-c3cc-50d3-a177-dabf0bad1718', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '1', 'Understanding business activity', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('eb55fa05-939e-5ca4-a192-5f4febf7e11c', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.1', 'Business activity', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('509174cc-603e-5461-ae11-616a97aa3179', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.2', 'Economic sectors', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d80b2da3-5e25-5a9c-a261-a050774b1ac4', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.3', 'Enterprise, business growth and size', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('9bec721a-4ca6-56e7-acbf-8659f394ea23', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.4', 'Types of business organisation', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('12a92fb8-1fdd-5fa4-a639-754c2522441a', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.5', 'Business objectives and stakeholder objectives', 4) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('eb55fa05-939e-5ca4-a192-5f4febf7e11c', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.1', 'Business activity', 0, '## What businesses do
+Businesses combine **factors of production** (land, labour, capital, enterprise) to make goods and services that satisfy **needs** (essentials: food, shelter) and **wants** (things we''d like).
+
+## Key ideas
+- **Scarcity**: resources are limited, wants are unlimited, so choices must be made.
+- **Opportunity cost**: the next best alternative given up.
+- **Specialisation and division of labour**: people and businesses focus on what they do best, raising output and quality.
+- **Added value** = selling price − cost of bought-in materials. Businesses add value through branding, design, convenience, quality and service.
+
+> Exam tip: when asked how a business can add value, use the case: "the café could add value by offering free Wi-Fi, so customers pay more for the experience".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('509174cc-603e-5461-ae11-616a97aa3179', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.2', 'Economic sectors', 1, '## Economic sectors
+| Sector | Activity | Examples |
+|---|---|---|
+| **Primary** | Extracting natural resources | Farming, fishing, mining, forestry |
+| **Secondary** | Manufacturing and construction | Car factory, sugar refinery, builder |
+| **Tertiary** | Providing services | Banks, shops, hotels, tourism, tutoring |
+
+## Changes in importance
+As countries develop, employment and output usually move from primary → secondary → tertiary. **Deindustrialisation** is the decline of the secondary sector, often because of cheaper production abroad and automation.
+
+Mauritius example: a shift from sugar (primary) to textiles (secondary) to tourism, finance and ICT (tertiary).
+
+## Public vs private sector
+- **Private sector**: owned by individuals or shareholders, usually aiming for profit
+- **Public sector**: owned and run by the government to provide services
+
+> Exam tip: be ready to classify a business from a case study and explain why.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d80b2da3-5e25-5a9c-a261-a050774b1ac4', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.3', 'Enterprise, business growth and size', 2, '## Enterprise and entrepreneurs
+An **entrepreneur** organises resources and takes risks to start a business. Typical qualities: risk-taking, creativity, hard work, self-confidence, good communication.
+
+**Business plan**: describes the idea, market, finance and objectives. It helps get loans and gives direction.
+
+**Government support** for start-ups: grants, cheap loans, advice, training, low taxes, incubator units.
+
+## Measuring size
+Number of employees, revenue, capital employed, market share. (Profit is **not** a good measure of size.)
+
+## Growth
+- **Internal (organic)**: opening branches, new products
+- **External**: mergers and takeovers
+  - **Horizontal**: same stage, same industry
+  - **Vertical backward** (towards supplier) / **forward** (towards customer)
+  - **Conglomerate**: unrelated industries
+
+**Problems of growth**: poor communication, loss of control, finance shortages. Some businesses **stay small** (owner''s choice, small market, personal service).
+
+**Why businesses fail**: poor management, lack of finance, poor planning, changes in the market, competition.
+
+> Exam tip: for growth questions, link each type to a real benefit (e.g. backward vertical integration secures supplies).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('9bec721a-4ca6-56e7-acbf-8659f394ea23', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.4', 'Types of business organisation', 3, '## Types of business organisation
+| Type | Ownership | Liability | Key advantage | Key disadvantage |
+|---|---|---|---|---|
+| **Sole trader** | One person | Unlimited | Full control, keeps all profit | Hard to raise finance, unlimited liability |
+| **Partnership** | 2–20 partners | Usually unlimited | More capital and skills | Disagreements, shared profit |
+| **Private limited company (Ltd)** | Shareholders (shares not sold to the public) | Limited | Limited liability, more finance | Legal formalities, shares not freely sold |
+| **Public limited company (plc)** | Shareholders; shares sold on the stock exchange | Limited | Can raise large amounts | Risk of takeover, published accounts |
+| **Franchise** | Franchisee buys the right to use a brand | Depends | Proven brand, support | Fees and royalties, little freedom |
+| **Joint venture** | Two businesses share a project | Depends | Shared costs and risks | Shared profits, possible conflicts |
+| **Public corporation** | Government | n/a | Provides essential services | May be inefficient |
+
+**Limited liability**: owners can only lose what they invested. **Unlimited liability**: personal assets can be taken to pay business debts.
+
+> Exam tip: "recommend a type of organisation" needs advantages AND disadvantages, then a justified choice.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('12a92fb8-1fdd-5fa4-a639-754c2522441a', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '1.5', 'Business objectives and stakeholder objectives', 4, '## Business objectives
+- **Survival** (especially new businesses)
+- **Profit** (reward for owners, finance for growth)
+- **Growth** (economies of scale, market power)
+- **Market share**
+- **Social and environmental** goals (social enterprises: social, environmental and financial aims)
+
+Objectives change over time, e.g. survival at first, then growth.
+
+## Stakeholders
+| Stakeholder | Main objective |
+|---|---|
+| Owners / shareholders | Profit, dividends, growth in value |
+| Managers | Higher pay, status, growth |
+| Employees | Fair pay, job security, good conditions |
+| Customers | Quality, low prices, service |
+| Suppliers | Regular orders, paid on time |
+| Government | Taxes, jobs, following the law |
+| Local community | Jobs, low pollution |
+
+**Conflicting objectives**: e.g. shareholders want lower wage costs; employees want higher pay. Expanding a factory brings jobs (community likes) but noise and pollution (community dislikes).
+
+> Exam tip: identify the conflict, explain both sides, then suggest how the business might balance them.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('904d6d01-c7b4-5c32-aef2-186694669f10', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', 'Chapter 1 quiz', 'quiz', 60, 0) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('7b0e1245-63eb-5852-a82b-5ec1bbbf81d7', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '904d6d01-c7b4-5c32-aef2-186694669f10', 'Which business is in the secondary sector?', '["Fishing company","Bank","Hairdresser","Car manufacturer"]'::jsonb, 'The secondary sector turns raw materials into products (manufacturing and construction), so a car maker. Fishing is primary; banks and hairdressers provide services (tertiary).') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('7b0e1245-63eb-5852-a82b-5ec1bbbf81d7', 3) on conflict (question_id) do nothing;
@@ -298,10 +916,97 @@ insert into question_keys (question_id, correct) values ('e5521f9e-8b77-53f4-a84
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('2d9c29c0-6256-5ded-a424-a1b7195719b5', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '904d6d01-c7b4-5c32-aef2-186694669f10', 'A benefit of a business staying small is…', '["Closer contact with customers and quicker decisions","Lower average costs from economies of scale","Easier access to large bank loans","Bigger bulk-buying discounts"]'::jsonb, 'Small firms can offer a personal service and react quickly. The other options are advantages of being large.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('2d9c29c0-6256-5ded-a424-a1b7195719b5', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('d85278ab-73c3-5282-a46a-813d3130834d', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '2', 'People in business', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('24e3f1a2-b425-5abb-a556-18fdb62c2746', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.1', 'Human resource management (HRM)', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e9cd1805-7824-52dd-a7e6-f233c8aada98', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.2', 'Organisation and management', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('10d3d840-86db-5fad-afe3-273b32a9a94f', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.3', 'Methods of communication', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d65743a7-a875-58da-aa8c-1f1e20e86226', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.4', 'Motivating employees', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('24e3f1a2-b425-5abb-a556-18fdb62c2746', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.1', 'Human resource management (HRM)', 0, '## Human resource management (HRM)
+HRM covers recruitment, selection, training, motivation, and dismissal or redundancy.
+
+## Recruitment
+1. Identify the vacancy → **job analysis**
+2. **Job description** (duties of the job) and **person specification** (skills and qualities wanted)
+3. Advertise: **internal** (cheaper, known worker, motivates staff) or **external** (new ideas, wider choice)
+4. Applications (CV/application form), shortlist, interview/tests, appoint
+
+## Training
+- **Induction**: introduces new staff to the business
+- **On-the-job**: learn while working (cheap, but may pick up bad habits)
+- **Off-the-job**: courses away from work (expert teaching, but costly and production lost)
+
+## Reducing the workforce
+- **Dismissal**: due to the worker (misconduct, poor performance)
+- **Redundancy**: the job is no longer needed (closure, automation, falling demand), usually with compensation
+
+## Employment law
+Protects against unfair dismissal and discrimination, sets minimum wages and health and safety.
+
+> Exam tip: recommend a recruitment method using the case (e.g. internal for a manager who must know the business).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e9cd1805-7824-52dd-a7e6-f233c8aada98', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.2', 'Organisation and management', 1, '## Organisational structure
+Shows who is responsible to whom.
+- **Hierarchy**: levels of authority
+- **Chain of command**: the route instructions pass down
+- **Span of control**: number of subordinates directly under one manager
+
+| Tall structure | Flat structure |
+|---|---|
+| Many levels, narrow spans | Few levels, wide spans |
+| Close supervision | More delegation and motivation |
+| Slow communication | Faster communication |
+
+## Management functions
+Planning, organising, coordinating, commanding and controlling.
+
+**Delegation**: passing authority to a subordinate. It saves managers'' time and motivates staff, but the manager stays responsible.
+
+## Leadership styles
+- **Autocratic**: leader decides alone (quick decisions, useful in a crisis, can demotivate)
+- **Democratic**: staff are involved (better ideas, motivation, slower)
+- **Laissez-faire**: staff decide (suits skilled, self-motivated workers)
+
+**Trade unions** represent workers in negotiations on pay and conditions.
+
+> Exam tip: link leadership style to the situation, e.g. "laissez-faire suits a team of experienced designers".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('10d3d840-86db-5fad-afe3-273b32a9a94f', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.3', 'Methods of communication', 2, '## Communication
+Communication: sender → message → medium → receiver → feedback.
+
+| Method | Advantages | Disadvantages |
+|---|---|---|
+| Verbal (meetings, calls) | Fast, instant feedback | No permanent record |
+| Written (letters, reports, email) | Permanent record, detailed | Slower, no body language |
+| Visual (charts, posters) | Easy to understand | May oversimplify |
+| Electronic (email, messaging, video calls) | Quick, reaches many | Information overload, needs equipment |
+
+- **One-way**: no reply possible (notice board)
+- **Two-way**: feedback (meeting)
+- **Internal** (inside the business) vs **external** (customers, suppliers)
+
+## Barriers and solutions
+| Barrier | Solution |
+|---|---|
+| Jargon or language | Use clear, simple language |
+| Wrong medium | Choose the right method |
+| Long chain of command | Flatter structure |
+| No feedback | Use two-way communication |
+| Noise, distractions | Quiet setting, written follow-up |
+
+> Exam tip: choose a method for a scenario and justify it (e.g. a meeting for bad news so questions can be asked).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d65743a7-a875-58da-aa8c-1f1e20e86226', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.4', 'Motivating employees', 3, '## Motivation
+Motivated staff are more productive, with lower labour turnover and absenteeism.
+
+## Theories
+**Maslow''s hierarchy** (bottom to top): physiological → safety → social → esteem → self-actualisation. Meet lower needs first.
+
+**Herzberg**: **hygiene factors** (pay, conditions, security) prevent dissatisfaction. **Motivators** (achievement, recognition, responsibility) actually motivate.
+
+**Taylor**: workers are motivated mainly by money, so pay piece rates.
+
+## Financial methods
+Wages (time rate), **salary**, **piece rate**, **commission**, **bonus**, **profit sharing**, fringe benefits (car, discounts, health insurance).
+
+## Non-financial methods
+- **Job rotation**: moving between tasks (variety)
+- **Job enlargement**: more tasks at the same level
+- **Job enrichment**: more challenging, responsible work
+- **Teamworking**, training, promotion, **recognition**
+
+> Exam tip: recommend motivation methods that fit the job, e.g. commission for sales staff, piece rate for factory output.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'Chapter 2 quiz', 'quiz', 60, 1) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('75a68ff8-afac-5112-a599-18eb955ca99a', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'In Maslow''s hierarchy, which need is at the top?', '["Self-actualisation","Safety","Physiological","Social"]'::jsonb, 'Self-actualisation (reaching your full potential) is at the top of Maslow''s hierarchy. From the bottom: physiological, safety, social, esteem, then self-actualisation.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('75a68ff8-afac-5112-a599-18eb955ca99a', 0) on conflict (question_id) do nothing;
@@ -334,10 +1039,88 @@ insert into question_keys (question_id, correct) values ('47a4ea77-cad1-5fe8-a47
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('3e5a7b34-a995-52e3-a6d0-65649231e1f5', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'One-way communication is when…', '["Two people talk on the phone","There is a meeting with questions","The receiver cannot respond, e.g. a notice board","There is a video call"]'::jsonb, 'In one-way communication there is no feedback, so the sender can''t check the message was understood.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('3e5a7b34-a995-52e3-a6d0-65649231e1f5', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('4a6917c9-553e-55e8-aa82-87402390ef15', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '3', 'Marketing', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5364794a-48f3-5350-a459-5544673e71ec', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.1', 'Marketing and the market', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('b56b017c-bd7a-53c6-ad6e-e9ca759402b8', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.2', 'Market research', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4fc7dd7c-4511-5ac1-a354-ea767836450b', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.3', 'Marketing mix', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('73d4c489-4e09-5630-a840-733edaae7110', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.4', 'Legal controls', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('5364794a-48f3-5350-a459-5544673e71ec', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.1', 'Marketing and the market', 0, '## Marketing and the market
+**Marketing** identifies customer needs and satisfies them profitably.
+
+## Markets
+- **Mass market**: large, standard products (high sales, more competition)
+- **Niche market**: small, specialised (less competition, higher prices, but limited sales)
+- **Market segmentation**: dividing a market by age, gender, income, location, lifestyle, so the marketing mix can be targeted
+- **Market share** = firm''s sales ÷ total market sales × 100
+
+## Why markets change
+Changing tastes, incomes, technology, competition, and population changes.
+
+**Product-oriented** (focus on the product) vs **market-oriented** (start from what customers want).
+
+## Building loyalty
+Brand image, loyalty schemes, after-sales service and customer relationships keep customers coming back.
+
+> Exam tip: in segmentation questions, name the segment AND say how the business would target it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b56b017c-bd7a-53c6-ad6e-e9ca759402b8', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.2', 'Market research', 1, '## Market research
+Finding out about customers, competitors and the market to reduce risk.
+
+## Primary (field) research
+New data collected first-hand: **questionnaires, interviews, focus groups, observation, test marketing**, online surveys.
+- Up to date and specific to the business
+- But expensive, time-consuming, and may be biased
+
+## Secondary (desk) research
+Existing data: government statistics, newspapers, trade reports, internet, the business''s own sales records.
+- Cheap and quick
+- But may be out of date, not specific, or unreliable
+
+## Sampling
+A **sample** represents the population. **Random sample**: everyone has an equal chance. **Quota sample**: a set number from each group (e.g. 20 teens).
+
+## Presenting data
+Tables, bar charts, pie charts, line graphs.
+
+## Accuracy depends on
+Sample size, question wording, honesty of answers, how up to date the data is.
+
+> Exam tip: suggest two research methods suited to a small business (cheap ones like online surveys and observation).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4fc7dd7c-4511-5ac1-a354-ea767836450b', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.3', 'Marketing mix', 2, '## The marketing mix (4Ps)
+## Product
+Design, quality, features, packaging, brand. **Product life cycle**: introduction → growth → maturity → decline. **Extension strategies** in maturity: new uses, new markets, new packaging, promotions.
+
+## Price
+| Strategy | When |
+|---|---|
+| **Cost-plus** | Cost + mark-up (e.g. $8 + 25% = $10) |
+| **Competitive** | Match rivals'' prices |
+| **Penetration** | Low price to enter a market and win share |
+| **Skimming** | High price for a new, unique product |
+| **Promotional** | Short-term low price |
+| **Psychological** | $9.99 instead of $10 |
+
+**Price elasticity**: if demand is elastic, cutting price raises revenue.
+
+## Place
+Distribution channels: producer → consumer; producer → retailer → consumer; producer → wholesaler → retailer → consumer. Plus **e-commerce** (online, 24/7, global reach, but delivery costs and security worries).
+
+## Promotion
+- **Above the line**: paid media advertising (TV, radio, social media ads)
+- **Below the line**: sales promotions (BOGOF, coupons, free samples), personal selling, sponsorship, PR
+
+> Exam tip: the mix must be consistent. A luxury product needs high price, exclusive place and image-led promotion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('73d4c489-4e09-5630-a840-733edaae7110', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.4', 'Legal controls', 3, '## Legal controls on marketing
+Governments protect consumers from unfair practices.
+
+## Laws commonly cover
+- **False or misleading descriptions** of goods and prices
+- **Product safety** (toys, electrical goods, food)
+- **Weights and measures**: correct quantities
+- **Advertising standards**: no misleading claims
+- **Consumer rights**: goods must be of satisfactory quality and fit for purpose; refunds or repairs if faulty
+- Restrictions on marketing some products to children (e.g. unhealthy food)
+
+## Effects on businesses
+- Costs rise (testing, labelling, redesign)
+- Some marketing is restricted
+- But it can build trust and a good reputation, and creates fair competition
+
+> Exam tip: evaluate both sides: the law adds cost, but customers trust and buy from law-abiding firms.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('0944761e-b220-5635-aeec-975153efb1f8', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', 'Chapter 3 quiz', 'quiz', 60, 2) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('0e9a71ce-465b-53f1-a4e2-3c9ce5b758d8', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'Primary market research is…', '["Using published statistics","Using competitors'' reports","Collecting new data first-hand","Reading newspapers"]'::jsonb, 'Primary (field) research collects new information first-hand for a specific purpose, e.g. questionnaires and interviews. Published statistics and reports are secondary research.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('0e9a71ce-465b-53f1-a4e2-3c9ce5b758d8', 2) on conflict (question_id) do nothing;
@@ -370,12 +1153,115 @@ insert into question_keys (question_id, correct) values ('7e39ad27-d922-5e3b-a7f
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('471390f4-1f20-526a-ab34-9f7e8bc2ca3f', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'In market research, a sample is…', '["A type of price","A free product","A smaller group chosen to represent the whole population","The whole population"]'::jsonb, 'Asking everyone is too costly, so a representative sample is used instead.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('471390f4-1f20-526a-ab34-9f7e8bc2ca3f', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('acfcb10e-2017-5def-aeb1-7d978feeb433', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4', 'Operations management', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('efec63cc-847c-534c-a880-b02155a0a062', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.1', 'Production of goods and services', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('887a8abf-ec80-5f33-ae68-6c8297cb2c9a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.2', 'Technology and production of goods and services', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('7c28c38e-3182-5ad3-a8d1-527fb3ba9763', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.3', 'Sustainable production of goods and services', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('6e03ab3a-5e63-5dcc-aa50-4c5913b5791a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.4', 'Costs, scale of production and break-even analysis', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('57d78489-9309-51f1-a5ec-190a1864ca82', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.5', 'Quality of goods and services', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('cde68957-bb1b-5d0c-a1fe-3f9e76f89a53', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.6', 'Location decisions', 5) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('efec63cc-847c-534c-a880-b02155a0a062', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.1', 'Production of goods and services', 0, '## Production
+Production turns inputs into goods and services. **Productivity** = output ÷ input (e.g. units per worker per day). Raise it with training, better technology, motivation and better methods.
+
+## Methods of production
+| Method | Description | Example |
+|---|---|---|
+| **Job** | One-off, made to order | Wedding cake, bridge |
+| **Batch** | A quantity of one product, then switch | Bakery, clothing |
+| **Flow (mass)** | Continuous, identical products | Bottled drinks, cars |
+
+## Lean production (cutting waste)
+- **Just-in-time (JIT)**: materials arrive only when needed, so little inventory. Saves storage costs but needs reliable suppliers.
+- **Kaizen**: continuous small improvements suggested by workers.
+
+## Inventory
+Buffer inventory protects against delays; too much ties up cash and costs storage.
+
+> Exam tip: recommend a production method based on demand and product type.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('887a8abf-ec80-5f33-ae68-6c8297cb2c9a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.2', 'Technology and production of goods and services', 1, '## Technology in production
+- **Automation and robots**: faster, consistent quality, can work 24/7
+- **CAD** (computer-aided design) and **CAM** (computer-aided manufacturing)
+- **Electronic point of sale (EPOS)**: tracks sales and inventory
+- **Online ordering and contactless payments** in services
+
+| Benefits | Drawbacks |
+|---|---|
+| Higher productivity and lower unit costs | High set-up cost |
+| Better, consistent quality | Job losses, so worker resistance |
+| Less waste | Breakdowns stop production |
+| New products possible | Training needed, and it soon becomes outdated |
+
+> Exam tip: weigh cost savings against the impact on workers, especially in labour-intensive businesses.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7c28c38e-3182-5ad3-a8d1-527fb3ba9763', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.3', 'Sustainable production of goods and services', 2, '## Sustainable production
+Producing in a way that meets today''s needs without harming future generations.
+
+## Methods
+- **Renewable energy** (solar, wind)
+- **Recycling** and using recycled materials
+- **Less packaging**, biodegradable packaging
+- Reducing water and energy use
+- **Responsible sourcing** of materials
+
+## Why businesses do it
+- Customer demand for green products, better reputation and brand image
+- Lower costs in the long run (energy, waste)
+- Avoid fines and meet regulations
+- Attract investors and employees
+
+## Drawbacks
+Higher initial costs, possibly higher prices, and the need to change suppliers.
+
+> Exam tip: "sustainable" questions usually want a long-term vs short-term cost argument.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6e03ab3a-5e63-5dcc-aa50-4c5913b5791a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.4', 'Costs, scale of production and break-even analysis', 3, '## Costs
+- **Fixed costs**: don''t change with output (rent, salaries, insurance)
+- **Variable costs**: change with output (materials, piece-rate wages)
+- **Total cost** = fixed + variable
+- **Average cost** = total cost ÷ output
+
+## Economies of scale
+Average costs fall as a business grows:
+- **Purchasing** (bulk discounts)
+- **Marketing** (spread over more units)
+- **Financial** (cheaper loans)
+- **Managerial** (specialist managers)
+- **Technical** (better machines)
+
+**Diseconomies**: poor communication, low morale, slow decisions.
+
+## Break-even
+**Contribution per unit** = price − variable cost
+**Break-even output** = fixed costs ÷ contribution per unit
+e.g. FC $12 000, price $10, VC $6 → 12 000 ÷ 4 = **3 000 units**
+**Margin of safety** = actual output − break-even output
+
+Break-even chart: revenue line, total cost line (starts at fixed cost), crossing at the break-even point.
+
+**Limitations**: assumes all output is sold, costs and prices stay constant, and straight-line costs.
+
+> Exam tip: always show the formula and units ("units", not "$") for break-even output.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('57d78489-9309-51f1-a5ec-190a1864ca82', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.5', 'Quality of goods and services', 4, '## Quality
+Quality means meeting customer expectations: products that work, last and look right, and services that are reliable and friendly.
+
+| Approach | How it works | Pros | Cons |
+|---|---|---|---|
+| **Quality control** | Inspect finished products | Faults found before reaching customers | Waste, cost of rejects, blame culture |
+| **Quality assurance** | Check at every stage | Fewer faults and less waste, everyone responsible | Training cost |
+| **TQM (total quality management)** | Quality is part of everyone''s job, aim for zero defects | Strong reputation, less waste | Needs commitment and training |
+
+**Why quality matters**: reputation, repeat customers, can charge higher prices, less waste and fewer complaints.
+
+> Exam tip: link quality to the case, e.g. a restaurant''s quality affects reviews and repeat customers.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('cde68957-bb1b-5d0c-a1fe-3f9e76f89a53', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.6', 'Location decisions', 5, '## Location decisions
+## Factors
+- **Market**: near customers for bulky, perishable products and services
+- **Raw materials**: near materials if they are heavy or bulky
+- **Labour**: skills available and wage levels
+- **Transport links**: ports, airports, roads
+- **Costs**: rent, land and utilities
+- **Government**: grants, tax incentives, planning permission
+- **Competitors** and **external economies** (suppliers nearby)
+- **Climate** (e.g. for tourism or agriculture)
+
+## Services
+Retailers need footfall, visibility, parking and nearby customers. Online businesses are less tied to location.
+
+## Moving abroad
+Cheaper labour, access to new markets, avoiding trade barriers. Risks: language, culture, exchange rates and political instability.
+
+> Exam tip: give a recommendation for the specific business and say which factor matters most for it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('b1843aa4-56cf-5714-a55a-5d14084a03e9', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'Chapter 4 quiz', 'quiz', 60, 3) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b1ef0748-ed08-5137-ad88-757f5810ae64', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'Fixed costs $12 000, price $10, variable cost $6 per unit. Break-even output?', '["2 000 units","1 500 units","1 200 units","3 000 units"]'::jsonb, 'Contribution per unit = price − variable cost = $10 − $6 = $4. Break-even = fixed costs ÷ contribution = $12 000 ÷ $4 = 3 000 units.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b1ef0748-ed08-5137-ad88-757f5810ae64', 3) on conflict (question_id) do nothing;
@@ -408,11 +1294,106 @@ insert into question_keys (question_id, correct) values ('be194840-223f-5500-a3c
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b00da646-d917-5f1e-adba-e754699c573f', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'Fixed costs $6 000, contribution per unit $3, sales 2 500 units. Profit is…', '["$1 500","$7 500","−$1 500","$6 000"]'::jsonb, 'Total contribution = 2 500 × $3 = $7 500. Profit = $7 500 − $6 000 = $1 500.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b00da646-d917-5f1e-adba-e754699c573f', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('e645c134-7320-552e-a820-0ae824153b0c', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '5', 'Financial information and decisions', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a05ad1c1-a128-5c27-a7a7-c4db8c9585e0', 'e645c134-7320-552e-a820-0ae824153b0c', '5.1', 'Business finance', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4e5af296-28cc-58f1-a2d0-306659d35c1b', 'e645c134-7320-552e-a820-0ae824153b0c', '5.2', 'Cash flow forecast', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('959ac0aa-ecf6-5d17-a787-6c27c0589090', 'e645c134-7320-552e-a820-0ae824153b0c', '5.3', 'Profit and loss', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('52897909-d9e5-5bee-af80-33e465d1a632', 'e645c134-7320-552e-a820-0ae824153b0c', '5.4', 'Statement of financial position', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('c624fffb-2f5f-5ce4-ad75-62a17fe64bb9', 'e645c134-7320-552e-a820-0ae824153b0c', '5.5', 'Analysis of accounts', 4) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('a05ad1c1-a128-5c27-a7a7-c4db8c9585e0', 'e645c134-7320-552e-a820-0ae824153b0c', '5.1', 'Business finance', 0, '## Sources of finance
+**Why businesses need finance**: start-up, working capital, expansion, replacing assets.
+
+| Internal | External |
+|---|---|
+| Retained profit | Bank loans |
+| Selling assets | Overdrafts |
+| Owner''s savings | Share issue (companies) |
+| Reducing inventory | Trade credit, leasing, hire purchase |
+| | Grants, **microfinance**, **crowdfunding**, debt factoring |
+
+## Short-term vs long-term
+- **Short-term** (working capital): overdraft, trade credit, factoring
+- **Long-term** (assets, expansion): loans, mortgages, shares, retained profit
+
+## Choosing finance
+Purpose and amount, the time period, the cost (interest), the size and legal form of the business, and control (shares dilute ownership).
+
+> Exam tip: match finance to purpose. A factory = long-term loan or shares, not an overdraft.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4e5af296-28cc-58f1-a2d0-306659d35c1b', 'e645c134-7320-552e-a820-0ae824153b0c', '5.2', 'Cash flow forecast', 1, '## Cash-flow forecasts
+A cash-flow forecast predicts **cash inflows and outflows** month by month.
+
+| | Jan | Feb |
+|---|---|---|
+| Cash inflows | 5 000 | 4 000 |
+| Cash outflows | 6 500 | 3 000 |
+| **Net cash flow** | (1 500) | 1 000 |
+| Opening balance | 2 000 | 500 |
+| **Closing balance** | 500 | 1 500 |
+
+Closing balance = opening + net cash flow, and it becomes next month''s opening.
+
+## Why it matters
+Shows when the business may run short, so it can arrange an overdraft in advance. Banks ask for it before lending.
+
+## Improving cash flow
+- Ask customers to pay sooner; offer discounts for early payment
+- Delay payments to suppliers (longer credit)
+- Arrange an overdraft
+- Reduce inventory; lease instead of buy
+
+**Working capital** = current assets − current liabilities.
+
+> Exam tip: profit ≠ cash. A profitable business can fail if it runs out of cash.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('959ac0aa-ecf6-5d17-a787-6c27c0589090', 'e645c134-7320-552e-a820-0ae824153b0c', '5.3', 'Profit and loss', 2, '## Income statements
+Shows **profit or loss** over a period.
+
+| | $ |
+|---|---|
+| Revenue | 50 000 |
+| Cost of sales | (30 000) |
+| **Gross profit** | 20 000 |
+| Expenses | (12 000) |
+| **Profit** | 8 000 |
+
+Revenue = price × quantity sold. Cost of sales = the cost of the goods that were sold.
+
+## Uses of profit
+Reward owners (dividends/drawings), reinvest for growth (retained profit), and a measure of success.
+
+## Users of the income statement
+Owners, managers, banks, investors, government (tax).
+
+> Exam tip: "profit for the year" is after all expenses; "gross profit" is before expenses.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('52897909-d9e5-5bee-af80-33e465d1a632', 'e645c134-7320-552e-a820-0ae824153b0c', '5.4', 'Statement of financial position', 3, '## Statement of financial position
+A snapshot of what a business **owns** and **owes** on one date.
+
+- **Non-current assets**: kept long-term (buildings, machinery, vehicles)
+- **Current assets**: change within a year (inventory, trade receivables, cash)
+- **Current liabilities**: owed within a year (trade payables, overdraft)
+- **Non-current liabilities**: owed after a year (long-term loans)
+- **Equity / capital**: owners'' investment plus retained profits
+
+**Total assets − total liabilities = equity**
+
+## Working capital
+Current assets − current liabilities. Too little means trouble paying bills; too much means idle resources.
+
+> Exam tip: classify each item correctly. That''s often 1 mark each.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c624fffb-2f5f-5ce4-ad75-62a17fe64bb9', 'e645c134-7320-552e-a820-0ae824153b0c', '5.5', 'Analysis of accounts', 4, '## Analysing accounts
+**Profitability**
+- Gross profit margin = gross profit ÷ revenue × 100
+- Profit margin = profit ÷ revenue × 100
+- Return on capital employed (ROCE) = profit ÷ capital employed × 100
+
+**Liquidity**
+- Current ratio = current assets ÷ current liabilities
+- Acid test ratio = (current assets − inventory) ÷ current liabilities
+
+## Interpreting
+- Margins rising → better pricing or cost control
+- Current ratio below 1 → may struggle to pay short-term debts
+- Compare with previous years and with competitors
+
+## Users and what they look at
+Owners (profit, ROCE), banks (liquidity), suppliers (liquidity), employees (profit and security), government (profit for tax).
+
+**Limitations**: past data, no non-financial factors, different accounting methods.
+
+> Exam tip: calculate, then interpret in context, then suggest an improvement.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('1a56a715-38e1-551e-a307-65dccf8ba076', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', 'Chapter 5 quiz', 'quiz', 60, 4) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('cbaae83e-092d-5102-a265-3dea69ee5837', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'Which is an internal source of finance?', '["Bank loan","Share issue","Retained profit","Overdraft"]'::jsonb, 'Retained profit is generated inside the business. Bank loans, overdrafts and share issues all come from outside it.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('cbaae83e-092d-5102-a265-3dea69ee5837', 2) on conflict (question_id) do nothing;
@@ -445,11 +1426,104 @@ insert into question_keys (question_id, correct) values ('d36b2b00-3446-508e-a38
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('5d6ab4d8-d1a5-5e5a-ac3d-5d0173069178', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'Who would use a business''s accounts to decide whether to lend it money?', '["A customer","A bank","A competitor","A pressure group"]'::jsonb, 'A bank checks profitability and liquidity to judge whether the loan can be repaid.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('5d6ab4d8-d1a5-5e5a-ac3d-5d0173069178', 1) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('b482d586-3417-5d4e-a2b0-bb5c0cac4090', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '6', 'External influences on business activity', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('84efa6da-fc94-51de-a571-73d088c76ba7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.1', 'Economic issues', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('626a3898-eb5e-5dde-af31-67462ca97c08', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.2', 'Business and the international economy', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('7f6f9559-9d13-5610-abbb-16d802dd9eda', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.3', 'Business and the environment', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5ccdff92-80a3-52e3-a40c-8347d8feaa49', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.4', 'Business and ethical issues', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3d5e29ef-4f2a-540a-a28b-6a1dfee0eeaf', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.5', 'Pressure groups', 4) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('84efa6da-fc94-51de-a571-73d088c76ba7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.1', 'Economic issues', 0, '## Economic issues and business
+**Business cycle**: growth → boom → recession → slump → recovery.
+- **Recession**: falling output, rising unemployment, lower sales, especially for luxury goods
+
+## Government economic objectives
+Economic growth, low unemployment, low and stable inflation, a balance of payments in balance.
+
+## Policies and effects on business
+| Policy | Example | Effect on business |
+|---|---|---|
+| **Fiscal** | Taxes and government spending | Lower income tax → more consumer spending |
+| **Monetary** | Interest rates | Higher rates → dearer loans, less spending |
+| **Supply-side** | Training, deregulation | More productive workforce |
+
+## Inflation
+Rising costs, customers'' real incomes fall, and exports become less competitive.
+
+## Unemployment
+Lower spending, but easier recruitment and lower wages.
+
+> Exam tip: always explain the chain: policy → customers/costs → effect on this business.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('626a3898-eb5e-5dde-af31-67462ca97c08', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.2', 'Business and the international economy', 1, '## Business and the international economy
+**Globalisation**: increasing links between countries through trade, investment, technology and travel.
+
+**Opportunities**: bigger markets, cheaper supplies, and producing abroad. **Threats**: foreign competition, and the need to adapt to other cultures.
+
+## Multinational companies (MNCs)
+Operate in more than one country.
+| Benefits to the host country | Drawbacks to the host country |
+|---|---|
+| Jobs and training | Profits sent home |
+| Investment, technology | Local firms may be forced out |
+| Tax revenue, exports | Use of resources, environmental damage |
+
+## Protectionism
+**Tariffs** (taxes on imports), **quotas** (limits), **subsidies** to local firms. It protects local jobs, but raises prices and limits choice.
+
+## Exchange rates
+- **Appreciation**: exports dearer, imports cheaper
+- **Depreciation**: exports cheaper, imports dearer
+
+> Exam tip: work out an exchange-rate effect with a quick calculation (e.g. $10 at Rs45 = Rs450).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7f6f9559-9d13-5610-abbb-16d802dd9eda', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.3', 'Business and the environment', 2, '## Business and the environment
+Businesses create **external costs** (pollution, noise, congestion, waste) paid by third parties, and **external benefits** (jobs, training, infrastructure).
+
+## Sustainable development
+Meeting present needs without harming future generations.
+
+## Government controls
+- **Laws and regulations** (pollution limits)
+- **Taxes and fines** on pollution
+- **Permits** (pollution trading)
+- **Subsidies** for clean technology
+
+## Business responses
+Cleaner technology, recycling, renewable energy, green products, carbon reporting.
+
+**Cost-benefit analysis**: weigh private and social costs and benefits before big projects.
+
+> Exam tip: "should the government allow the factory?" means weigh social costs against social benefits.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5ccdff92-80a3-52e3-a40c-8347d8feaa49', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.4', 'Business and ethical issues', 3, '## Ethical issues
+**Ethics**: doing what is morally right, not just what is legal.
+
+## Common issues
+- Child labour and poor working conditions in supply chains
+- Fair prices to suppliers (fair trade)
+- Honest advertising and product safety
+- Bribery and corruption
+- Animal testing; environmental damage
+- Paying fair taxes
+
+## Why act ethically
+- Better reputation, customer loyalty, attracts staff and investors
+- Avoids boycotts and bad publicity
+
+## Costs
+Higher costs, possibly higher prices, and lower short-term profit.
+
+> Exam tip: discuss the conflict between profit and ethics, then judge which matters more for the business in the case.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3d5e29ef-4f2a-540a-a28b-6a1dfee0eeaf', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.5', 'Pressure groups', 4, '## Pressure groups
+Organisations that try to influence business or government decisions, e.g. environmental groups, consumer groups, animal welfare groups and local residents.
+
+## Methods
+- Protests and petitions
+- **Boycotts** (customers stop buying)
+- Media and social media campaigns
+- Lobbying government
+
+## How effective they are depends on
+- Public support and media attention
+- How much the business relies on its image
+- Whether the change is affordable
+- The size of the pressure group and how organised it is
+
+## Business response
+Change policy, negotiate, run its own PR, or ignore (risky).
+
+> Exam tip: judge whether giving in is worth it, comparing the cost of change with the cost of lost sales and reputation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('42a85e8c-ef58-57d9-af58-90a23dce0205', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', 'Chapter 6 quiz', 'quiz', 60, 5) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b5426b7b-4751-5dc4-a881-14037101f97a', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '42a85e8c-ef58-57d9-af58-90a23dce0205', 'Higher interest rates usually…', '["Reduce loan repayments","Have no effect","Increase the cost of borrowing for businesses","Increase consumer spending"]'::jsonb, 'Higher interest rates make loans more expensive for businesses and customers, so investment and spending on credit usually fall.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b5426b7b-4751-5dc4-a881-14037101f97a', 2) on conflict (question_id) do nothing;
@@ -486,10 +1560,70 @@ insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_lim
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('824a68c7-4e2a-51f6-ab50-e88508603368', '1cfd38e6-861e-579b-a83a-d236a693b94a', null, 'Paper 1 practice (40 questions, 1h)', 'exam', 150, 3600, 40, 1000, 'locked') on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('47799acd-059b-5eff-abe1-3b7e8cef9758', '1cfd38e6-861e-579b-a83a-d236a693b94a', null, 'Fix my mistakes', 'review', 0, 1001) on conflict (id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('558f3894-659e-55a5-a96b-13f911a97931', '1cfd38e6-861e-579b-a83a-d236a693b94a', '1', 'The basic economic problem', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5321fb03-dc06-5ebd-a10e-6ccab97606df', '558f3894-659e-55a5-a96b-13f911a97931', '1.1', 'The nature of the basic economic problem', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4ea7b3df-1de3-5c8f-ac90-4cc76724e10d', '558f3894-659e-55a5-a96b-13f911a97931', '1.2', 'Factors of production', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('ef368ce0-946b-5839-a098-1e22c9ee1b8f', '558f3894-659e-55a5-a96b-13f911a97931', '1.3', 'Opportunity cost', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e888433a-8c9b-55bf-a6f7-6d37363dd3e0', '558f3894-659e-55a5-a96b-13f911a97931', '1.4', 'Production possibility curve (PPC) diagrams', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('5321fb03-dc06-5ebd-a10e-6ccab97606df', '558f3894-659e-55a5-a96b-13f911a97931', '1.1', 'The nature of the basic economic problem', 0, '## The basic economic problem
+**Economic resources are finite** (limited), but **human wants are unlimited**. This is **scarcity**, and it means every person, firm and government must make choices.
+
+## The three basic questions
+1. **What** to produce?
+2. **How** to produce it?
+3. **For whom** to produce?
+
+## Goods
+- **Economic goods**: need scarce resources to make, so they have an opportunity cost (bread, phones)
+- **Free goods**: no opportunity cost to produce (air, sunlight)
+
+## Economic agents
+Households (consumers), firms (producers) and government all face the problem.
+
+> Exam tip: scarcity applies to rich and poor countries alike, because wants always exceed resources.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4ea7b3df-1de3-5c8f-ac90-4cc76724e10d', '558f3894-659e-55a5-a96b-13f911a97931', '1.2', 'Factors of production', 1, '## Factors of production
+| Factor | Meaning | Reward |
+|---|---|---|
+| **Land** | Natural resources: land, minerals, fish, forests | Rent |
+| **Labour** | Human effort, physical and mental | Wages |
+| **Capital** | Man-made goods used to make other goods (machines, factories, roads) | Interest |
+| **Enterprise** | Organising the other factors and taking risks | Profit |
+
+Money is **not** capital in this sense; it''s used to buy capital.
+
+## Quantity and quality of factors
+- **Labour**: population size, retirement age, education, training, health
+- **Capital**: investment
+- **Land**: discoveries, reclaiming land, depletion
+
+## Mobility
+- **Geographical mobility**: ability to move to another area for work
+- **Occupational mobility**: ability to change to another type of job (helped by training)
+
+> Exam tip: be clear about the difference between capital goods and money.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ef368ce0-946b-5839-a098-1e22c9ee1b8f', '558f3894-659e-55a5-a96b-13f911a97931', '1.3', 'Opportunity cost', 2, '## Opportunity cost
+The **next best alternative forgone** when a choice is made.
+
+## Examples
+- **Consumer**: buying a new phone instead of a holiday → opportunity cost = the holiday
+- **Worker**: staying in school instead of working → lost wages
+- **Producer**: using a field for sugar cane instead of vegetables → the vegetables
+- **Government**: spending $1m on a hospital instead of a school → the school
+
+## Why it matters
+It helps everyone make better decisions by comparing what is gained with what is given up.
+
+> Exam tip: opportunity cost is ONE item, the next best alternative, not every alternative and not the money price.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e888433a-8c9b-55bf-a6f7-6d37363dd3e0', '558f3894-659e-55a5-a96b-13f911a97931', '1.4', 'Production possibility curve (PPC) diagrams', 3, '## Production possibility curve (PPC)
+Shows the **maximum combinations of two goods** an economy can produce with all its resources fully and efficiently used.
+
+- **On the curve**: efficient, all resources used
+- **Inside the curve**: unemployed or wasted resources
+- **Outside the curve**: unattainable with current resources
+
+## Opportunity cost on a PPC
+Moving along the curve to make more of one good means making less of the other. The curve is usually **bowed out** because resources aren''t equally good at making both goods, so opportunity cost rises.
+
+## Shifts
+- **Outward** (economic growth): more resources, better technology, a better-educated workforce, investment
+- **Inward**: natural disaster, war, emigration, resources running out
+
+> Exam tip: draw and label the axes (Good A, Good B), the curve, and the points. Diagrams earn marks.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7c3203ea-91dd-5bb2-ab4d-40999d911978', '1cfd38e6-861e-579b-a83a-d236a693b94a', '558f3894-659e-55a5-a96b-13f911a97931', 'Chapter 1 quiz', 'quiz', 60, 0) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('60486a5e-30a0-5722-a168-db920e961884', '1cfd38e6-861e-579b-a83a-d236a693b94a', '558f3894-659e-55a5-a96b-13f911a97931', '7c3203ea-91dd-5bb2-ab4d-40999d911978', 'The basic economic problem is…', '["Finite resources and unlimited wants","Inflation only","Unemployment only","Too much money"]'::jsonb, 'Resources (land, labour, capital, enterprise) are finite but people''s wants are unlimited, so choices have to be made. This is scarcity, the basic economic problem.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('60486a5e-30a0-5722-a168-db920e961884', 0) on conflict (question_id) do nothing;
@@ -522,16 +1656,179 @@ insert into question_keys (question_id, correct) values ('776397ef-dde5-5303-aaf
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('365b19d6-5527-5592-ab9b-88bb63ceedcf', '1cfd38e6-861e-579b-a83a-d236a693b94a', '558f3894-659e-55a5-a96b-13f911a97931', '7c3203ea-91dd-5bb2-ab4d-40999d911978', 'The three basic economic questions are…', '["What to produce, how to produce and for whom","How much, how many and why","Where, when and why to produce","Who, what and where to produce"]'::jsonb, 'Every economic system must decide what to make, how to make it and who gets it.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('365b19d6-5527-5592-ab9b-88bb63ceedcf', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('a615ef7e-67ea-5066-ae26-9405a496de5d', '1cfd38e6-861e-579b-a83a-d236a693b94a', '2', 'The allocation of resources', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4fa0d8da-c11d-5ed9-ac1a-bfc147d9042b', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.1', 'The role of markets in allocating resources', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('296a4dec-f57b-5345-ac40-48c134713cee', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.2', 'Demand', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('86d99e88-9720-5900-ab1a-5a3763ac32e0', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.3', 'Supply', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('830cf071-c0f4-57de-af3b-c8bc86d6e08c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.4', 'Price determination', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('61209274-5304-542d-abd4-d248d9d5fa5a', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.5', 'Price changes', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('40fae6a6-6ee9-52e9-a4e2-e54887527789', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.6', 'Price elasticity of demand (PED)', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('82fc66fc-4eee-58d9-a42e-6771333432b1', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.7', 'Price elasticity of supply (PES)', 6) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('1bb97293-f551-571e-a2b2-f4f53f3f92b8', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.8', 'Market economic system', 7) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('fa5a89e0-bcdf-5602-a879-f3341b68984c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.9', 'Market failure', 8) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5a5733af-bdc8-5e05-a053-e7c859ee7d6c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.10', 'Mixed economic system', 9) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('4fa0d8da-c11d-5ed9-ac1a-bfc147d9042b', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.1', 'The role of markets in allocating resources', 0, '## Markets and resource allocation
+A **market** is where buyers and sellers exchange goods, services or factors.
+
+## The price mechanism
+In a market economy, prices signal what to produce:
+- **High demand → price rises → firms make more** (more profit) and resources move there
+- **Low demand → price falls → firms make less**, and resources move elsewhere
+
+So prices **ration** goods, **signal** information and give **incentives**.
+
+## The three questions answered by markets
+What: what consumers buy. How: the cheapest method. For whom: those who can afford it.
+
+> Exam tip: describe the chain demand → price → profit → resources.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('296a4dec-f57b-5345-ac40-48c134713cee', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.2', 'Demand', 1, '## Demand
+**Demand**: the quantity consumers are **willing and able** to buy at each price.
+
+**Law of demand**: as price rises, quantity demanded falls (and vice versa). Demand curves slope **downwards**.
+
+## Movements vs shifts
+- A change in the good''s **own price** → **movement along** the curve (extension or contraction)
+- Other factors → **shift** of the whole curve
+
+## Causes of a shift (right = increase)
+- Income (more income → more demand for normal goods)
+- Price of **substitutes** rises → demand rises
+- Price of **complements** rises → demand falls
+- Tastes and fashion, advertising
+- Population size and age structure
+- Expectations of future prices
+
+**Individual vs market demand**: market demand is the sum of all individual demand.
+
+> Exam tip: never say "demand increased because price fell". That''s an extension of quantity demanded, not a shift.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('86d99e88-9720-5900-ab1a-5a3763ac32e0', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.3', 'Supply', 2, '## Supply
+**Supply**: the quantity producers are willing and able to sell at each price.
+
+**Law of supply**: as price rises, quantity supplied rises. Supply curves slope **upwards** (higher prices → more profit).
+
+## Causes of a shift (right = increase)
+- **Costs of production** fall (cheaper materials, lower wages)
+- Better **technology**
+- **Subsidies** (supply rises); **indirect taxes** (supply falls)
+- Weather and natural disasters (agriculture)
+- Number of firms in the market
+- Prices of other goods the firm could produce
+
+Change in own price → **movement along** the supply curve.
+
+> Exam tip: a tax shifts supply LEFT; a subsidy shifts supply RIGHT.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('830cf071-c0f4-57de-af3b-c8bc86d6e08c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.4', 'Price determination', 3, '## Price determination
+**Equilibrium**: where demand = supply. The market clears, with no shortage or surplus.
+
+## Disequilibrium
+- **Price above equilibrium** → **excess supply** (surplus) → price falls
+- **Price below equilibrium** → **excess demand** (shortage) → price rises
+
+The market moves back towards equilibrium.
+
+## Diagram
+Price on the vertical axis, quantity on the horizontal; D slopes down, S slopes up, and they cross at P* and Q*.
+
+> Exam tip: label everything: axes, D, S, P*, Q*, and any new curves (D1, S1).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('61209274-5304-542d-abd4-d248d9d5fa5a', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.5', 'Price changes', 4, '## Price changes
+Shifts in demand or supply change the equilibrium.
+
+| Change | Equilibrium price | Equilibrium quantity |
+|---|---|---|
+| Demand increases (right) | Rises | Rises |
+| Demand decreases (left) | Falls | Falls |
+| Supply increases (right) | Falls | Rises |
+| Supply decreases (left) | Rises | Falls |
+
+## Example
+A bad harvest reduces sugar supply → supply shifts left → price rises, quantity falls.
+
+## Explaining with a diagram
+1. Draw the original equilibrium.
+2. Shift the right curve the right way.
+3. Show the new price and quantity.
+4. Explain the cause and the effect in words.
+
+> Exam tip: decide first whether the event affects **demand or supply**. Most mistakes happen there.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('40fae6a6-6ee9-52e9-a4e2-e54887527789', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.6', 'Price elasticity of demand (PED)', 5, '## Price elasticity of demand (PED)
+How much quantity demanded responds to a change in price.
+
+**PED = % change in quantity demanded ÷ % change in price**
+
+| PED (ignoring the minus sign) | Type | Meaning |
+|---|---|---|
+| > 1 | **Elastic** | Quantity changes more than price |
+| < 1 | **Inelastic** | Quantity changes less than price |
+| = 1 | Unitary | Same % change |
+| 0 | Perfectly inelastic | Quantity doesn''t change |
+| ∞ | Perfectly elastic | |
+
+## Worked example
+Price +10%, quantity −20% → PED = −20 ÷ 10 = **−2 (elastic)**
+
+## What makes demand elastic
+Many **substitutes**, a large share of income, luxuries, a long time period. Necessities and addictive goods are inelastic.
+
+## PED and revenue
+- **Elastic** → cut the price to raise revenue
+- **Inelastic** → raise the price to raise revenue
+
+Governments tax goods with inelastic demand (fuel, cigarettes) because revenue is high.
+
+> Exam tip: always give your answer with the sign, a short interpretation and the effect on revenue.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('82fc66fc-4eee-58d9-a42e-6771333432b1', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.7', 'Price elasticity of supply (PES)', 6, '## Price elasticity of supply (PES)
+How much quantity supplied responds to a change in price.
+
+**PES = % change in quantity supplied ÷ % change in price**
+
+- **> 1 elastic**: firms can respond quickly
+- **< 1 inelastic**: firms can''t increase output easily
+
+## Determinants
+- **Spare capacity** and available resources → elastic
+- **Inventories** (stocks) that can be sold → elastic
+- **Time period**: supply is more elastic in the long run
+- **Perishable goods** (fresh fruit) → harder to store, often inelastic
+- How easily resources can switch from other uses
+
+> Exam tip: agricultural products have inelastic supply in the short run because crops take time to grow.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1bb97293-f551-571e-a2b2-f4f53f3f92b8', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.8', 'Market economic system', 7, '## The market economic system
+Resources are owned privately and allocated by the **price mechanism**, with little government intervention.
+
+| Advantages | Disadvantages |
+|---|---|
+| Choice and variety for consumers | Inequality of income and wealth |
+| Efficiency from competition | Public goods not provided |
+| Incentive to innovate | Merit goods under-provided |
+| Quick response to consumer wants | Demerit goods over-consumed |
+| | External costs ignored (pollution) |
+| | Monopolies may develop |
+
+> Exam tip: a pure market economy doesn''t exist. Real economies are mixed.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fa5a89e0-bcdf-5602-a879-f3341b68984c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.9', 'Market failure', 8, '## Market failure
+When the market misallocates resources.
+
+## Key terms
+- **Private costs/benefits**: to the producer or consumer
+- **External costs/benefits**: to third parties
+- **Social cost** = private + external cost; **social benefit** = private + external benefit
+
+## Types
+- **Public goods** (street lights, defence): **non-excludable and non-rival**, so the free-rider problem and no private provision
+- **Merit goods** (education, healthcare): benefits underestimated, so **under-consumed**
+- **Demerit goods** (cigarettes, alcohol): harm underestimated, so **over-consumed**
+- **External costs** (pollution) → overproduction
+- **Monopoly power** → higher prices, less output
+- **Factor immobility** and **lack of information**
+
+> Exam tip: identify the type of failure and the third party affected.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5a5733af-bdc8-5e05-a053-e7c859ee7d6c', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '2.10', 'Mixed economic system', 9, '## The mixed economic system
+Both private sector and government allocate resources.
+
+## Government intervention
+| Tool | Example | Effect |
+|---|---|---|
+| **Maximum price** | Rent cap below equilibrium | Cheaper, but shortages |
+| **Minimum price** | Minimum wage or farm prices above equilibrium | Higher incomes, but surpluses |
+| **Indirect taxes** | Tax on cigarettes | Less consumption, revenue raised |
+| **Subsidies** | On public transport | Lower price, more consumption |
+| **Regulation** | Pollution limits, bans | Directly controls behaviour |
+| **Direct provision** | State schools and hospitals | Free or cheap merit goods |
+| **Privatisation / nationalisation** | Selling or taking over firms | Changes ownership |
+
+## Government failure
+Intervention can make things worse: poor information, costs, unintended consequences (black markets).
+
+> Exam tip: in "should the government…?" questions, give advantages, disadvantages and a conclusion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7c017a78-cedc-525a-a51e-951868e26c1e', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'a615ef7e-67ea-5066-ae26-9405a496de5d', 'Chapter 2 quiz', 'quiz', 60, 1) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('d6cc43cb-955e-5458-ae06-961f999e3c8f', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '7c017a78-cedc-525a-a51e-951868e26c1e', 'A rise in the price of a good causes…', '["A shift left","No change in quantity","A contraction (movement along) in demand","A shift of the demand curve right"]'::jsonb, 'A change in the good''s own price causes a movement along the demand curve (a contraction when price rises). Changes in income, tastes or other prices shift the curve.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('d6cc43cb-955e-5458-ae06-961f999e3c8f', 2) on conflict (question_id) do nothing;
@@ -564,13 +1861,126 @@ insert into question_keys (question_id, correct) values ('16375bdf-7730-575d-a89
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('ffb9e8b8-3d1c-5ac0-a165-36c64f03fdbc', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'a615ef7e-67ea-5066-ae26-9405a496de5d', '7c017a78-cedc-525a-a51e-951868e26c1e', 'Supply is more price elastic when…', '["There are no spare resources","The good is perishable and can''t be stored","Firms have spare capacity and can store inventory","Production takes a long time"]'::jsonb, 'If firms can quickly raise output or sell from stock, quantity supplied responds strongly to price changes.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('ffb9e8b8-3d1c-5ac0-a165-36c64f03fdbc', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('50693a18-f1ee-5073-a782-088fbee2fa16', '1cfd38e6-861e-579b-a83a-d236a693b94a', '3', 'Microeconomic decision-makers', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d6c78e44-ffe1-5f65-a0f1-11a13a9c1627', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.1', 'Money and banking', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('8277df23-da5b-58ba-ad88-f7f1618d12a3', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.2', 'Households', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('b8c6ca7f-ab28-5bdd-ae81-71fe480db512', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.3', 'Workers', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('bc607614-d97a-53ef-a693-e072d3252908', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.4', 'Firms', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3dbc2060-c9f0-5baf-a07f-0567a46db5a1', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.5', 'Firms and production', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('73fa2643-c379-5f69-a5cb-c2dfc674e24e', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.6', 'Firms'' costs, revenue and objectives', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('36477e91-1c62-53f3-a999-04f154904e52', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.7', 'Types of markets', 6) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('d6c78e44-ffe1-5f65-a0f1-11a13a9c1627', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.1', 'Money and banking', 0, '## Money and banking
+## Money
+Anything generally accepted as payment. **Functions**: medium of exchange, store of value, unit of account, standard of deferred payment. **Characteristics**: acceptable, durable, portable, divisible, scarce, hard to forge.
+
+## Central bank
+- Issues the currency
+- Banker to the government and to commercial banks
+- Sets interest rates and **monetary policy**
+- Manages the exchange rate and reserves
+- Lender of last resort
+
+(Mauritius: the Bank of Mauritius.)
+
+## Commercial banks
+Accept deposits, give loans, provide payments, and help businesses and households. They aim for profit.
+
+> Exam tip: compare central and commercial banks by who they serve and their aims.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8277df23-da5b-58ba-ad88-f7f1618d12a3', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.2', 'Households', 1, '## Households
+## Spending, saving and borrowing
+Influenced by:
+- **Income** (main factor). Higher income → more spending and more saving.
+- **Interest rates**: higher rates encourage saving and discourage borrowing
+- **Confidence** about the future
+- **Wealth** and the availability of credit
+- **Age** and family size
+
+Poorer households spend a larger **share** of income (on necessities); richer households save more.
+
+## Saving vs borrowing
+- **Saving**: for emergencies, big purchases, retirement
+- **Borrowing**: for houses, cars, education
+
+> Exam tip: link interest rates to the household''s decision: "higher rates raise the reward for saving".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b8c6ca7f-ab28-5bdd-ae81-71fe480db512', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.3', 'Workers', 2, '## Workers
+## Factors in choosing a job
+- **Wage factors**: pay, bonuses, overtime
+- **Non-wage factors**: hours, holidays, job security, promotion prospects, location, working conditions, fringe benefits
+
+## Wage determination
+Wages are set by the demand for and supply of labour.
+- **High wages**: scarce skills, high productivity, high demand for the product, dangerous or unpleasant work
+- **Low wages**: many people able to do the job, low skill
+
+## Other influences
+**Trade unions** (collective bargaining), **minimum wage laws**, **discrimination**, public vs private sector.
+
+## Specialisation of labour
+Workers focus on particular tasks: higher productivity and quality, but boredom and over-dependence.
+
+> Exam tip: explain wage differences using both demand AND supply of labour.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('bc607614-d97a-53ef-a693-e072d3252908', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.4', 'Firms', 3, '## Firms
+## Classifying firms
+By sector (primary, secondary, tertiary), by ownership (private or public sector), by size.
+
+## Small firms survive because
+They serve niche markets, offer personal service and flexibility, and the market may be small.
+
+## Growth of firms
+- **Internal**: increasing output, new branches
+- **External**: mergers and takeovers. **Horizontal** (same stage), **vertical** (different stages: backward to suppliers, forward to customers), **conglomerate** (unrelated)
+
+## Economies of scale
+- **Internal**: purchasing (bulk buying), technical, financial, managerial, marketing
+- **External**: a skilled local workforce, nearby suppliers, infrastructure
+- **Diseconomies**: poor communication, low morale, slow decisions
+
+> Exam tip: say whether each economy of scale is internal or external.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3dbc2060-c9f0-5baf-a07f-0567a46db5a1', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.5', 'Firms and production', 4, '## Firms and production
+**Production**: converting inputs into output.
+
+## Labour-intensive vs capital-intensive
+| Labour-intensive | Capital-intensive |
+|---|---|
+| More workers relative to machines | More machines relative to workers |
+| Flexible, personal | Consistent, fast, low unit cost at large scale |
+| Hand-made goods, services | Car factories, bottling plants |
+
+The choice depends on the cost of labour vs capital, the size of the market, and the product.
+
+## Productivity
+Output per worker per period. Raised by training, technology, better management and motivation.
+
+**Demand for factors** is derived demand: firms want workers because consumers want the product.
+
+> Exam tip: for "should the firm become more capital-intensive?", weigh cost savings against job losses and set-up costs.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('73fa2643-c379-5f69-a5cb-c2dfc674e24e', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.6', 'Firms'' costs, revenue and objectives', 5, '## Costs, revenue and objectives
+## Costs
+- **Fixed costs (FC)**: don''t change with output in the short run
+- **Variable costs (VC)**: change with output
+- **Total cost (TC)** = FC + VC
+- **Average total cost (ATC)** = TC ÷ output; **AFC** = FC ÷ output; **AVC** = VC ÷ output
+
+## Revenue
+- **Total revenue (TR)** = price × quantity
+- **Average revenue (AR)** = TR ÷ quantity = price
+
+## Profit
+Profit = TR − TC.
+
+## Objectives of firms
+Profit maximisation, survival, growth, market share, social responsibility, satisficing.
+
+> Exam tip: practise filling in cost tables. They''re quick marks if you know the formulas.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('36477e91-1c62-53f3-a999-04f154904e52', '50693a18-f1ee-5073-a782-088fbee2fa16', '3.7', 'Types of markets', 6, '## Types of markets
+## Competitive markets
+Many firms, similar products, low barriers to entry.
+- **Benefits**: lower prices, choice, efficiency, innovation
+- **Drawbacks**: firms may be too small for economies of scale
+
+## Monopoly
+A single seller (or a dominant firm) with **high barriers to entry** (legal rights, high set-up costs, control of resources).
+| Disadvantages | Possible advantages |
+|---|---|
+| Higher prices, less choice | Economies of scale |
+| Less incentive to be efficient | Profits fund research |
+| Lower output | Avoids wasteful duplication (natural monopoly) |
+
+Governments regulate monopolies, limit price rises or encourage competition.
+
+> Exam tip: evaluate monopoly with both sides, not just "monopolies are bad".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('c69bd4d4-fb70-54be-ab1d-1c0c6c6d7deb', '1cfd38e6-861e-579b-a83a-d236a693b94a', '50693a18-f1ee-5073-a782-088fbee2fa16', 'Chapter 3 quiz', 'quiz', 60, 2) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('92c633ad-ed3a-5c3a-a745-2d813abc535e', '1cfd38e6-861e-579b-a83a-d236a693b94a', '50693a18-f1ee-5073-a782-088fbee2fa16', 'c69bd4d4-fb70-54be-ab1d-1c0c6c6d7deb', 'Which is a function of money?', '["Type of tax","Factor of production","Medium of exchange","Source of labour"]'::jsonb, 'Money is a medium of exchange (accepted as payment). Its other functions are a store of value, a unit of account and a standard of deferred payment.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('92c633ad-ed3a-5c3a-a745-2d813abc535e', 2) on conflict (question_id) do nothing;
@@ -603,13 +2013,131 @@ insert into question_keys (question_id, correct) values ('2a5f7b79-0eb8-58fc-ad3
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('f6b157a2-7ba6-50b6-ac2d-d6ee33024d7d', '1cfd38e6-861e-579b-a83a-d236a693b94a', '50693a18-f1ee-5073-a782-088fbee2fa16', 'c69bd4d4-fb70-54be-ab1d-1c0c6c6d7deb', 'A feature of a highly competitive market is…', '["Only one seller","No choice for consumers","High barriers to entry","Many firms and low barriers to entry"]'::jsonb, 'With many firms competing and easy entry, prices are kept down and consumers have choice.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('f6b157a2-7ba6-50b6-ac2d-d6ee33024d7d', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '1cfd38e6-861e-579b-a83a-d236a693b94a', '4', 'Government and the macroeconomy', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('0303b31a-370e-5f67-aed5-8560c2f06c05', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.1', 'Government macroeconomic intervention', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5272e099-f35d-5c66-a459-f954d609035a', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.2', 'Fiscal policy', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('7585b02d-fca9-5241-a54f-0725781055b7', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.3', 'Monetary policy', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4f93d919-d178-55ce-ab2c-290bbe6d01d6', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.4', 'Supply-side policy', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('021fe089-867b-5505-ab21-b9b3d3d6226e', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.5', 'Economic growth', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a2c0990a-8479-55bf-a666-1529502009d5', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.6', 'Employment and unemployment', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('cd3b42f7-453c-5b29-a160-c0800d87959b', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.7', 'Inflation', 6) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('0303b31a-370e-5f67-aed5-8560c2f06c05', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.1', 'Government macroeconomic intervention', 0, '## Government and the macroeconomy
+## Macroeconomic aims
+- **Economic growth**
+- **Low unemployment** (full employment)
+- **Low and stable inflation**
+- **Balance of payments stability**
+- **Redistribution of income** (fairness)
+
+## Conflicts between aims
+- Growth vs low inflation: fast growth can push prices up
+- Low unemployment vs low inflation
+- Growth vs the environment
+
+Governments use **fiscal**, **monetary** and **supply-side** policies to reach their aims.
+
+> Exam tip: when asked about a conflict, explain the chain linking the two aims.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5272e099-f35d-5c66-a459-f954d609035a', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.2', 'Fiscal policy', 1, '## Fiscal policy
+Using **government spending and taxation** to influence the economy.
+
+## Government budget
+- **Deficit**: spending > tax revenue
+- **Surplus**: tax revenue > spending
+
+## Taxes
+| Type | Meaning | Example |
+|---|---|---|
+| **Direct** | On income and wealth | Income tax, corporation tax |
+| **Indirect** | On spending | VAT, excise duties |
+| **Progressive** | Higher earners pay a larger % | Income tax bands |
+| **Regressive** | Lower earners pay a larger % of income | Many indirect taxes |
+| **Proportional** | Same % for all | Flat tax |
+
+## Using it
+- **Expansionary**: cut taxes or raise spending → more demand, growth and jobs
+- **Contractionary**: raise taxes or cut spending → reduce inflation
+
+> Exam tip: explain the impact on spending (aggregate demand) first, then on the aim.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7585b02d-fca9-5241-a54f-0725781055b7', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.3', 'Monetary policy', 2, '## Monetary policy
+Changing **interest rates** and the **money supply** (usually by the central bank).
+
+## Lower interest rates
+→ cheaper borrowing and less reward for saving → more consumer spending and investment → growth and jobs (but may raise inflation and weaken the currency)
+
+## Higher interest rates
+→ more saving, less borrowing → lower demand → reduces inflation (but may slow growth and raise unemployment)
+
+## Exchange rate effects
+Higher interest rates attract foreign money → the currency appreciates → exports dearer, imports cheaper.
+
+> Exam tip: write the full chain: interest rate → borrowing/saving → spending → the aim.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4f93d919-d178-55ce-ab2c-290bbe6d01d6', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.4', 'Supply-side policy', 3, '## Supply-side policy
+Aims to increase the economy''s **productive capacity** (shifting the PPC out) and efficiency.
+
+## Examples
+- **Education and training** → more skilled workers
+- **Lower income and corporation taxes** → incentives to work and invest
+- **Deregulation** → less red tape, more competition
+- **Privatisation** → efficiency through profit motive
+- **Improving infrastructure** (roads, broadband)
+- **Labour market reforms** (e.g. making it easier to find jobs)
+- **Subsidies for research and development**
+
+## Pros and cons
+Long-term growth without inflation, but slow to work, costly, and may increase inequality.
+
+> Exam tip: supply-side policies help the long run; fiscal and monetary policies work faster.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('021fe089-867b-5505-ab21-b9b3d3d6226e', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.5', 'Economic growth', 4, '## Economic growth
+An increase in the economy''s output (**real GDP**) over time.
+
+**GDP**: the total value of goods and services produced in a year. **Real GDP** is adjusted for inflation.
+
+## Causes
+More resources, better technology, investment, education and training, more productive workers, trade.
+
+## Recession
+A fall in real GDP for **two consecutive quarters**.
+
+| Benefits of growth | Costs of growth |
+|---|---|
+| Higher living standards, more jobs | Pollution and resource depletion |
+| More tax revenue for services | Inequality may rise |
+| Less poverty | Inflation if too fast |
+
+> Exam tip: distinguish actual growth (using existing capacity) from potential growth (more capacity).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a2c0990a-8479-55bf-a666-1529502009d5', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.6', 'Employment and unemployment', 5, '## Employment and unemployment
+**Unemployment**: people willing and able to work who can''t find a job.
+
+## Types
+- **Frictional**: between jobs
+- **Structural**: industries decline and skills no longer match (e.g. sugar mills closing)
+- **Cyclical (demand-deficient)**: during recession
+- **Seasonal**: e.g. tourism off-season
+- **Technological**: replaced by machines
+
+## Measuring
+Unemployment rate = unemployed ÷ labour force × 100.
+
+## Consequences
+- **Individuals**: lost income, stress, lost skills
+- **Government**: less tax revenue, more benefit spending
+- **Economy**: lost output (inside the PPC)
+
+## Policies
+Fiscal and monetary expansion (cyclical), training and education (structural), better job information (frictional).
+
+> Exam tip: match the policy to the type of unemployment.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('cd3b42f7-453c-5b29-a160-c0800d87959b', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', '4.7', 'Inflation', 6, '## Inflation
+A **sustained rise in the general price level**. Measured with the **consumer prices index (CPI)**: a weighted basket of goods and services.
+
+## Causes
+- **Demand-pull**: total demand grows faster than output
+- **Cost-push**: rising costs (oil, wages, imports) passed on as higher prices
+
+## Consequences
+- Lower **real incomes** (especially for people on fixed incomes)
+- Savers lose; borrowers may gain
+- Exports less competitive
+- Uncertainty, and costs of changing prices
+
+**Deflation**: falling prices. People delay buying, leading to falling output and jobs.
+
+## Policies
+Raise interest rates (monetary), cut spending or raise taxes (fiscal), supply-side policies.
+
+> Exam tip: "inflation fell from 5% to 3%" means prices are still rising, just more slowly.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('a5e85896-724d-53c6-a046-ee070a5cfc89', '1cfd38e6-861e-579b-a83a-d236a693b94a', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', 'Chapter 4 quiz', 'quiz', 60, 3) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('3867d9d7-bb8f-597b-ab44-88272803fe07', '1cfd38e6-861e-579b-a83a-d236a693b94a', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', 'a5e85896-724d-53c6-a046-ee070a5cfc89', 'Changing government spending and taxation is…', '["Supply-side policy","Fiscal policy","Exchange rate policy","Monetary policy"]'::jsonb, 'Fiscal policy uses government spending and taxation. Monetary policy uses interest rates and the money supply.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('3867d9d7-bb8f-597b-ab44-88272803fe07', 1) on conflict (question_id) do nothing;
@@ -642,10 +2170,73 @@ insert into question_keys (question_id, correct) values ('bee2d85a-5e91-502e-a00
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('83a17499-b108-57a5-a8a3-d5f11a245627', '1cfd38e6-861e-579b-a83a-d236a693b94a', '2a9ebb8e-febc-5964-a5f8-e0e20b5184f3', 'a5e85896-724d-53c6-a046-ee070a5cfc89', 'A recession is usually defined as…', '["A fall in unemployment","One month of rising prices","Two consecutive quarters of falling real GDP","Rising exports"]'::jsonb, 'In a recession output falls, so incomes fall and unemployment usually rises.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('83a17499-b108-57a5-a8a3-d5f11a245627', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('dc370ce2-6d05-51de-a37c-d53daa029452', '1cfd38e6-861e-579b-a83a-d236a693b94a', '5', 'Economic development', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('f2b86e56-7f42-5386-a6d8-7b0c9576835c', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.1', 'Living standards', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('ce419d76-778c-5715-aa71-85e3e93dce10', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.2', 'Poverty', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e895b275-684c-5586-aa15-7bdff7c82e7b', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.3', 'Population', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e410d4a1-8a5a-50bc-ac30-1888265ac5e0', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.4', 'Differences in economic development between countries', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('f2b86e56-7f42-5386-a6d8-7b0c9576835c', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.1', 'Living standards', 0, '## Living standards
+## Measures
+- **Real GDP per head** = real GDP ÷ population
+  - Limitations: ignores inequality, non-market activity, quality of life, environment
+- **Human Development Index (HDI)**: combines **income** (GNI per head), **education** (years of schooling) and **health** (life expectancy). Scored 0–1.
+
+## Other indicators
+Literacy, infant mortality, access to clean water, doctors per head, internet access.
+
+## Comparing countries
+Use several indicators. GDP alone can mislead.
+
+> Exam tip: explain why HDI is a wider measure than GDP per head.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ce419d76-778c-5715-aa71-85e3e93dce10', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.2', 'Poverty', 1, '## Poverty
+- **Absolute poverty**: can''t afford basic needs (food, clean water, shelter)
+- **Relative poverty**: much poorer than the average in that society
+
+## Causes
+Unemployment, low wages, poor education and health, old age, large families, discrimination, natural disasters, conflict.
+
+## Policies to reduce poverty
+- Free or subsidised **education and healthcare**
+- **Minimum wage**
+- **Benefits** and pensions
+- **Progressive taxes** to redistribute income
+- Job creation and growth
+- Foreign aid and microfinance in developing countries
+
+> Exam tip: distinguish short-term help (benefits) from long-term solutions (education).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e895b275-684c-5586-aa15-7bdff7c82e7b', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.3', 'Population', 2, '## Population
+## Population change
+- **Natural increase** = birth rate − death rate
+- **Net migration** = immigration − emigration
+
+## Birth rates are higher where
+Children are seen as workers or carers in old age, there is less access to contraception, and there is high infant mortality.
+
+## Death rates fall with
+Better healthcare, diet and sanitation.
+
+## Population structure
+- **Young (developing countries)**: more school spending, a future workforce
+- **Ageing (developed countries)**: more pensions and healthcare, a smaller workforce
+
+**Dependency ratio**: dependants (children and elderly) compared with working people.
+
+**Optimum population**: the size giving the highest output per head.
+
+> Exam tip: discuss both problems and opportunities of a changing population.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e410d4a1-8a5a-50bc-ac30-1888265ac5e0', 'dc370ce2-6d05-51de-a37c-d53daa029452', '5.4', 'Differences in economic development between countries', 3, '## Differences in development
+## Why countries differ
+- **Productivity** and education levels
+- **Investment** and capital
+- **Health** of the workforce
+- **Population growth**
+- **Infrastructure**
+- **Political stability** and corruption
+- **Dependence on primary products** (volatile prices)
+- Trade access and debt
+
+## Characteristics of less developed countries
+Low GDP per head, large primary sector, high birth rates, lower life expectancy, lower literacy.
+
+## Helping development
+Education, healthcare, infrastructure, trade, foreign investment, aid, debt relief, good governance.
+
+> Exam tip: compare two countries using data given in the question, not just general knowledge.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('e650a3fd-9a21-5104-ad28-d0e68f7bfe72', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'dc370ce2-6d05-51de-a37c-d53daa029452', 'Chapter 5 quiz', 'quiz', 60, 4) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('be9bd8d5-632b-5e0e-a68a-4d70ea27001d', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'dc370ce2-6d05-51de-a37c-d53daa029452', 'e650a3fd-9a21-5104-ad28-d0e68f7bfe72', 'The Human Development Index (HDI) combines…', '["Income, education and life expectancy","Inflation and unemployment","Exports and imports","Population and land"]'::jsonb, 'The HDI combines income (GNI per head), education (years of schooling) and health (life expectancy), so it measures living standards more widely than income alone.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('be9bd8d5-632b-5e0e-a68a-4d70ea27001d', 0) on conflict (question_id) do nothing;
@@ -678,10 +2269,73 @@ insert into question_keys (question_id, correct) values ('6467282f-8e8f-569b-add
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('40206e29-6100-504c-a367-3bac6211b195', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'dc370ce2-6d05-51de-a37c-d53daa029452', 'e650a3fd-9a21-5104-ad28-d0e68f7bfe72', 'Over-population means…', '["There are too many people for the resources available, so output per head falls","The birth rate equals the death rate","Output per head is at its highest","A country covers a large area"]'::jsonb, 'Beyond the optimum, each extra person adds less to output, so average living standards fall.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('40206e29-6100-504c-a367-3bac6211b195', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('c9d82879-bc18-571d-a6df-b3a7c2955bff', '1cfd38e6-861e-579b-a83a-d236a693b94a', '6', 'International trade and globalisation', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a22c893a-3497-5670-ae39-030590b24908', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.1', 'Specialisation and free trade', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('f44d1d7f-4c5c-59e2-a566-5c07b0e4b2a1', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.2', 'Globalisation and trade restrictions', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('bffb43fe-835c-50d1-a75c-02584a215c52', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.3', 'Foreign exchange rates', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('cc4fb56a-f1e3-5ace-a7d8-bbd4d14d7cba', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.4', 'Current account of the balance of payments', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('a22c893a-3497-5670-ae39-030590b24908', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.1', 'Specialisation and free trade', 0, '## Specialisation and free trade
+**International specialisation**: countries focus on what they produce at **lower opportunity cost** and trade for the rest.
+
+## Benefits of free trade
+- Lower prices and more choice for consumers
+- Larger markets and economies of scale for firms
+- Access to resources and technology
+- Competition encourages efficiency
+
+## Drawbacks
+- Over-dependence on a few exports (e.g. a single crop)
+- Job losses in uncompetitive industries
+- Vulnerability to world price changes
+
+> Exam tip: use an example: Mauritius exports textiles and sugar and imports fuel and machinery.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('f44d1d7f-4c5c-59e2-a566-5c07b0e4b2a1', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.2', 'Globalisation and trade restrictions', 1, '## Globalisation and trade restrictions
+**Globalisation**: growing integration of the world''s economies.
+
+**Drivers**: cheaper transport, the internet, trade agreements, multinational companies (MNCs).
+
+## Trade restrictions (protectionism)
+- **Tariffs**: taxes on imports
+- **Quotas**: limits on the quantity of imports
+- **Subsidies** to domestic producers
+- **Embargoes**: bans
+- Regulations and red tape
+
+## Reasons for protection
+Protect **infant industries**, protect jobs, prevent **dumping**, national security, raise revenue, improve the balance of payments.
+
+## Problems
+Higher prices, less choice, inefficiency, and **retaliation** by other countries.
+
+> Exam tip: evaluate. Protection may help in the short term but harm in the long term.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('bffb43fe-835c-50d1-a75c-02584a215c52', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.3', 'Foreign exchange rates', 2, '## Foreign exchange rates
+The price of one currency in terms of another (e.g. US$1 = Rs45).
+
+## Floating exchange rates
+Set by the demand for and supply of the currency.
+- **Demand for rupees** comes from foreigners buying Mauritian exports, tourism and investment
+- **Supply of rupees** comes from Mauritians buying imports and investing abroad
+
+**Fixed** rates are set by the government or central bank.
+
+## Effects
+| Appreciation (currency rises) | Depreciation (currency falls) |
+|---|---|
+| Exports dearer, so fewer sold | Exports cheaper, so more sold |
+| Imports cheaper, so lower inflation | Imports dearer, so inflation may rise |
+
+> Exam tip: practise a conversion: a $10 import at Rs45 = Rs450; at Rs40 = Rs400 (cheaper after the rupee appreciates).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('cc4fb56a-f1e3-5ace-a7d8-bbd4d14d7cba', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '6.4', 'Current account of the balance of payments', 3, '## The current account
+The **balance of payments** records a country''s transactions with the rest of the world. The **current account** includes:
+1. **Trade in goods** (visible trade)
+2. **Trade in services** (tourism, banking, transport)
+3. **Primary income**: wages, profits, interest earned abroad
+4. **Secondary income**: transfers, gifts, aid, remittances
+
+**Deficit**: more money out than in. **Surplus**: more in than out.
+
+## Causes of a deficit
+High imports (strong currency, high incomes), uncompetitive exports, a weak tourism season.
+
+## Policies to reduce a deficit
+Devaluation or depreciation, higher interest rates, protectionism, supply-side policies to improve competitiveness.
+
+> Exam tip: a deficit isn''t always bad. Importing machinery can boost future growth.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('8c349e55-4af2-5023-a35a-34efe3ea28a5', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', 'Chapter 6 quiz', 'quiz', 60, 5) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('17454c29-6065-5377-aaf3-521ce6f55f8a', '1cfd38e6-861e-579b-a83a-d236a693b94a', 'c9d82879-bc18-571d-a6df-b3a7c2955bff', '8c349e55-4af2-5023-a35a-34efe3ea28a5', 'A tariff is…', '["A limit on the quantity of imports","A tax on imports","A subsidy to exporters","A ban on exports"]'::jsonb, 'A tariff is a tax on imports that makes them dearer. A quota limits the quantity; a subsidy helps domestic producers.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('17454c29-6065-5377-aaf3-521ce6f55f8a', 1) on conflict (question_id) do nothing;
@@ -718,9 +2372,72 @@ insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_lim
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('0816c424-d4e2-5f5e-a631-26e971abc893', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', null, 'Mixed topic test (25 questions, 30m)', 'exam', 100, 1800, 25, 1000, 'locked') on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('1fada79c-dabb-5cd9-a1a8-8c0cd47c5457', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', null, 'Fix my mistakes', 'review', 0, 1001) on conflict (id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('86d578a5-3bc7-5b19-a1ab-d8252b1cf742', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '1', 'Data representation', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('363f674f-0b43-5efa-a56b-a94dc487e709', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.1', 'Number systems', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('0ca7e1a3-0e82-5f69-a93d-babd05552d6a', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.2', 'Text, sound and images', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3c515714-9183-5a64-af9c-f3af809e2a4f', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.3', 'Data storage and compression', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('363f674f-0b43-5efa-a56b-a94dc487e709', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.1', 'Number systems', 0, '## Number systems
+Computers use **binary** (base 2) because circuits have two states: on/off.
+
+| System | Base | Digits | Use |
+|---|---|---|---|
+| Denary | 10 | 0–9 | Humans |
+| Binary | 2 | 0, 1 | Computers |
+| Hexadecimal | 16 | 0–9, A–F | Shorter way to show binary (colour codes, MAC addresses, error codes) |
+
+## Converting
+- **Denary → binary**: use place values 128 64 32 16 8 4 2 1. 45 = 32 + 8 + 4 + 1 = **0010 1101**
+- **Binary → hex**: split into nibbles (4 bits). 1111 1010 → F A = **FA**
+- **Hex → denary**: 3C = 3×16 + 12 = **60**
+
+## Binary addition
+0+0=0, 0+1=1, 1+1=10 (write 0 carry 1), 1+1+1=11. A result over 8 bits causes **overflow**.
+
+## Logical shifts
+Left shift doubles each place (×2 per shift); right shift halves. Bits shifted out are lost.
+
+## Two''s complement (negative numbers)
+The leftmost bit is worth −128. To get −5: write +5 (0000 0101), flip the bits (1111 1010), add 1 → **1111 1011**.
+
+> Exam tip: show your working in columns. Method marks are available.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0ca7e1a3-0e82-5f69-a93d-babd05552d6a', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.2', 'Text, sound and images', 1, '## Representing text, sound and images
+## Text
+Each character has a binary code from a **character set**.
+- **ASCII**: 7/8 bits, English characters only
+- **Unicode**: more bits per character, covers most world languages and emojis, so files are larger
+
+## Sound
+Sound waves are **sampled** at regular intervals.
+- **Sample rate**: samples per second. Higher = more accurate, bigger file.
+- **Sample resolution**: bits per sample. Higher = more accurate, bigger file.
+
+## Images
+Bitmap images are made of **pixels**.
+- **Resolution**: number of pixels (width × height)
+- **Colour depth**: bits per pixel. 1 bit = 2 colours, 8 bits = 256 colours, 24 bits ≈ 16.7 million.
+
+**Image file size (bits) = width × height × colour depth**
+e.g. 100 × 50 × 8 = 40 000 bits = **5 000 bytes**
+
+> Exam tip: convert bits → bytes (÷8) → KiB (÷1024) as the question asks.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3c515714-9183-5a64-af9c-f3af809e2a4f', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', '1.3', 'Data storage and compression', 2, '## Data storage and compression
+## Units
+| Unit | Size |
+|---|---|
+| Bit | 0 or 1 |
+| Nibble | 4 bits |
+| Byte | 8 bits |
+| KiB | 1024 bytes |
+| MiB | 1024 KiB |
+| GiB | 1024 MiB |
+| TiB | 1024 GiB |
+
+## Why compress
+Smaller files use less storage, transfer faster and use less bandwidth.
+
+## Lossy
+Permanently removes data the user is unlikely to notice. Much smaller files, but the original can''t be restored. Examples: **JPEG**, **MP3**, reducing resolution or colour depth.
+
+## Lossless
+The original can be **restored exactly**. Needed for text and program files. Example: **run-length encoding (RLE)**: "AAAABBB" → 4A 3B.
+
+> Exam tip: say WHICH data a method removes (e.g. sounds humans can''t hear in MP3).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('f743aaa2-bc3c-534a-a7d3-fc877a3c7c17', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', 'Chapter 1 quiz', 'quiz', 60, 0) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('de423eb8-d2f5-57ac-ac43-f4cfdc3e0b0d', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', 'f743aaa2-bc3c-534a-a7d3-fc877a3c7c17', 'What is denary 45 in 8-bit binary?', '["00101011","00101101","00110101","01001101"]'::jsonb, '45 = 32 + 8 + 4 + 1, so put a 1 in the 32, 8, 4 and 1 columns: 0010 1101.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('de423eb8-d2f5-57ac-ac43-f4cfdc3e0b0d', 1) on conflict (question_id) do nothing;
@@ -753,9 +2470,52 @@ insert into question_keys (question_id, correct) values ('2409c36c-6733-58f0-a68
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b7c73dd4-9a93-52bb-a6e9-7ae0e30be82e', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '86d578a5-3bc7-5b19-a1ab-d8252b1cf742', 'f743aaa2-bc3c-534a-a7d3-fc877a3c7c17', 'Which of these is a lossy compression method?', '["Reducing an image''s resolution","Zipping a text file","Run-length encoding","Saving a file without compression"]'::jsonb, 'Lowering resolution permanently removes pixel data, so the original can''t be rebuilt. RLE and zip are lossless.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b7c73dd4-9a93-52bb-a6e9-7ae0e30be82e', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '2', 'Data transmission', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('d5f76429-648e-5dd4-ae18-5197dcec4d64', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.1', 'Types and methods of data transmission', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a3c82fae-a123-57f3-a58f-a743350fabe1', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.2', 'Methods of error detection', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('27a5a4db-3230-5829-ad17-08b8532587cb', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.3', 'Encryption', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('d5f76429-648e-5dd4-ae18-5197dcec4d64', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.1', 'Types and methods of data transmission', 0, '## Data transmission
+Data is split into **packets**:
+- **Header**: destination and source IP address, packet number
+- **Payload**: the actual data
+- **Trailer**: end marker, error check
+
+**Packet switching**: packets take different routes (via **routers**) and are reassembled in order at the destination.
+
+## Methods
+| | Serial | Parallel |
+|---|---|---|
+| How | One bit at a time, one wire | Several bits at once, several wires |
+| Distance | Long | Short (skew: bits arrive out of sync) |
+| Example | USB | Inside computers (older printers) |
+
+## Direction
+- **Simplex**: one way only (to a printer)
+- **Half-duplex**: both ways, not at the same time (walkie-talkie)
+- **Full-duplex**: both ways at once (phone call)
+
+**USB**: serial, plug and play, powers devices, standard connector.
+
+> Exam tip: justify each method for the scenario in the question.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a3c82fae-a123-57f3-a58f-a743350fabe1', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.2', 'Methods of error detection', 1, '## Error detection
+Data can be corrupted by interference.
+
+| Method | How it works |
+|---|---|
+| **Parity check** | Extra bit makes the number of 1s even (or odd). A wrong count means an error. Can''t spot two flipped bits. |
+| **Parity block** | Parity by row and column, so it can locate the flipped bit |
+| **Checksum** | Value calculated from the data is sent; the receiver recalculates and compares |
+| **Echo check** | Receiver sends the data back; the sender compares |
+| **Check digit** | Last digit calculated from the others (ISBN, barcodes). Catches typing errors. |
+| **ARQ** | Receiver sends an acknowledgement; if none arrives before a **timeout**, the data is resent |
+
+> Exam tip: be able to find the error in a parity question: count the 1s in each byte.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('27a5a4db-3230-5829-ad17-08b8532587cb', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', '2.3', 'Encryption', 2, '## Encryption
+Encryption scrambles data (**plaintext → ciphertext**) so that intercepted data can''t be understood. It doesn''t stop interception.
+
+## Symmetric encryption
+The same key encrypts and decrypts. Fast, but the key must be shared securely.
+
+## Asymmetric encryption
+A **public key** (shared with anyone) encrypts; a matching **private key** (kept secret) decrypts. Solves the key-sharing problem. Used in HTTPS.
+
+> Exam tip: "who holds which key?" The receiver''s public key encrypts; only the receiver''s private key decrypts.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('ef7aac40-de5a-593a-a205-c95479ea7594', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', 'Chapter 2 quiz', 'quiz', 60, 1) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('d1d54c02-5745-5549-acae-f7d9b070bf5c', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', 'ef7aac40-de5a-593a-a205-c95479ea7594', 'Serial transmission sends…', '["Only in one direction","One bit at a time over a single wire","Several bits at once over several wires","Only analogue data"]'::jsonb, 'Serial transmission sends bits one after another down a single wire. Parallel sends several bits at the same time down several wires.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('d1d54c02-5745-5549-acae-f7d9b070bf5c', 1) on conflict (question_id) do nothing;
@@ -788,10 +2548,81 @@ insert into question_keys (question_id, correct) values ('96628430-be93-566c-a43
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('8cdc241e-f592-5b06-aad1-3657175c7892', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'c9d3f8d8-91a5-567d-acd8-76be1b1d5eba', 'ef7aac40-de5a-593a-a205-c95479ea7594', 'The part of a packet that contains the actual data is the…', '["Header","Payload","Trailer","Router"]'::jsonb, 'The header holds addressing information, the trailer helps detect errors, and the payload is the data itself.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('8cdc241e-f592-5b06-aad1-3657175c7892', 1) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('370a13a2-14d8-5bde-a83e-93460980a1aa', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '3', 'Hardware', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('f46d7132-2f0a-5ea7-a6ce-5285a9275d22', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.1', 'Computer architecture', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('a679210a-74dc-5a37-ac1e-f749fc900f98', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.2', 'Input and output devices', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('c8dd1476-55e2-5db7-a6c3-51f835573d60', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.3', 'Data storage', 2) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('05d88890-d98a-59ae-aaac-fe3640c4aa47', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.4', 'Network hardware', 3) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('f46d7132-2f0a-5ea7-a6ce-5285a9275d22', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.1', 'Computer architecture', 0, '## Computer architecture
+**Von Neumann architecture**: data and instructions are stored together in memory.
+
+## CPU components
+- **ALU**: calculations and logic
+- **Control unit (CU)**: decodes instructions and sends control signals
+- **Registers**:
+  - **PC** (program counter): address of the next instruction
+  - **MAR**: address being read from or written to
+  - **MDR**: data being transferred
+  - **CIR**: current instruction
+  - **ACC** (accumulator): results from the ALU
+- **Buses**: address bus (one-way), data bus, control bus
+
+## Fetch–decode–execute cycle
+1. PC → MAR; the address goes along the address bus
+2. Instruction → MDR → CIR; PC increments
+3. CU decodes; the instruction is executed
+
+## Performance
+**Clock speed** (more cycles per second), **number of cores** (parallel work), **cache size** (fast memory near the CPU).
+
+**Embedded systems**: a computer inside a larger device for one task (washing machine, microwave).
+
+**Instruction set**: the list of machine-code commands a CPU understands.
+
+> Exam tip: name the register AND what it holds.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a679210a-74dc-5a37-ac1e-f749fc900f98', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.2', 'Input and output devices', 1, '## Input and output devices
+## Input
+Keyboard, mouse, microphone, touch screen (resistive / capacitive / infra-red), 2D and 3D scanners, barcode and QR code scanners, digital camera.
+
+## Output
+Monitor (LCD/LED), printers (**inkjet**, **laser**, **3D**), speakers, projectors (DLP/LCD), **actuators** (motors, valves).
+
+## Sensors
+Measure physical quantities and send data to a microprocessor: **temperature, light, pressure, moisture, humidity, gas, infra-red (motion), acoustic, pH, accelerometer, proximity, level, magnetic field**.
+
+| Device | How it works (key point) |
+|---|---|
+| Laser printer | Drum charged, toner attracted, fused by heat |
+| Inkjet printer | Tiny droplets sprayed (thermal bubble or piezo) |
+| Barcode scanner | Laser reflects off bars; sensor reads pattern |
+| Capacitive screen | Detects change in electrical field from a finger |
+
+> Exam tip: match the sensor to the scenario and say what it measures.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c8dd1476-55e2-5db7-a6c3-51f835573d60', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.3', 'Data storage', 2, '## Data storage
+## Primary storage
+- **RAM**: volatile, read/write, holds programs and data in use
+- **ROM**: non-volatile, read-only, holds the boot-up instructions (BIOS)
+
+## Secondary storage
+| Type | Examples | Notes |
+|---|---|---|
+| **Magnetic** | Hard disk drive | Large and cheap, moving parts |
+| **Solid state** | SSD, USB flash drive, SD card | No moving parts, fast, robust |
+| **Optical** | CD, DVD, Blu-ray | Laser reads pits and lands; portable |
+
+**Virtual memory**: when RAM is full, part of secondary storage is used as extra RAM (slower).
+
+## Cloud storage
+Data stored on remote servers over the internet.
+- **Benefits**: access anywhere, automatic backup, scalable
+- **Drawbacks**: needs internet, security and privacy concerns, ongoing cost
+
+> Exam tip: recommend storage by considering capacity, speed, portability, durability and cost.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('05d88890-d98a-59ae-aaac-fe3640c4aa47', '370a13a2-14d8-5bde-a83e-93460980a1aa', '3.4', 'Network hardware', 3, '## Network hardware
+- **NIC** (network interface card): connects a device to a network; has a **MAC address**
+- **MAC address**: unique 48-bit address set by the manufacturer, usually shown in hex
+- **IP address**: identifies a device on a network and can change.
+  - **IPv4**: 32 bits, four numbers 0–255 (192.168.1.10)
+  - **IPv6**: 128 bits in hex, many more addresses
+  - **Static** (fixed) vs **dynamic** (assigned each time)
+- **Router**: forwards packets between networks using IP addresses; assigns local IP addresses
+
+> Exam tip: MAC = physical and fixed; IP = logical and can change.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('243cec3b-95b0-53cf-a228-568b3d470450', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', 'Chapter 3 quiz', 'quiz', 60, 2) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('a5d75b74-901d-571b-a9ca-af553804830f', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', '243cec3b-95b0-53cf-a228-568b3d470450', 'Which register holds the address of the next instruction?', '["Accumulator","CIR","MDR","Program counter (PC)"]'::jsonb, 'The program counter (PC) holds the address of the next instruction to fetch and is incremented during the fetch stage.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('a5d75b74-901d-571b-a9ca-af553804830f', 3) on conflict (question_id) do nothing;
@@ -824,8 +2655,43 @@ insert into question_keys (question_id, correct) values ('8875ff65-97d3-5ac0-aca
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b1f910ef-5ab6-505a-a6cb-1282b2fa3570', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', '243cec3b-95b0-53cf-a228-568b3d470450', 'An IP address…', '["Is the same as a MAC address","Is set permanently by the manufacturer","Is stored only in ROM","Identifies a device on a network and can change"]'::jsonb, 'IP addresses are assigned by the network (and can be dynamic). The MAC address is the one fixed by the manufacturer.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b1f910ef-5ab6-505a-a6cb-1282b2fa3570', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('b4554ed1-9472-5f54-af1e-bd8fb51a7b78', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '4', 'Software', 3) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('f0926a55-fe6a-5ca2-ab32-b9c39480363c', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '4.1', 'Types of software and interrupts', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('aa59b53d-2f76-5d75-acf8-9328d8f9d2ee', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '4.2', 'Types of programming language, translators and integrated development environments (IDEs)', 1) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('f0926a55-fe6a-5ca2-ab32-b9c39480363c', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '4.1', 'Types of software and interrupts', 0, '## Software and interrupts
+## Types of software
+- **System software**: runs the computer: **operating system**, utilities (antivirus, defragmenter, backup), drivers
+- **Application software**: does user tasks: word processor, spreadsheet, browser, games
+
+## Operating system functions
+Manage files, memory, peripherals and drivers, multitasking, security (user accounts), the user interface, interrupts.
+
+**Firmware**: software in ROM that starts the hardware (bootloader).
+
+## Interrupts
+A signal to the processor that something needs attention: a key press, mouse click, printer out of paper, a timer, a software error (divide by zero).
+1. The current task is paused and its state saved
+2. The **interrupt service routine (ISR)** runs
+3. The original task resumes
+
+> Exam tip: give a hardware and a software example of an interrupt.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('aa59b53d-2f76-5d75-acf8-9328d8f9d2ee', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '4.2', 'Types of programming language, translators and integrated development environments (IDEs)', 1, '## Languages, translators and IDEs
+## High- vs low-level languages
+| High-level | Low-level |
+|---|---|
+| English-like, easy to read and debug | Assembly or machine code |
+| Portable across machines | Machine-specific |
+| Must be translated | Direct hardware control, efficient |
+
+## Translators
+| | Compiler | Interpreter | Assembler |
+|---|---|---|---|
+| Translates | Whole program at once | One line at a time | Assembly → machine code |
+| Output | Executable file | No executable | Machine code |
+| Errors | Reported after the whole program | Stops at the first error | |
+| Speed | Fast to run | Slower | |
+
+## IDE features
+Code editor, **run-time environment**, **translator**, **error diagnostics**, **auto-completion**, **auto-correction**, **prettyprint** (colour-coding, indentation).
+
+> Exam tip: compilers suit finished programs; interpreters suit development and debugging.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('0ff3576b-79aa-5896-aae9-b89095034ab4', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', 'Chapter 4 quiz', 'quiz', 60, 3) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('aff2486f-cfc4-5a4b-a6ec-af200dd117c2', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '0ff3576b-79aa-5896-aae9-b89095034ab4', 'A compiler…', '["Translates the whole program before it runs","Translates line by line","Runs assembly code","Is an operating system"]'::jsonb, 'A compiler translates the whole source code into machine code (an executable file) before the program runs. An interpreter translates and runs it one line at a time.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('aff2486f-cfc4-5a4b-a6ec-af200dd117c2', 0) on conflict (question_id) do nothing;
@@ -858,9 +2724,58 @@ insert into question_keys (question_id, correct) values ('cb0b9eb3-e39c-5c78-ac0
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('66633dae-cbab-55a7-a1c5-2d952ce0ed9e', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '0ff3576b-79aa-5896-aae9-b89095034ab4', 'Machine code is…', '["Pseudocode","Binary instructions that the CPU can execute directly","A high-level language","Assembly language"]'::jsonb, 'All programs must end up as machine code, because that is the only language the processor understands.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('66633dae-cbab-55a7-a1c5-2d952ce0ed9e', 1) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '5', 'The internet and its uses', 4) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('75756aee-a9de-556f-aa25-d39518dc5bd3', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.1', 'The internet and the world wide web', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('4105b4e7-3d65-5c53-abcd-7045d483d0a3', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.2', 'Digital currency', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('3e2ae411-e0ba-5ab1-a06e-9cef4900e603', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.3', 'Cyber security', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('75756aee-a9de-556f-aa25-d39518dc5bd3', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.1', 'The internet and the world wide web', 0, '## The internet and the web
+- **Internet**: the global network of networks (the infrastructure)
+- **World Wide Web**: web pages and resources accessed over the internet
+
+## URL
+Protocol + domain name + file path, e.g. https://www.example.com/page.html
+
+## How a page loads
+1. The browser asks a **DNS** server for the IP address of the domain
+2. DNS returns the IP address
+3. The browser requests the page from the **web server**
+4. The server sends the HTML, which the browser **renders**
+
+## HTTP vs HTTPS
+HTTPS uses **SSL/TLS** encryption (padlock icon).
+
+## Cookies
+Small text files a website stores on your computer: **session** (deleted when the browser closes) or **persistent** (logins, preferences, tracking).
+
+**Browser functions**: render HTML, bookmarks, history, tabs, store cookies, a navigation bar.
+
+> Exam tip: explain DNS as a step-by-step sequence.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4105b4e7-3d65-5c53-abcd-7045d483d0a3', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.2', 'Digital currency', 1, '## Digital currency
+Money that exists only electronically (no physical coins or notes), e.g. cryptocurrencies.
+
+## Blockchain
+A **decentralised** digital ledger of transactions.
+- Each **block** stores transactions, a timestamp, its own **hash** and the **previous block''s hash**
+- Changing a block changes its hash and breaks the chain, so tampering is obvious
+- Copies are held by many computers (no single owner)
+
+## Uses
+Cryptocurrency, tracking supply chains, smart contracts.
+
+> Exam tip: the key point is that every block holds the previous block''s hash.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3e2ae411-e0ba-5ab1-a06e-9cef4900e603', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.3', 'Cyber security', 2, '## Cyber security
+## Threats
+| Threat | What it is |
+|---|---|
+| **Brute-force attack** | Trying many passwords until one works |
+| **Data interception** | Capturing data in transit (packet sniffing) |
+| **DDoS** | Flooding a server with traffic from many computers so it can''t serve real users |
+| **Hacking** | Unauthorised access |
+| **Malware** | Virus, worm, Trojan, spyware, adware, ransomware |
+| **Phishing** | Fake emails or messages that trick users into giving details |
+| **Pharming** | Malicious code or DNS changes that redirect to a fake site |
+| **Social engineering** | Manipulating people to reveal information |
+
+## Protection
+Anti-malware, **firewalls**, **proxy servers**, strong passwords and **two-step verification**, biometrics, access levels, **encryption**, automatic software updates, SSL/TLS, checking URLs and spellings, privacy settings, staff training.
+
+> Exam tip: for each threat give one specific prevention method.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('c8e14b32-f069-5fa0-a43a-1dd2a4beff2c', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', 'Chapter 5 quiz', 'quiz', 60, 4) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('0ddb62aa-2d6b-50ac-a366-ba2cdd33951c', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', 'c8e14b32-f069-5fa0-a43a-1dd2a4beff2c', 'The internet is…', '["A global network of networks","A search engine","A collection of web pages","A browser"]'::jsonb, 'The internet is the global infrastructure of connected networks. The World Wide Web is the collection of web pages accessed over the internet.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('0ddb62aa-2d6b-50ac-a366-ba2cdd33951c', 0) on conflict (question_id) do nothing;
@@ -893,9 +2808,52 @@ insert into question_keys (question_id, correct) values ('8047724c-7c80-500f-ad0
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('dec29f31-3fdd-5735-a280-35209f779f50', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', 'c8e14b32-f069-5fa0-a43a-1dd2a4beff2c', 'Social engineering means…', '["Building social media apps","Encrypting data","Manipulating people into giving away confidential information","A new type of hardware"]'::jsonb, 'It targets people rather than computers, e.g. pretending to be IT support to get a password.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('dec29f31-3fdd-5735-a280-35209f779f50', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '6', 'Automated and emerging technologies', 5) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('fa06c5c4-d3b0-524a-a447-9afce28d52d8', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.1', 'Automated systems', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('fac0bf95-deb8-501e-a486-2fed1591778f', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.2', 'Robotics', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('e100ccb6-d7ec-5708-a413-3eefb0940762', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.3', 'Artificial intelligence', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('fa06c5c4-d3b0-524a-a447-9afce28d52d8', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.1', 'Automated systems', 0, '## Automated systems
+**Sensors → microprocessor → actuators**
+1. A sensor takes a reading (analogue → converted to digital by an **ADC**)
+2. The microprocessor **compares** it with stored values
+3. If outside the range, it signals an **actuator** (motor, valve, heater)
+4. Repeats continuously
+
+## Uses
+Industry, transport (traffic lights, autopilot), agriculture (irrigation), weather stations, gaming, lighting, science.
+
+| Advantages | Disadvantages |
+|---|---|
+| Works 24/7, faster and consistent | Expensive to set up and maintain |
+| Safer (dangerous tasks) | Can fail or be hacked |
+| Fewer human errors | Job losses |
+
+> Exam tip: describe the loop using the scenario''s sensor and actuator.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fac0bf95-deb8-501e-a486-2fed1591778f', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.2', 'Robotics', 1, '## Robotics
+A **robot** is a programmable machine with a **mechanical structure**, **electrical components** (sensors, motors, a microprocessor) and is **programmable**.
+
+## Uses
+Manufacturing (welding, painting), transport (driverless cars, drones), agriculture (harvesting), medicine (surgery), domestic (vacuum cleaners), warehouses, exploration.
+
+| Advantages | Disadvantages |
+|---|---|
+| Work continuously, precise and consistent | High cost |
+| Dangerous or repetitive tasks | Need maintenance and programming |
+| Higher productivity | Job losses; can''t easily handle unusual situations |
+
+> Exam tip: robots don''t have to look human. Focus on the three characteristics.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e100ccb6-d7ec-5708-a413-3eefb0940762', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '6.3', 'Artificial intelligence', 2, '## Artificial intelligence (AI)
+AI is the simulation of intelligent behaviour by computers. Main characteristics: **collecting data, applying rules, and adapting (learning)**.
+
+## Expert systems
+Copy the knowledge of a human expert (medical diagnosis, car fault-finding). Made of:
+- **Knowledge base**: facts
+- **Rule base**: IF … THEN rules
+- **Inference engine**: applies the rules to the facts to reach conclusions
+- **User interface**: asks questions and shows results
+
+## Machine learning
+The program improves its performance from data without being explicitly reprogrammed, e.g. spam filters, recommendations, image recognition.
+
+**Concerns**: bias in training data, job losses, privacy, decisions that are hard to explain.
+
+> Exam tip: name all four parts of an expert system and their jobs.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('0272229c-9d36-5f19-a01a-8ab60c63b7cb', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', 'Chapter 6 quiz', 'quiz', 60, 5) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('5aba084b-95a4-5272-a497-83c3702ad9fb', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '0272229c-9d36-5f19-a01a-8ab60c63b7cb', 'An automated system uses…', '["Only humans","Only a keyboard","No input","Sensors, a microprocessor and actuators"]'::jsonb, 'Sensors send data to a microprocessor, which compares it with stored values and signals actuators to take action.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('5aba084b-95a4-5272-a497-83c3702ad9fb', 3) on conflict (question_id) do nothing;
@@ -928,7 +2886,39 @@ insert into question_keys (question_id, correct) values ('8876de10-2921-5330-ad3
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('75faf73e-23e8-53a2-a6bc-cb2dc5ee1063', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '7f09772a-bb5c-5ea8-abf7-da1bb142f3d8', '0272229c-9d36-5f19-a01a-8ab60c63b7cb', 'In an automated system, what does the microprocessor do with sensor readings?', '["Prints them","Deletes them","Sends them back to the sensor","Compares them with stored values and decides what action to take"]'::jsonb, 'If a reading is outside the set range, the microprocessor signals an actuator to act.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('75faf73e-23e8-53a2-a6bc-cb2dc5ee1063', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('6264350f-f6d4-5ad9-a352-7b4727c680bb', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '7', 'Algorithm design and problem-solving', 6) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('b98e874f-5425-51a1-a993-9009fcc11176', '6264350f-f6d4-5ad9-a352-7b4727c680bb', '7', 'Algorithm design and problem-solving', 0) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('b98e874f-5425-51a1-a993-9009fcc11176', '6264350f-f6d4-5ad9-a352-7b4727c680bb', '7', 'Algorithm design and problem-solving', 0, '## Algorithm design and problem-solving
+## Program development life cycle
+**Analysis** (abstraction, decomposition, requirements) → **Design** (structure diagrams, flowcharts, pseudocode) → **Coding** → **Testing**
+
+- **Abstraction**: remove unnecessary detail
+- **Decomposition**: break the problem into smaller parts
+
+## Standard methods
+Linear search, bubble sort, totalling, counting, finding max/min/average.
+
+```
+Total ← 0
+FOR Index ← 1 TO 10
+    Total ← Total + Marks[Index]
+NEXT Index
+OUTPUT "Average: ", Total / 10
+```
+
+## Validation (is the data sensible?)
+Range, length, type, presence, format, check digit.
+
+## Verification (was it entered correctly?)
+Double entry, visual check.
+
+## Test data
+**Normal** (valid), **abnormal** (should be rejected), **extreme** (largest/smallest valid), **boundary** (edges: just inside and just outside).
+
+## Errors and trace tables
+Use a **trace table** to dry-run an algorithm and find **logic errors**.
+
+Flowchart symbols: terminator (start/stop), process (rectangle), input/output (parallelogram), decision (diamond).
+
+> Exam tip: in pseudocode, use the Cambridge keywords exactly (FOR, NEXT, IF…THEN…ENDIF, WHILE…ENDWHILE).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('b826bfec-fa1e-5d37-afdc-ede2f464ddd0', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '6264350f-f6d4-5ad9-a352-7b4727c680bb', 'Chapter 7 quiz', 'quiz', 60, 6) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('cd8ab11c-49a4-5596-a1cd-3fd2f82a18d7', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '6264350f-f6d4-5ad9-a352-7b4727c680bb', 'b826bfec-fa1e-5d37-afdc-ede2f464ddd0', 'Decomposition means…', '["Translating code","Testing a program","Removing unnecessary detail","Breaking a problem into smaller sub-problems"]'::jsonb, 'Decomposition breaks a problem into smaller parts that are easier to solve. Abstraction is removing unnecessary detail.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('cd8ab11c-49a4-5596-a1cd-3fd2f82a18d7', 3) on conflict (question_id) do nothing;
@@ -961,9 +2951,85 @@ insert into question_keys (question_id, correct) values ('b1525831-e1db-5789-ace
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('d12cd487-df02-5cfc-a675-d87f249a376d', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '6264350f-f6d4-5ad9-a352-7b4727c680bb', 'b826bfec-fa1e-5d37-afdc-ede2f464ddd0', 'A logic error is…', '["A hardware fault","A missing bracket","A misspelled keyword","An error that makes a program give wrong results without crashing"]'::jsonb, 'The code runs, but the logic is wrong, e.g. using < instead of <=. Misspelled keywords and missing brackets are syntax errors.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('d12cd487-df02-5cfc-a675-d87f249a376d', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('9a70aada-2c44-5164-a728-3caa3b7bfb35', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '8', 'Programming', 7) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('5cf9c537-5080-5f6a-a99d-e99290724dbf', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.1', 'Programming concepts', 0) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('0a1e0172-aa62-5a80-a4de-8c4436700c2b', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.2', 'Arrays', 1) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('b26ed588-6d3e-58f6-a072-bed05bf04f7a', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.3', 'File handling', 2) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('5cf9c537-5080-5f6a-a99d-e99290724dbf', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.1', 'Programming concepts', 0, '## Variables and constants
+Variables hold values that can change; constants don''t. Use meaningful identifiers.
+
+## Data types
+INTEGER, REAL, CHAR, STRING, BOOLEAN.
+
+## Sequence, selection, iteration
+```
+IF Score >= 50 THEN
+    OUTPUT "Pass"
+ELSE
+    OUTPUT "Fail"
+ENDIF
+
+FOR Count ← 1 TO 5            // count-controlled
+    OUTPUT Count
+NEXT Count
+
+WHILE Password <> "secret" DO // pre-condition (may run 0 times)
+    INPUT Password
+ENDWHILE
+
+REPEAT                        // post-condition (runs at least once)
+    INPUT Age
+UNTIL Age > 0
+```
+
+## Operators
+Arithmetic: + − * / ^ **MOD** (remainder) **DIV** (whole-number division).
+Logical: AND, OR, NOT.
+
+## String handling
+LENGTH, SUBSTRING, UCASE, LCASE.
+
+## Procedures and functions
+Reusable blocks; **functions return a value**. **Parameters** pass data in. **Local** variables exist only inside the module; **global** variables anywhere.
+
+> Exam tip: 17 MOD 5 = 2 and 17 DIV 5 = 3. Learn both.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0a1e0172-aa62-5a80-a4de-8c4436700c2b', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.2', 'Arrays', 1, '## Arrays
+An array stores many values of the **same data type** under one identifier, accessed by an **index**.
+
+```
+DECLARE Names : ARRAY[1:5] OF STRING
+Names[1] ← "Ava"
+
+DECLARE Grid : ARRAY[1:3, 1:4] OF INTEGER   // 3 rows × 4 columns = 12 elements
+Grid[2, 3] ← 7
+```
+
+## Using arrays with loops
+```
+Highest ← Scores[1]
+FOR i ← 2 TO 30
+    IF Scores[i] > Highest THEN
+        Highest ← Scores[i]
+    ENDIF
+NEXT i
+```
+
+Nested loops handle 2D arrays (outer loop: rows; inner loop: columns).
+
+> Exam tip: check the array bounds. Starting at 0 or 1 matters in loops.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b26ed588-6d3e-58f6-a072-bed05bf04f7a', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '8.3', 'File handling', 2, '## File handling
+Files store data **permanently**, so it is still there after the program ends.
+
+```
+OPENFILE "scores.txt" FOR WRITE
+WRITEFILE "scores.txt", Name
+CLOSEFILE "scores.txt"
+
+OPENFILE "scores.txt" FOR READ
+READFILE "scores.txt", Line
+CLOSEFILE "scores.txt"
+```
+
+- **WRITE** overwrites the file; **APPEND** adds to the end (in some languages)
+- Always **close** the file after use
+
+> Exam tip: give a reason for storing data in a file: "so the data is kept when the program is closed".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('0ba84087-f3b6-50f7-a914-0b31625e2c57', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '9a70aada-2c44-5164-a728-3caa3b7bfb35', 'Chapter 8 quiz', 'quiz', 60, 7) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('8a7830a6-f308-59b1-a401-f7509d6c4e97', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '0ba84087-f3b6-50f7-a914-0b31625e2c57', 'Which loop always runs at least once?', '["REPEAT … UNTIL","IF … THEN","WHILE … DO … ENDWHILE","FOR … TO … NEXT"]'::jsonb, 'REPEAT … UNTIL checks its condition at the end, so the loop body always runs at least once. WHILE checks first, so it might not run at all.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('8a7830a6-f308-59b1-a401-f7509d6c4e97', 0) on conflict (question_id) do nothing;
@@ -996,7 +3062,40 @@ insert into question_keys (question_id, correct) values ('8c795d5a-5e1e-5ffe-a03
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('773f53c7-a840-5e91-a40b-eea954f7f7c6', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '9a70aada-2c44-5164-a728-3caa3b7bfb35', '0ba84087-f3b6-50f7-a914-0b31625e2c57', 'Why use procedures and functions?', '["They replace all variables","They stop programs from running","They make programs longer","They avoid repeating code and make programs easier to maintain"]'::jsonb, 'Code is written once, tested once and called whenever needed, which makes programs easier to read and update.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('773f53c7-a840-5e91-a40b-eea954f7f7c6', 3) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('73b6563b-bab8-5051-a0bc-a5670657d6d8', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '9', 'Databases', 8) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('f54bb6ce-f00c-5e73-ad31-d573faf0d1dd', '73b6563b-bab8-5051-a0bc-a5670657d6d8', '9', 'Databases', 0) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('f54bb6ce-f00c-5e73-ad31-d573faf0d1dd', '73b6563b-bab8-5051-a0bc-a5670657d6d8', '9', 'Databases', 0, '## Databases
+A **single-table database** stores data about one thing.
+
+- **Table**: the whole set of records
+- **Record**: one row (all the data about one item)
+- **Field**: one column (one attribute)
+- **Primary key**: a field with a **unique** value for every record (e.g. StudentID)
+
+## Data types
+Text/alphanumeric, character, Boolean, integer, real, date/time. Phone numbers are **text** (they keep leading zeros and aren''t used in calculations).
+
+## Validation in databases
+Range, length, type, presence and format checks stop bad data being entered.
+
+## SQL
+```
+SELECT Name, Age
+FROM Students
+WHERE Age > 16 AND Town = ''Flacq''
+ORDER BY Name ASC;
+
+SELECT COUNT(*) FROM Students WHERE Age > 16;
+SELECT SUM(Price) FROM Products;
+```
+
+| Keyword | Does |
+|---|---|
+| SELECT | Fields to show |
+| FROM | Table |
+| WHERE | Conditions |
+| ORDER BY | Sort (ASC/DESC) |
+| SUM / COUNT | Total / number of records |
+
+> Exam tip: put text values in quotes and end SQL statements with a semicolon.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('3414c747-f6d5-5238-ab70-74b420751d7d', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '73b6563b-bab8-5051-a0bc-a5670657d6d8', 'Chapter 9 quiz', 'quiz', 60, 8) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('20f89a1f-4fd5-5505-ae06-3c9f83e26ec8', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '73b6563b-bab8-5051-a0bc-a5670657d6d8', '3414c747-f6d5-5238-ab70-74b420751d7d', 'A primary key…', '["Is always a name","Uniquely identifies each record","Is a type of table","Can be repeated"]'::jsonb, 'A primary key holds a unique value for every record, so each record can be identified. It can''t be repeated.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('20f89a1f-4fd5-5505-ae06-3c9f83e26ec8', 1) on conflict (question_id) do nothing;
@@ -1029,7 +3128,28 @@ insert into question_keys (question_id, correct) values ('5c344c93-3ac3-5b3e-ae1
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('c3fd7405-efc2-52cd-a8fc-f544f2c48a75', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '73b6563b-bab8-5051-a0bc-a5670657d6d8', '3414c747-f6d5-5238-ab70-74b420751d7d', 'A validation rule in a database is used to…', '["Delete records","Check that entered data is sensible and in the right format","Encrypt the table","Copy the database"]'::jsonb, 'For example, a range check can stop an age of 250 being entered.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('c3fd7405-efc2-52cd-a8fc-f544f2c48a75', 1) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('5e408c01-9306-56b1-a66d-f4dd2a452920', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '10', 'Boolean logic', 9) on conflict (id) do nothing;
-insert into parts (id, chapter_id, number, title, sort) values ('b1bb21af-a875-5053-a05b-57c0c100b3e4', '5e408c01-9306-56b1-a66d-f4dd2a452920', '10', 'Boolean logic', 0) on conflict (id) do nothing;
+insert into parts (id, chapter_id, number, title, sort, body) values ('b1bb21af-a875-5053-a05b-57c0c100b3e4', '5e408c01-9306-56b1-a66d-f4dd2a452920', '10', 'Boolean logic', 0, '## Boolean logic
+| Gate | Output is 1 when… |
+|---|---|
+| **NOT** | Input is 0 (it inverts) |
+| **AND** | All inputs are 1 |
+| **OR** | At least one input is 1 |
+| **NAND** | NOT AND: any input is 0 |
+| **NOR** | NOT OR: all inputs are 0 |
+| **XOR** | Inputs are different |
+
+## Truth tables
+2 inputs → 4 rows; 3 inputs → 8 rows (2ⁿ). List inputs in binary order: 000, 001, 010, …
+
+## Logic expressions
+Read the problem statement carefully:
+"The alarm (X) sounds if the door is open (D) AND the system is armed (A), OR smoke is detected (S)"
+→ **X = (D AND A) OR S**
+
+## Working through a circuit
+Label the output of each gate, add a column for each in the truth table, and finish with X.
+
+> Exam tip: add an extra column for each intermediate gate output. It stops mistakes and earns working marks.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7ac891dc-b7ce-5947-a898-e66a48dae479', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '5e408c01-9306-56b1-a66d-f4dd2a452920', 'Chapter 10 quiz', 'quiz', 60, 9) on conflict (id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('bcd92ac0-ee34-5a0b-afab-9c02e784ae66', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '5e408c01-9306-56b1-a66d-f4dd2a452920', '7ac891dc-b7ce-5947-a898-e66a48dae479', 'The output of an AND gate is 1 when…', '["The inputs are different","Both inputs are 0","Either input is 1","Both inputs are 1"]'::jsonb, 'AND outputs 1 only when all inputs are 1. Any 0 makes the output 0.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('bcd92ac0-ee34-5a0b-afab-9c02e784ae66', 3) on conflict (question_id) do nothing;

@@ -18,9 +18,31 @@ export function renderMarkdown(src: string) {
   let list: "ul" | "ol" | null = null;
   let code = false;
   const close = () => { if (list) { out.push(`</${list}>`); list = null; } };
+  let table: string[][] | null = null;
+  let codeLines: string[] = [];
+  const flushTable = () => {
+    if (!table) return;
+    const [head, ...body] = table;
+    out.push(`<div class="table-wrap"><table><thead><tr>${head.map((c) => `<th>${inline(c)}</th>`).join("")}</tr></thead><tbody>${body.map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`);
+    table = null;
+  };
   for (const line of lines) {
-    if (line.trim().startsWith("```")) { close(); out.push(code ? "</code></pre>" : "<pre><code>"); code = !code; continue; }
-    if (code) { out.push(line + "\n"); continue; }
+    // simple pipe tables: | a | b |, with an optional |---|---| separator row
+    if (!code && /^\s*\|.*\|\s*$/.test(line)) {
+      close();
+      const cells = line.trim().slice(1, -1).split("|").map((c) => c.trim());
+      if (cells.every((c) => /^:?-{2,}:?$/.test(c))) continue;
+      (table ??= []).push(cells);
+      continue;
+    }
+    flushTable();
+    if (line.trim().startsWith("```")) {
+      close();
+      if (code) { out.push(`<pre><code>${codeLines.join("\n")}</code></pre>`); codeLines = []; }
+      code = !code;
+      continue;
+    }
+    if (code) { codeLines.push(line); continue; }
     let m;
     if ((m = line.match(/^(#{1,3})\s+(.*)$/))) { close(); const l = m[1].length + 1; out.push(`<h${l}>${inline(m[2])}</h${l}>`); continue; }
     if ((m = line.match(/^\s*[-*]\s+(.*)$/))) { if (list !== "ul") { close(); out.push("<ul>"); list = "ul"; } out.push(`<li>${inline(m[1])}</li>`); continue; }
@@ -30,7 +52,8 @@ export function renderMarkdown(src: string) {
     close();
     out.push(`<p>${inline(line)}</p>`);
   }
+  flushTable();
   close();
-  if (code) out.push("</code></pre>");
+  if (code) out.push(`<pre><code>${codeLines.join("\n")}</code></pre>`);
   return out.join("\n");
 }

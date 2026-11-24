@@ -181,6 +181,12 @@ h1, h2, h3, .font-display { font-family: var(--font-display); letter-spacing: 0.
   .prose-notes pre { @apply bg-surface2 p-3 my-3 overflow-x-auto text-sm border-2 border-line; border-radius: calc(var(--radius) * 0.6); }
   .prose-notes blockquote { @apply border-l-4 border-accent pl-3 italic text-muted my-3; }
   .prose-notes a { @apply text-accent underline; }
+  .prose-notes pre code { padding: 0; background: none; border-radius: 0; }
+  .prose-notes .table-wrap { @apply my-3 overflow-x-auto; }
+  .prose-notes table { @apply w-full border-collapse text-sm; }
+  .prose-notes th, .prose-notes td { @apply border-2 border-line px-2.5 py-1.5 text-left align-top; }
+  .prose-notes th { @apply bg-surface2 font-bold; }
+  .prose-notes td:not(:first-child), .prose-notes th:not(:first-child) { white-space: nowrap; }
 }
 
 @media print {
