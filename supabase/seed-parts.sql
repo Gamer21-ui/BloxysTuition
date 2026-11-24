@@ -2237,4 +2237,2448 @@ Read the problem statement carefully:
 Label the output of each gate, add a column for each in the truth table, and finish with X.
 
 > Exam tip: add an extra column for each intermediate gate output. It stops mistakes and earns working marks.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0e4ece15-0c8d-542a-ae80-25bfd59d5c84', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.1', 'Scarcity, choice and opportunity cost', 0, '## Scarcity
+**Wants are unlimited** but **resources are finite**, so every economy must choose. This is the **basic economic problem**.
+
+## Choice and opportunity cost
+**Opportunity cost** is the next best alternative given up when a choice is made.
+- A student who spends Saturday revising gives up a paid shift (if that was the next best option)
+- A government that builds a hospital may give up a new road
+
+## Economic decision makers
+| Agent | Typical aim |
+|---|---|
+| Consumers | Maximise satisfaction (utility) |
+| Firms | Maximise profit (usually) |
+| Government | Maximise social welfare |
+
+## Short run vs long run
+- **Short run**: at least one factor of production is fixed
+- **Long run**: all factors are variable
+
+> Exam tip: always name the *specific* next best alternative when explaining opportunity cost.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c91a03cc-ed64-5364-a8de-0e2bc9f81c85', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.2', 'Economic methodology', 1, '## Positive and normative statements
+- **Positive**: can be tested against evidence ("Unemployment rose to 7%")
+- **Normative**: a value judgement, often uses *should* or *ought* ("The government should cut taxes")
+
+## Ceteris paribus
+"All other things being equal". Economists change one variable at a time to see its effect, e.g. the effect of a price change on quantity demanded.
+
+## Models and assumptions
+Economics uses simplified **models** (demand and supply, PPCs) built on **assumptions** (rational agents, perfect information). Models are useful but may not hold perfectly in real life.
+
+## The margin
+Decisions are made **at the margin**: is the extra benefit of one more unit worth the extra cost?
+
+> Exam tip: in evaluation, question the assumptions behind a model.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('9d9e3ae9-c459-5348-a212-cc9076dd81d8', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.3', 'Factors of production', 2, '## The four factors
+| Factor | Example | Reward |
+|---|---|---|
+| **Land** | Natural resources: soil, minerals, fish | Rent |
+| **Labour** | Human effort | Wages |
+| **Capital** | Machines, factories, roads | Interest |
+| **Enterprise** | Organising factors and bearing risk | Profit |
+
+## Division of labour and specialisation
+Splitting production into small tasks raises output per worker.
+- **Advantages**: higher productivity, workers become skilled, time saved
+- **Disadvantages**: boredom, lack of flexibility, over-dependence on one process
+
+## Role of the entrepreneur
+Combines the other factors, takes risks, innovates.
+
+> Exam tip: money is not capital; it is used to buy capital goods.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8eaa9381-f8d6-5b80-a8a7-6d1b5ec74b85', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.4', 'Resource allocation in different economic systems', 3, '## Three questions every economy answers
+What to produce? How? For whom?
+
+## Economic systems
+| System | Who decides | Strengths | Weaknesses |
+|---|---|---|---|
+| **Market** | Price mechanism | Efficiency, choice, incentives | Inequality, market failure, no public goods |
+| **Planned** | Government | Equity, provides public goods | Inefficiency, shortages, little choice |
+| **Mixed** | Both | Combines benefits | Risk of government failure |
+
+## Transition economies
+Economies moving from planned towards market (privatisation, removing price controls). This can cause unemployment and inflation in the short run.
+
+> Exam tip: nearly all real economies are mixed; the debate is about the *degree* of intervention.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b3898111-f1ba-572b-a852-f9fde3b33676', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.5', 'Production possibility curves', 4, '## What a PPC shows
+All combinations of two goods that can be produced when resources are **fully and efficiently** used.
+- **On** the curve: efficient
+- **Inside**: unemployed or inefficient resources
+- **Outside**: unattainable (for now)
+
+## Opportunity cost on a PPC
+- **Concave (bowed out)**: increasing opportunity cost, because resources are not equally suited to both goods
+- **Straight line**: constant opportunity cost
+
+## Shifts
+- **Outward**: more or better resources, better technology (economic growth)
+- **Inward**: natural disasters, war, emigration of skilled workers
+- **Pivot**: technology improves in only one industry
+
+> Exam tip: movement along the curve = reallocation; a shift = change in productive capacity.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('23153981-6451-5a28-a8f8-c0f92dcd2851', '14270a41-7c88-5f81-ae15-86701b7aff46', '1.6', 'Classification of goods and services', 5, '## Types of goods
+| Type | Key feature | Example |
+|---|---|---|
+| **Free good** | No opportunity cost | Air |
+| **Private good** | Rival and excludable | A sandwich |
+| **Public good** | Non-rival and non-excludable | Street lights, defence |
+| **Merit good** | Under-consumed, benefits underestimated | Education, vaccines |
+| **Demerit good** | Over-consumed, harm underestimated | Cigarettes |
+
+## Free rider problem
+Because people cannot be excluded from a public good, they can benefit without paying, so private firms will not supply it.
+
+## Information failure
+Merit and demerit goods arise largely from **imperfect information**: people misjudge the true benefits or costs.
+
+> Exam tip: quasi-public goods (e.g. roads with tolls) have some but not all public-good features.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3a041e45-2bc7-5b38-aa06-52620fc581a6', '2e481239-978a-5127-ae80-1b8e801f6f72', '2.1', 'Demand and supply curves', 0, '## Demand
+**Demand** is the quantity consumers are willing **and able** to buy at each price.
+- **Law of demand**: price ↑ → quantity demanded ↓ (movement along the curve)
+- **Shifts** (conditions of demand): income, price of substitutes and complements, tastes, advertising, population, expectations
+
+## Supply
+**Supply** is the quantity producers are willing and able to sell at each price.
+- Price ↑ → quantity supplied ↑ (higher price = more profitable)
+- **Shifts**: costs of production, technology, indirect taxes, subsidies, weather, number of firms
+
+## Joint, competitive and derived demand
+- **Joint demand**: goods used together (cars and petrol)
+- **Derived demand**: demand for a factor comes from demand for the product (bricklayers ← houses)
+- **Joint supply**: making one good produces another (beef and leather)
+
+> Exam tip: "change in demand" = shift; "change in quantity demanded" = movement.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('151b518b-75e9-5861-a8a1-9ccdfac8c632', '2e481239-978a-5127-ae80-1b8e801f6f72', '2.2', 'Price elasticity, income elasticity and cross elasticity of demand', 1, '## Price elasticity of demand (PED)
+**PED = %Δ quantity demanded ÷ %Δ price**
+| Value (ignore sign) | Meaning |
+|---|---|
+| > 1 | Elastic |
+| < 1 | Inelastic |
+| = 1 | Unitary |
+| 0 | Perfectly inelastic |
+
+**Determinants**: number of substitutes, proportion of income, necessity vs luxury, time period, habit/addiction.
+
+**PED and total revenue**: if demand is inelastic, raising price raises revenue; if elastic, cutting price raises revenue.
+
+## Income elasticity (YED)
+**YED = %ΔQd ÷ %Δ income**. Positive = normal (> 1 luxury), negative = inferior.
+
+## Cross elasticity (XED)
+**XED = %ΔQd of A ÷ %Δ price of B**. Positive = substitutes, negative = complements, zero = unrelated.
+
+> Exam tip: PED varies along a straight-line demand curve: elastic at high prices, inelastic at low prices.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('bc1e2071-8eb6-5def-aa16-273a30e1769b', '2e481239-978a-5127-ae80-1b8e801f6f72', '2.3', 'Price elasticity of supply', 2, '## Price elasticity of supply (PES)
+**PES = %Δ quantity supplied ÷ %Δ price** (always positive)
+
+| Value | Meaning |
+|---|---|
+| > 1 | Elastic |
+| < 1 | Inelastic |
+| 0 | Perfectly inelastic (vertical) |
+| ∞ | Perfectly elastic (horizontal) |
+
+## Determinants
+- **Spare capacity**: more = more elastic
+- **Inventories**: goods in stock can be released quickly
+- **Time**: supply is more elastic in the long run
+- **Factor mobility**: how easily resources move between uses
+- **Perishability**: perishable goods can''t be stored, so inelastic
+
+## Why it matters
+Agricultural supply is inelastic in the short run, so demand shocks cause large price swings.
+
+> Exam tip: any straight supply curve from the origin has PES = 1.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('27fb33a5-1076-5f2d-a7fb-ddb59f568343', '2e481239-978a-5127-ae80-1b8e801f6f72', '2.4', 'The interaction of demand and supply', 3, '## Equilibrium
+Where **demand = supply**. No pressure for price to change.
+- **Excess demand** (shortage): price rises, rationing the good
+- **Excess supply** (surplus): price falls
+
+## Changes in equilibrium
+| Change | Price | Quantity |
+|---|---|---|
+| Demand ↑ | ↑ | ↑ |
+| Demand ↓ | ↓ | ↓ |
+| Supply ↑ | ↓ | ↑ |
+| Supply ↓ | ↑ | ↓ |
+
+## Functions of the price mechanism
+1. **Signalling**: prices show where resources are wanted
+2. **Incentive**: higher prices encourage more supply
+3. **Rationing**: prices allocate scarce goods to those willing to pay
+
+## Related markets
+A change in one market spills into others: higher oil prices raise demand for electric cars (substitutes) and cut demand for large cars (complements).
+
+> Exam tip: draw and label every diagram: axes, curves, old and new equilibria.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7e3295e2-0ba6-53d1-ace3-04c8bd2a09aa', '2e481239-978a-5127-ae80-1b8e801f6f72', '2.5', 'Consumer and producer surplus', 4, '## Consumer surplus
+The difference between what consumers are **willing to pay** and what they **actually pay**.
+Area: below demand curve, above price.
+
+## Producer surplus
+The difference between the price producers **receive** and the **minimum** they would accept.
+Area: above supply curve, below price.
+
+## Changes
+- Price rises: consumer surplus falls, producer surplus rises
+- Price falls: the opposite
+- An indirect tax reduces both, creates tax revenue and a **deadweight loss**
+
+## Why it matters
+Total surplus (CS + PS) measures welfare. Government policy is often judged by how it changes it.
+
+> Exam tip: shade and label the areas clearly on your diagram.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b634a761-b3b9-5270-a14e-6ab6e407ff39', '176d8144-7473-57dc-ab8a-56a00e12efcd', '3.1', 'Reasons for government intervention in markets', 0, '## Why governments intervene
+Markets can **fail** to allocate resources efficiently or fairly.
+- **Public goods**: not provided because of free riders
+- **Merit goods**: under-consumed (information failure)
+- **Demerit goods**: over-consumed
+- **Externalities**: third-party costs/benefits ignored
+- **Inequality**: market outcomes may be seen as unfair
+- **Monopoly power**: higher prices, lower output
+
+## Objectives
+Efficiency, equity, protecting consumers, stabilising prices of key goods (food, fuel).
+
+> Exam tip: link each reason to the specific *type* of market failure.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('18e21071-8ec9-5e88-a405-10f299d2383b', '176d8144-7473-57dc-ab8a-56a00e12efcd', '3.2', 'Methods and effects of government intervention in markets', 1, '## Main methods
+| Method | Effect |
+|---|---|
+| **Maximum price** (below eq.) | Cheaper for consumers but shortage, queues, black markets |
+| **Minimum price** (above eq.) | Protects producers but surplus |
+| **Indirect tax** | Supply shifts left; price ↑, quantity ↓, revenue raised |
+| **Subsidy** | Supply shifts right; price ↓, quantity ↑ |
+| **Direct provision** | Government provides (defence, schools) |
+| **Price stabilisation (buffer stocks)** | Buy in good harvests, sell in bad |
+| **Regulation** | Laws, bans, standards |
+| **Nationalisation / privatisation** | Change ownership |
+
+## Incidence of a tax
+The more **inelastic demand** is, the greater the share paid by consumers.
+
+## Unintended consequences
+Black markets, surpluses, dependence on subsidies, government failure.
+
+> Exam tip: draw tax/subsidy diagrams showing consumer and producer shares and the government revenue/cost box.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6fed38eb-f251-51d7-af34-cc7379e74dad', '176d8144-7473-57dc-ab8a-56a00e12efcd', '3.3', 'Addressing income and wealth inequality', 2, '## Income vs wealth
+- **Income**: a flow (wages, rent, interest, profit, benefits)
+- **Wealth**: a stock of assets (property, shares, savings)
+
+## Measuring inequality
+- **Lorenz curve**: further from the line of equality = more unequal
+- **Gini coefficient**: 0 = perfect equality, 1 = perfect inequality
+
+## Policies
+- **Progressive taxes**: richer pay a higher %
+- **Transfer payments**: pensions, unemployment benefit
+- **Minimum wage**
+- **State provision** of education and healthcare
+- **Wealth/inheritance taxes**
+
+## Trade-offs
+Higher taxes may reduce incentives to work and invest. Benefits may create a **poverty trap**.
+
+> Exam tip: distinguish **horizontal equity** (same treatment for equals) and **vertical equity** (different treatment for different circumstances).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fe79fa95-97aa-5f8e-afb9-674f495e7efd', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.1', 'National income statistics', 0, '## Measures of national income
+- **GDP**: value of output produced **within** a country
+- **GNI**: GDP + net primary income from abroad
+- **NNI**: GNI − depreciation
+
+## Three methods
+Output, income and expenditure, which should give the same figure.
+
+## Nominal vs real
+- **Nominal**: current prices
+- **Real**: adjusted for inflation, so it shows true change in output
+
+**Real GDP = Nominal GDP × (base-year price index ÷ current price index)**
+
+## Per capita
+Divide by population for average living standards.
+
+## Uses and limitations
+Comparing living standards over time and between countries. Limitations: informal economy, inequality, quality of life, environment, different currencies (use PPP).
+
+> Exam tip: when comparing countries, use real GDP per capita at **PPP**.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1e30a21b-f7d2-53bb-afbb-a9a8f0d3d1e8', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.2', 'Introduction to the circular flow of income', 1, '## The circular flow
+Households supply factors to firms; firms pay incomes; households spend on goods.
+
+## Injections and withdrawals
+| Injections (J) | Withdrawals (W) |
+|---|---|
+| Investment (I) | Savings (S) |
+| Government spending (G) | Taxation (T) |
+| Exports (X) | Imports (M) |
+
+- If **J > W**, national income rises
+- If **J < W**, national income falls
+- Equilibrium when **J = W**
+
+## Open vs closed
+A closed economy has no trade; a three-sector economy adds government; a four-sector adds the foreign sector.
+
+> Exam tip: injections and withdrawals do not need to be equal *individually*, only in total.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('891bd18f-cadf-514f-a54c-54b4bc387a83', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.3', 'Aggregate demand and aggregate supply analysis', 2, '## Aggregate demand (AD)
+**AD = C + I + G + (X − M)**. Slopes downward (wealth, interest rate and international trade effects).
+
+**Shifts**: consumer confidence, interest rates, government spending, exchange rate, world incomes.
+
+## Aggregate supply (AS)
+- **SRAS**: shifts with costs (wages, raw materials, indirect taxes)
+- **LRAS**: shows productive capacity
+
+**Keynesian AS**: horizontal at low output (spare capacity), then rising, then vertical at full employment.
+**Classical/monetarist LRAS**: vertical at full employment.
+
+## Equilibrium
+Where AD = AS. A rise in AD raises output and/or the price level depending on spare capacity.
+
+> Exam tip: be clear which AS model you''re using and label it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('dee4e7d8-e4c9-5aa5-af1a-23bd716095d7', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.4', 'Economic growth', 3, '## Economic growth
+- **Actual growth**: increase in real GDP (using spare capacity)
+- **Potential growth**: increase in productive capacity (PPC/LRAS shifts out)
+
+## Causes
+More or better factors, investment, technology, education, higher AD (short run).
+
+## Business cycle
+Boom → downturn → recession (two consecutive quarters of falling real GDP) → recovery.
+
+## Output gaps
+- **Negative output gap**: actual < potential (unemployment)
+- **Positive output gap**: actual > potential (inflationary pressure)
+
+## Costs and benefits
+Higher incomes, jobs, tax revenue vs pollution, resource depletion, inequality.
+
+> Exam tip: sustainable growth meets current needs without harming future generations.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('f242bf38-1ea1-5eac-a42e-d555e4e5b8cf', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.5', 'Unemployment', 4, '## Measuring unemployment
+- **Claimant count**: people claiming unemployment benefits
+- **Labour Force Survey (ILO)**: people without work, available and actively looking
+
+**Unemployment rate = unemployed ÷ labour force × 100**
+
+## Types
+| Type | Cause |
+|---|---|
+| **Frictional** | Between jobs |
+| **Structural** | Decline of an industry, skills mismatch |
+| **Cyclical (demand-deficient)** | Recession, low AD |
+| **Seasonal** | Season changes (tourism) |
+
+## Consequences
+Lost output, lower tax revenue, higher benefit spending, poverty, loss of skills, social problems.
+
+> Exam tip: match the policy to the type: training for structural, raising AD for cyclical.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5b030295-d28b-52c9-a663-3724bca88bb6', '10920fe3-a075-55af-a5c0-23c89a2fa8af', '4.6', 'Price stability', 5, '## Inflation and deflation
+- **Inflation**: sustained rise in the general price level
+- **Deflation**: sustained fall
+- **Disinflation**: inflation rate falling but still positive
+
+## Measuring: the CPI
+1. Choose a base year and a basket of goods
+2. Weight items by share of spending
+3. Track price changes
+
+## Causes
+- **Demand-pull**: AD rises faster than capacity
+- **Cost-push**: rising costs shift SRAS left
+- **Monetary**: too much money growth
+
+## Consequences
+Lower purchasing power, menu and shoe-leather costs, redistribution from savers to borrowers, lower international competitiveness, uncertainty.
+
+> Exam tip: real interest rate = nominal rate − inflation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('72c9eadb-7067-5e8a-aced-8900d385c301', '34e3ae53-12ea-5373-ad53-b8d55ce6dfe1', '5.1', 'Government macroeconomic policy objectives', 0, '## Main objectives
+1. **Economic growth**: sustained rise in real GDP
+2. **Low unemployment**
+3. **Low and stable inflation** (often around 2%)
+4. **Balance of payments stability**
+
+Others: income redistribution, environmental sustainability.
+
+## Conflicts
+- Growth vs inflation: higher AD may raise prices
+- Growth vs current account: higher incomes raise imports
+- Low inflation vs low unemployment (short run)
+
+> Exam tip: questions often ask you to *evaluate* trade-offs between objectives.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1503bae7-bf0a-549a-ae08-665816dd8738', '34e3ae53-12ea-5373-ad53-b8d55ce6dfe1', '5.2', 'Fiscal policy', 1, '## Fiscal policy
+Using **government spending** and **taxation** to influence AD.
+
+- **Expansionary**: G ↑ or T ↓ → AD ↑
+- **Contractionary**: G ↓ or T ↑ → AD ↓
+
+## Budget position
+- **Deficit**: G > T
+- **Surplus**: T > G
+- **National debt**: the accumulated total of borrowing
+
+## Types of taxes
+Direct (income tax, corporation tax) vs indirect (VAT, excise). Progressive, proportional, regressive.
+
+## Automatic vs discretionary
+- **Automatic stabilisers**: benefits and tax revenue change with the cycle automatically
+- **Discretionary**: deliberate changes in budgets
+
+## Limitations
+Time lags, crowding out, incentive effects, debt.
+
+> Exam tip: the effect depends on the size of the multiplier (A Level) and spare capacity.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ac3e9bf7-bb78-5fc8-a88e-e5ce6887d2ab', '34e3ae53-12ea-5373-ad53-b8d55ce6dfe1', '5.3', 'Monetary policy', 2, '## Monetary policy
+Changing **interest rates**, the **money supply** and the **exchange rate** to influence AD. Usually run by the central bank.
+
+## Interest rates
+Higher rates:
+- Increase the cost of borrowing → less consumption and investment
+- Encourage saving
+- Raise mortgage payments → lower disposable income
+- Attract hot money → stronger currency → fewer exports
+
+## Quantitative easing (QE)
+The central bank creates money to buy bonds, lowering long-term rates and raising money supply.
+
+## Limitations
+Time lags (up to 18–24 months), low confidence, rates near zero.
+
+> Exam tip: an independent central bank may be more credible in fighting inflation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c4643063-8ebe-5538-ad90-59169bdd9a4e', '34e3ae53-12ea-5373-ad53-b8d55ce6dfe1', '5.4', 'Supply-side policy', 3, '## Supply-side policy
+Aims to increase **productive capacity** (shift LRAS right).
+
+## Market-based
+- Cutting income and corporation taxes (incentives)
+- Deregulation
+- Privatisation
+- Reducing trade union power, labour market flexibility
+
+## Interventionist
+- Education and training
+- Infrastructure investment
+- Research and development grants
+- Healthcare
+
+## Benefits
+Growth without inflation, lower unemployment (structural), improved competitiveness.
+
+## Limitations
+Slow to work, costly, may increase inequality.
+
+> Exam tip: link supply-side policies to tackling **structural** unemployment and cost-push inflation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('28bf735b-9ae6-542e-adbe-79a0b70691a3', 'ae0989c9-84ba-5713-adf8-c08f490b8587', '6.1', 'The reasons for international trade', 0, '## Absolute and comparative advantage
+- **Absolute advantage**: can produce more with the same resources
+- **Comparative advantage**: lower **opportunity cost**
+
+Countries gain by specialising in goods where they have comparative advantage and trading.
+
+## Free trade benefits
+Lower prices, more choice, economies of scale, competition, spreading technology.
+
+## Terms of trade
+**ToT = (index of export prices ÷ index of import prices) × 100**
+A rise means a favourable movement: each export buys more imports.
+
+## Limitations
+Transport costs, assumptions of constant costs, over-specialisation risk.
+
+> Exam tip: in calculations, work out opportunity cost ratios first.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('abb2d319-c04c-5fdc-ade1-ac01b97c4025', 'ae0989c9-84ba-5713-adf8-c08f490b8587', '6.2', 'Protectionism', 1, '## Methods of protection
+| Method | Effect |
+|---|---|
+| **Tariff** | Tax on imports; raises price |
+| **Quota** | Limit on quantity imported |
+| **Subsidy** | Helps domestic firms compete |
+| **Embargo** | Ban on trade |
+| **Administrative barriers** | Red tape, standards |
+
+## Arguments for
+Protect infant industries, protect jobs, prevent dumping, national security, correct trade deficits, raise revenue.
+
+## Arguments against
+Higher prices, less choice, retaliation, inefficiency, harms comparative advantage.
+
+> Exam tip: use a tariff diagram showing domestic supply, world price, imports and deadweight loss.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0a4095e0-b708-53b4-a737-d7c1385f05b5', 'ae0989c9-84ba-5713-adf8-c08f490b8587', '6.3', 'Current account of the balance of payments', 2, '## Structure of the current account
+1. **Trade in goods** (visible)
+2. **Trade in services** (invisible)
+3. **Primary income**: wages, interest, profits, dividends
+4. **Secondary income**: transfers such as remittances and aid
+
+## Deficit and surplus
+- **Deficit**: more money flows out than in
+- **Surplus**: more flows in
+
+## Causes of a deficit
+High incomes (more imports), strong currency, low productivity, high inflation.
+
+## Consequences
+Downward pressure on the exchange rate, borrowing, loss of jobs in export industries.
+
+> Exam tip: a deficit isn''t always bad, e.g. if it''s from importing capital goods.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('cdbeecc2-45ba-5cd3-a175-48cde7f222c2', 'ae0989c9-84ba-5713-adf8-c08f490b8587', '6.4', 'Exchange rates', 3, '## Exchange rate systems
+- **Floating**: set by demand and supply
+- **Fixed**: set by government/central bank
+- **Managed float**: mostly market, with intervention
+
+## Causes of changes
+Interest rates (hot money), inflation, trade flows, speculation, FDI.
+
+## Effects of a depreciation
+- Exports cheaper, imports dearer
+- May improve the current account (depending on elasticities)
+- May raise inflation (imported inflation)
+
+## Depreciation vs devaluation
+Depreciation (floating) vs devaluation (fixed, by government decision).
+
+> Exam tip: use **SPICED**: Strong Pound, Imports Cheaper, Exports Dearer (works for any currency).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2ba1ecdd-2a33-5b67-a8c1-4cfb38f12824', 'ae0989c9-84ba-5713-adf8-c08f490b8587', '6.5', 'Policies to correct imbalances in the current account', 4, '## Policies to correct a deficit
+| Type | Examples |
+|---|---|
+| **Expenditure-switching** | Tariffs, quotas, devaluation |
+| **Expenditure-reducing** | Contractionary fiscal and monetary policy |
+| **Supply-side** | Raise productivity and competitiveness |
+
+## Evaluation
+- Expenditure-reducing may cause unemployment
+- Protection risks retaliation
+- Devaluation may cause inflation
+- Supply-side is slow but long-lasting
+
+> Exam tip: match the policy to the cause of the imbalance.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6132d858-7a45-51fb-a56d-5ac82c325343', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.1', 'Utility', 0, '## Total and marginal utility
+- **Total utility (TU)**: overall satisfaction
+- **Marginal utility (MU)**: extra satisfaction from one more unit
+
+## Diminishing marginal utility
+Each extra unit adds less satisfaction. This underlies the downward-sloping demand curve.
+
+## Equi-marginal principle
+A consumer maximises utility when
+**MU of A ÷ price of A = MU of B ÷ price of B**
+i.e. the last dollar spent on each good gives the same utility.
+
+## Limitations
+Utility can''t be measured; people aren''t always rational (habit, impulse, limited information). See behavioural economics.
+
+> Exam tip: link MU theory directly to why demand slopes down.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1a98e5b1-8a42-58b3-a17a-f47846871200', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.2', 'Indifference curves and budget lines', 1, '## Budget line
+Shows combinations of two goods a consumer can afford.
+- **Income rise**: shifts out parallel
+- **Price change**: pivots
+
+## Indifference curves
+Show combinations giving **equal satisfaction**. Convex to the origin (diminishing marginal rate of substitution). Higher curves = more utility.
+
+## Optimum
+Where the budget line is **tangent** to the highest indifference curve.
+
+## Income and substitution effects
+| Good | Substitution effect | Income effect |
+|---|---|---|
+| Normal | Buy more when price falls | Buy more |
+| Inferior | Buy more | Buy less (but smaller) |
+| Giffen | Buy more | Buy less (larger) |
+
+> Exam tip: draw both effects carefully and label them on the diagram.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0a49b1cf-bd3d-5784-ad30-053adddc5911', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.3', 'Efficiency and market failure', 2, '## Types of efficiency
+- **Productive**: output at the lowest point of average cost
+- **Allocative**: P = MC
+- **Dynamic**: improvement over time through innovation
+- **Pareto optimality**: no one can be made better off without someone else worse off
+
+## Market failure
+When the market allocates resources inefficiently:
+- Externalities
+- Public goods
+- Merit/demerit goods
+- Information failure
+- Monopoly power
+- Factor immobility
+
+> Exam tip: link each type of failure to which form of efficiency is lost.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('924f5d83-8546-5d87-a7eb-b93df9691ff4', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.4', 'Private costs and benefits, externalities and social costs and benefits', 3, '## Key definitions
+- **Private cost/benefit**: borne by the decision maker
+- **External cost/benefit**: borne by third parties
+- **Social cost = private cost + external cost**
+- **Social benefit = private benefit + external benefit**
+
+## Negative externalities
+Pollution from a factory: MSC > MPC, so the market **over-produces**. Deadweight welfare loss.
+
+## Positive externalities
+Education, vaccinations: MSB > MPB, so the market **under-consumes**.
+
+## Cost-benefit analysis
+Used for public projects. Steps: identify all costs and benefits (private and external), put money values on them, discount future values, decide.
+
+**Problems**: valuing intangibles (noise, life), forecasting, bias.
+
+> Exam tip: the socially optimal output is where MSC = MSB.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5934da30-be9c-5cc9-aaed-35d01ad64af6', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.5', 'Types of cost, revenue and profit, short-run and long-run production', 4, '## Short-run costs
+- **Fixed costs** (don''t vary with output) and **variable costs** (do)
+- **AC = TC ÷ Q**, **MC = ΔTC ÷ ΔQ**
+- **Law of diminishing returns**: adding variable factors to a fixed one eventually reduces marginal product
+
+## Long-run costs
+- **Economies of scale**: AC falls as output grows (technical, managerial, financial, purchasing, risk-bearing)
+- **Diseconomies of scale**: AC rises (communication, coordination, motivation)
+- **Minimum efficient scale**: lowest output where LRAC is minimised
+
+## Revenue and profit
+TR = P × Q; AR = TR ÷ Q; MR = ΔTR ÷ ΔQ
+- **Normal profit**: TR = TC (including opportunity cost)
+- **Supernormal profit**: TR > TC
+
+## Decisions
+- Short run: produce if P ≥ AVC
+- Long run: produce if P ≥ AC
+
+> Exam tip: MC cuts AC and AVC at their lowest points.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5c26d7c4-b9b4-578a-a286-f937855d00bd', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.6', 'Different market structures', 5, '## Market structures
+| Structure | Firms | Barriers | Product | Long-run profit |
+|---|---|---|---|---|
+| **Perfect competition** | Many | None | Identical | Normal |
+| **Monopolistic competition** | Many | Low | Differentiated | Normal |
+| **Oligopoly** | Few | High | Same or differentiated | Supernormal possible |
+| **Monopoly** | One | Very high | Unique | Supernormal |
+
+## Oligopoly behaviour
+Interdependence, price rigidity (kinked demand curve), non-price competition, collusion (cartels), game theory.
+
+## Contestable markets
+Low entry/exit costs keep prices low even with few firms.
+
+## Price discrimination
+Charging different prices for the same product to different groups. Needs separate markets with different PEDs and no resale.
+
+> Exam tip: evaluate monopoly: higher prices vs economies of scale and dynamic efficiency.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('54c91375-73f9-5f72-abae-030c5e0dd210', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.7', 'Growth and survival of firms', 6, '## How firms grow
+- **Internal (organic)**: reinvesting profits, new products, new markets
+- **External**: mergers and takeovers
+  - **Horizontal**: same stage, same industry
+  - **Vertical**: different stages (backward or forward)
+  - **Conglomerate**: unrelated industries
+
+## Reasons for growth
+Economies of scale, market power, diversification, survival.
+
+## Why small firms survive
+Niche markets, personal service, flexibility, low barriers, government support.
+
+## Principal–agent problem
+Owners (principals) and managers (agents) may have different objectives.
+
+> Exam tip: discuss benefits *and* costs of mergers for consumers.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c29f94c0-4fae-5a80-a066-e9c75b189c43', '09386744-96be-5bf2-a548-99dc5b7e213d', '7.8', 'Differing objectives and policies of firms', 7, '## Objectives of firms
+| Objective | Output rule |
+|---|---|
+| **Profit maximisation** | MC = MR |
+| **Revenue maximisation** | MR = 0 |
+| **Sales maximisation** | AC = AR (break-even) |
+| **Satisficing** | Enough profit to keep owners happy |
+| **Survival** | Covering costs |
+
+## Pricing policies
+Limit pricing (deter entry), predatory pricing (drive rivals out), price leadership, price wars.
+
+## Non-price competition
+Branding, quality, advertising, after-sales service.
+
+## Public sector objectives
+Social welfare rather than profit, e.g. P = MC.
+
+> Exam tip: link the objective to who controls the firm (owners vs managers).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('4224a47e-3e2c-5b52-a4e2-51a2b9f72850', '316a086c-c5b7-592b-a0b5-2e222099f78f', '8.1', 'Government policies to achieve efficient resource allocation and correct market failure', 0, '## Correcting market failure
+| Policy | Use |
+|---|---|
+| **Indirect taxes (Pigouvian)** | Internalise negative externalities |
+| **Subsidies** | Encourage positive externalities |
+| **Regulation** | Limits, standards, bans |
+| **Tradable permits** | Cap and trade pollution |
+| **Property rights** | Let parties bargain (Coase) |
+| **Information provision** | Correct information failure |
+| **Direct provision** | Public goods |
+| **Competition policy** | Control monopoly |
+
+## Evaluation
+Hard to value externalities, enforcement costs, effects on competitiveness, risk of government failure.
+
+> Exam tip: draw the externality diagram showing the tax moving output to the social optimum.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fc32edef-beca-5f5d-a553-7a46a57575e6', '316a086c-c5b7-592b-a0b5-2e222099f78f', '8.2', 'Equity and policies towards income and wealth redistribution', 1, '## Equity and efficiency
+- **Equity**: fairness
+- Trade-off: redistribution may reduce incentives (efficiency)
+
+## Absolute and relative poverty
+- **Absolute**: can''t meet basic needs
+- **Relative**: below a % of median income
+
+## Policies
+- **Negative income tax**: below a threshold, people receive payments
+- Progressive taxation, wealth taxes
+- Universal vs means-tested benefits
+- Minimum wage, state education and health
+
+## Means-tested vs universal
+Means-tested targets help but can cause a poverty trap and low take-up; universal is simple but costly.
+
+> Exam tip: discuss the incentive effects of each redistribution policy.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('11a2672c-e57e-5ede-af03-904424196a62', '316a086c-c5b7-592b-a0b5-2e222099f78f', '8.3', 'Labour market forces and government intervention', 2, '## Demand for labour
+Derived demand. The **MRP** curve is the firm''s demand curve for labour.
+**MRP = MP × MR**
+
+Shifts: product demand, productivity, price of capital.
+
+## Supply of labour
+Wage rate, population, skills, working conditions, migration.
+
+## Wage determination
+- **Competitive market**: wage set by demand and supply
+- **Monopsony**: lower wage and employment
+- **Trade unions**: collective bargaining raises wages
+- **Minimum wage**: effect depends on market structure
+
+## Economic rent and transfer earnings
+- **Transfer earnings**: minimum to keep the worker in the job
+- **Economic rent**: anything above that (top footballers earn mostly rent)
+
+> Exam tip: in monopsony, a minimum wage can raise *both* wages and employment.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5a47c9e7-7ece-5716-aec9-75f8fbb4278a', '316a086c-c5b7-592b-a0b5-2e222099f78f', '8.4', 'Government failure in microeconomic intervention', 3, '## Government failure
+When intervention makes resource allocation **worse**.
+
+## Causes
+- **Information gaps**: not knowing the true size of an externality
+- **Unintended consequences**: black markets, tax evasion
+- **Administrative costs**
+- **Conflicting objectives**
+- **Political pressure** (short-termism, lobbying)
+- **Regulatory capture**
+- **Moral hazard**
+
+## Examples
+Agricultural price support creating surpluses, rent controls cutting housing supply.
+
+> Exam tip: always consider whether the cure might be worse than the disease.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1f726a03-bb38-5fcb-ae70-91123a1beb25', 'a0ba86d1-b5f5-56bf-acc7-0e9e6e5e5fa9', '9.1', 'The circular flow of income', 0, '## The multiplier
+An injection leads to a **larger final rise** in national income.
+**Multiplier (k) = 1 ÷ MPW = 1 ÷ (MPS + MPT + MPM)**
+
+Example: MPW = 0.2 → k = 5. A $10m injection raises income by $50m.
+
+## Consumption and saving
+- **APC = C ÷ Y**, **MPC = ΔC ÷ ΔY**
+- Consumption depends on income, wealth, interest rates, confidence
+
+## The accelerator
+Investment depends on the **rate of change** of output. Causes volatile investment.
+
+## Equilibrium income
+Where **AE = output** or **J = W**. Inflationary and deflationary gaps compare equilibrium with full employment.
+
+> Exam tip: the multiplier works in reverse too.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c59989bc-2f8c-546a-a81a-f7bc963cd981', 'a0ba86d1-b5f5-56bf-acc7-0e9e6e5e5fa9', '9.2', 'Economic growth and sustainability', 1, '## Measuring growth and development
+| Measure | Includes |
+|---|---|
+| **GDP per capita** | Income |
+| **HDI** | Income, education, life expectancy |
+| **MEW** | Adjusts output for leisure, pollution and household work |
+| **MPI** | Multidimensional Poverty Index: health, education, living standards |
+
+## Sustainability
+Growth that does not damage future generations'' ability to meet needs (renewable energy, resource management).
+
+## Costs of growth
+Pollution, resource depletion, inequality, urban congestion.
+
+## Comparing countries
+Differences in data accuracy, informal economies, PPP, distribution, non-monetary factors.
+
+> Exam tip: evaluate whether GDP growth always means higher living standards.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8723938f-3145-5f03-af1a-017ba0570c1a', 'a0ba86d1-b5f5-56bf-acc7-0e9e6e5e5fa9', '9.3', 'Employment/unemployment', 2, '## Labour market measures
+- **Labour force** = employed + unemployed
+- **Participation rate** = labour force ÷ working-age population
+- **Unemployment rate** = unemployed ÷ labour force
+
+## Natural rate of unemployment
+Frictional + structural. Cannot be removed by raising AD.
+
+## Policies
+| Type of unemployment | Policy |
+|---|---|
+| Cyclical | Expansionary fiscal/monetary |
+| Structural | Training, relocation subsidies |
+| Frictional | Better job information |
+
+## Phillips curve (short run)
+Trade-off between inflation and unemployment. In the long run (monetarist view) it is vertical at the natural rate.
+
+> Exam tip: explain why the long-run Phillips curve may be vertical.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d86c5f94-83c0-5ea0-a859-c43edd308171', 'a0ba86d1-b5f5-56bf-acc7-0e9e6e5e5fa9', '9.4', 'Money and banking', 3, '## Functions of money
+Medium of exchange, store of value, unit of account, standard of deferred payment.
+
+## Money supply
+- **Narrow**: notes and coins
+- **Broad**: plus bank deposits
+
+**Credit creation**: banks lend a proportion of deposits.
+**Credit multiplier = 1 ÷ reserve ratio**
+
+## Demand for money (Keynes)
+Transactions, precautionary, speculative (inversely related to interest rates).
+
+## Quantity theory
+**MV = PT**. If V and T are constant, more money → higher prices.
+
+## Central bank roles
+Issue currency, bank to the government and banks, lender of last resort, monetary policy.
+
+> Exam tip: contrast Keynesian and monetarist views on money.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a57fcd56-537f-5fdd-a8fc-682c2104bfee', '030e5a8c-5d6f-5737-a4f0-b5848bf7b506', '10.1', 'Government macroeconomic policy objectives', 0, '## The objectives revisited
+Growth, low unemployment, low inflation, balance of payments stability, redistribution, sustainability.
+
+## Trade-offs
+- **Inflation vs unemployment**: Phillips curve
+- **Growth vs current account**: imports rise with income
+- **Growth vs environment**
+- **Low inflation vs exports**: higher interest rates raise the exchange rate
+
+> Exam tip: use a specific country example if you can.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('76c7668e-176a-5bb3-a3bb-c391f997279f', '030e5a8c-5d6f-5737-a4f0-b5848bf7b506', '10.2', 'Links between macroeconomic problems and their interrelatedness', 1, '## Interrelatedness
+- High inflation → loss of competitiveness → current account deficit
+- Recession → unemployment → budget deficit (automatic stabilisers)
+- Exchange rate falls → imported inflation
+
+## Phillips curve
+- **Short run**: inverse relationship
+- **Long run** (monetarist): vertical at the natural rate; expectations adjust
+
+## Stagflation
+Supply shocks shift SRAS left: inflation and unemployment rise together. Policy dilemma: stimulus worsens inflation, contraction worsens unemployment.
+
+> Exam tip: use AD/AS diagrams to show how one problem leads to another.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a61ef71f-e3a5-5050-affb-2da6cbb4b45e', '030e5a8c-5d6f-5737-a4f0-b5848bf7b506', '10.3', 'Effectiveness of policy options to meet all macroeconomic objectives', 2, '## Comparing policy options
+| Policy | Strengths | Weaknesses |
+|---|---|---|
+| Fiscal | Targeted, multiplier | Time lags, crowding out, debt |
+| Monetary | Flexible, independent bank | Time lags, rates near zero |
+| Supply-side | Long-term growth without inflation | Slow, costly |
+| Exchange rate | Affects trade quickly | Inflation, retaliation |
+
+## Factors affecting effectiveness
+Spare capacity, confidence, size of multiplier, global conditions, policy credibility.
+
+## Policy mix
+Governments combine policies: e.g. loose fiscal with tight monetary.
+
+> Exam tip: a strong essay concludes which policy is *most* effective in a *given* context.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b5637038-4ed6-50d9-a052-4c77920b93ed', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.1', 'Policies to correct disequilibrium in the balance of payments', 0, '## Correcting imbalances
+| Approach | Examples |
+|---|---|
+| **Expenditure-switching** | Depreciation, tariffs, quotas |
+| **Expenditure-reducing** | Higher taxes, higher interest rates |
+| **Supply-side** | Productivity, innovation |
+
+## Marshall-Lerner condition
+A depreciation improves the current account only if **PED(X) + PED(M) > 1**.
+
+## J-curve
+In the short run, demand is inelastic so the balance **worsens** before improving.
+
+## Surpluses
+Persistent surpluses can also cause problems: inflationary pressure, currency appreciation, trade tensions.
+
+> Exam tip: discuss time frames and elasticities when evaluating depreciation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('9723c3e3-d893-5eb1-a4e7-bc0e2a46684b', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.2', 'Exchange rates', 1, '## Exchange rate determination
+Demand for a currency comes from exports, inward investment and speculation. Supply from imports and outward investment.
+
+## Systems compared
+| System | Pros | Cons |
+|---|---|---|
+| **Floating** | Automatic adjustment, independent monetary policy | Volatility, uncertainty |
+| **Fixed** | Certainty, discipline | Needs reserves, loses monetary independence |
+| **Managed** | Balance of both | Can be hard to judge |
+
+## Purchasing power parity
+Currencies adjust so identical goods cost the same across countries (Big Mac index).
+
+## Effects of changes
+On inflation, growth, employment and the current account.
+
+> Exam tip: an appreciation can reduce inflation but harm exporters.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('54693a59-c1d8-552d-a647-f3e91ec6b170', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.3', 'Economic development', 2, '## Growth vs development
+- **Growth**: increase in real output
+- **Development**: improvement in living standards, health, education, freedom
+
+## Indicators
+- **HDI**: income, education, life expectancy
+- **MPI** (Multidimensional Poverty Index): health, education, living standards
+- **Other**: infant mortality, literacy, access to clean water
+
+## Barriers to development
+Poor infrastructure, low savings and investment, corruption, debt, reliance on primary products, rapid population growth.
+
+> Exam tip: compare HDI and GDP per capita to show why one measure isn''t enough.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2982164c-3a8e-5715-ac15-04540b7192ba', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.4', 'Characteristics of countries at different levels of development', 3, '## Typical characteristics
+| Feature | Developing | Developed |
+|---|---|---|
+| Population growth | High | Low |
+| Main sector | Primary | Tertiary |
+| Income per head | Low | High |
+| Urbanisation | Rapid | High, stable |
+| Dependency | Young population | Ageing population |
+
+## Population issues
+- **Dependency ratio** = dependants ÷ working-age
+- Birth and death rates, migration
+- Demographic transition model
+
+## Employment
+Large informal economy, underemployment.
+
+> Exam tip: use data in the question to identify characteristics.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fa07d429-ec32-5ec1-a26e-4f0c9261dbff', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.5', 'Relationship between countries at different levels of development', 4, '## Trade and aid
+- **Trade**: export earnings fund development, but dependency on primary products and falling terms of trade
+- **Aid**: bilateral, multilateral, tied vs untied. Can help but may cause dependency
+
+## FDI and multinationals
+**Benefits**: jobs, technology, tax revenue, skills.
+**Costs**: profit repatriation, exploitation, environmental damage, influence over policy.
+
+## External debt
+Debt servicing diverts resources. Debt relief can help but risks moral hazard.
+
+## International organisations
+IMF (financial stability), World Bank (development loans), WTO (trade rules).
+
+> Exam tip: evaluate aid and FDI using the host country''s perspective.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b29be6cf-e208-503e-a8ea-2cba9fadf0c7', 'ba73d79a-7533-5601-a57e-3fd6b411010f', '11.6', 'Globalisation', 5, '## Globalisation
+The increasing **integration** of economies through trade, capital flows, technology and people.
+
+## Drivers
+Lower transport and communication costs, trade liberalisation, multinationals, technology.
+
+## Benefits
+Specialisation, economies of scale, lower prices, technology transfer, growth.
+
+## Costs
+Inequality, loss of jobs in high-cost countries, environmental damage, cultural loss, financial contagion.
+
+## Trading blocs
+| Type | Features |
+|---|---|
+| Free trade area | No internal tariffs |
+| Customs union | Plus common external tariff |
+| Common market | Plus free movement of factors |
+| Economic/monetary union | Plus common currency/policy |
+
+> Exam tip: distinguish **trade creation** and **trade diversion**.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8b034ded-1072-550d-a1a4-d2c6bbff66f8', '36f589e5-f924-501d-a645-dee9602ffde7', '1.1', 'Enterprise', 0, '## What is enterprise?
+**Enterprise** is the willingness and ability to start and run a business, taking **risks** to make a profit.
+
+## Role of the entrepreneur
+- Spots an opportunity
+- Combines the factors of production
+- Takes risks
+- Makes key decisions
+
+## Qualities
+Initiative, creativity, resilience, risk-taking, self-confidence, hard work.
+
+## Business and the economy
+Businesses create **added value** (selling price − cost of bought-in materials), employment, innovation, competition and tax revenue.
+
+## Problems for new businesses
+Lack of finance, weak market research, poor cash flow, competition, lack of experience.
+
+> Exam tip: link the importance of enterprise to a country''s economic development.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ff5c99e7-f061-52ce-aa96-0fa32081ff38', '36f589e5-f924-501d-a645-dee9602ffde7', '1.2', 'Business structure', 1, '## Economic sectors
+Primary (extraction), secondary (manufacturing), tertiary (services), quaternary (knowledge, IT).
+
+## Public vs private sector
+- **Private**: owned by individuals, usually profit-driven
+- **Public**: owned by government, provides services
+
+## Legal structures
+| Type | Liability | Key points |
+|---|---|---|
+| **Sole trader** | Unlimited | Full control, keeps profit, hard to raise finance |
+| **Partnership** | Usually unlimited | Shared skills and capital, possible disagreements |
+| **Private limited company (Ltd)** | Limited | Shares not on stock exchange |
+| **Public limited company (plc)** | Limited | Shares on stock exchange, more finance, risk of takeover |
+| **Franchise** | Varies | Proven model, royalties |
+| **Cooperative** | Limited | Owned by members |
+| **Social enterprise** | Varies | Social aims |
+
+> Exam tip: recommend a structure that suits the business''s size and goals, and justify it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b4b4d144-30e5-5dec-a6c9-5220f52cb32c', '36f589e5-f924-501d-a645-dee9602ffde7', '1.3', 'Size of business', 2, '## Measuring size
+Number of employees, revenue, capital employed, market share. Each has limitations (e.g. capital-intensive firms employ few people).
+
+## Small businesses
+**Advantages**: flexibility, personal service, niche markets, quick decisions.
+**Importance**: jobs, innovation, competition, supply larger firms.
+
+## Growth
+- **Internal (organic)**: new products, markets, reinvesting profit
+- **External**: mergers and takeovers
+
+## Types of integration
+| Type | Example |
+|---|---|
+| Horizontal | Two banks merge |
+| Vertical backward | Restaurant buys a farm |
+| Vertical forward | Factory buys shops |
+| Conglomerate | Phone maker buys a hotel |
+
+## Joint ventures and strategic alliances
+Sharing risks and resources without full merger.
+
+> Exam tip: mergers often fail because of culture clashes.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ff3fe407-88e8-597c-a962-814fce33d8a2', '36f589e5-f924-501d-a645-dee9602ffde7', '1.4', 'Business objectives', 3, '## Objectives
+Survival, profit maximisation, growth, market share, social/ethical objectives, increasing shareholder value.
+
+## SMART objectives
+**S**pecific, **M**easurable, **A**chievable, **R**elevant, **T**ime-bound.
+
+## Hierarchy
+Mission statement → corporate objectives → departmental objectives → individual targets.
+
+## Mission and vision
+- **Mission**: purpose now
+- **Vision**: where the business wants to be
+
+## Ethics and CSR
+Ethical decisions may raise costs in the short run but improve reputation and loyalty.
+
+## Changing objectives
+Objectives change with the business life cycle, competition and economic conditions.
+
+> Exam tip: link objectives to the type and stage of the business.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e1326ca2-282e-5685-a21f-f529c530f955', '36f589e5-f924-501d-a645-dee9602ffde7', '1.5', 'Stakeholders in a business', 4, '## Stakeholders
+Anyone affected by or with an interest in the business: owners, employees, customers, suppliers, lenders, government, local community.
+
+## Roles, rights and responsibilities
+- **Employees**: want fair pay and security; must work responsibly
+- **Customers**: want value and quality
+- **Government**: wants tax and law-abiding behaviour
+
+## Stakeholder conflict
+- Shareholders want profit; workers want pay rises
+- Community wants less pollution; managers want expansion
+
+## Stakeholder mapping (Mendelow)
+Power vs interest: manage closely, keep satisfied, keep informed, monitor.
+
+> Exam tip: identify *which* stakeholders are affected and how much power they have.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('85b80e41-2db8-5939-a11e-5432281863e0', 'dfb84fb6-ec45-5cea-a3aa-989757410b31', '2.1', 'Human resource management', 0, '## Purpose of HRM
+Making sure the business has the **right number** of workers with the **right skills** at the right time and cost.
+
+## Workforce planning
+Forecasting the number and skills of workers needed.
+
+## Recruitment and selection
+- **Job description**: duties of the job
+- **Person specification**: qualities needed
+- **Internal**: cheaper, motivating, but no new ideas
+- **External**: wider pool, fresh ideas, but costly
+
+## Training
+Induction, on-the-job, off-the-job.
+
+## Contracts
+Full-time, part-time, temporary, zero-hours, flexible working.
+
+## Key measures
+- **Labour turnover** = leavers ÷ average staff × 100
+- **Absenteeism**, labour productivity
+
+## Dismissal vs redundancy
+Dismissal is for misconduct or capability; redundancy is when the job is no longer needed.
+
+> Exam tip: high labour turnover raises recruitment and training costs.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('434ba9f2-1746-5ddf-ad9e-c16cd8efaab2', 'dfb84fb6-ec45-5cea-a3aa-989757410b31', '2.2', 'Motivation', 1, '## Why motivation matters
+Higher productivity, lower absenteeism and labour turnover, better quality.
+
+## Theories
+| Theorist | Key idea |
+|---|---|
+| **Taylor** | Money motivates; break jobs into simple tasks |
+| **Mayo** | Social needs and attention (Hawthorne effect) |
+| **Maslow** | Hierarchy of needs |
+| **Herzberg** | Hygiene factors vs motivators |
+| **McClelland** | Achievement, affiliation, power |
+| **Vroom** | Expectancy: effort → performance → reward |
+
+## Financial methods
+Piece rate, commission, bonus, profit sharing, performance-related pay.
+
+## Non-financial methods
+Job rotation, job enlargement, job enrichment, empowerment, team working, quality circles.
+
+> Exam tip: apply a theory to the case study rather than just describing it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6b38a253-ae82-51fd-af58-73a2ba935a63', 'dfb84fb6-ec45-5cea-a3aa-989757410b31', '2.3', 'Management', 2, '## Functions of management (Fayol)
+Planning, organising, commanding, coordinating, controlling.
+
+## Mintzberg''s roles
+- **Interpersonal**: figurehead, leader, liaison
+- **Informational**: monitor, disseminator, spokesperson
+- **Decisional**: entrepreneur, disturbance handler, resource allocator, negotiator
+
+## Leadership styles
+| Style | Features | Best when |
+|---|---|---|
+| **Autocratic** | Leader decides | Crises, unskilled staff |
+| **Democratic** | Staff involved | Skilled, motivated staff |
+| **Laissez-faire** | Staff decide | Highly skilled, creative teams |
+
+## McGregor''s Theory X and Y
+X: workers are lazy, need control. Y: workers want responsibility.
+
+> Exam tip: there''s no single best style; it depends on the task and workers.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('07e45473-00e2-5bb1-ad2d-9e32d77a1e18', '78b4ff45-3c8b-5ab9-a211-85d6a19ffb27', '3.1', 'The nature of marketing', 0, '## Marketing
+Identifying, anticipating and satisfying customer needs **profitably**.
+
+## Markets
+- **Consumer vs industrial** markets
+- **Mass vs niche** marketing
+- **Market size**, **growth**, **share**: Market share = firm''s sales ÷ total market sales × 100
+
+## Market orientation vs product orientation
+- **Market-oriented**: starts with customer research
+- **Product-oriented**: starts with the product
+
+## Segmentation
+Dividing the market by age, income, gender, location, lifestyle.
+
+## Customer relationship marketing (CRM)
+Building long-term loyalty.
+
+## Demand and supply
+Price affects sales; elasticity (PED, YED) helps marketing decisions.
+**PED = %Δ quantity demanded ÷ %Δ price**
+
+> Exam tip: use PED to explain whether a price change will raise revenue.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('179574c5-51b1-5b24-a91f-957fc8fe7809', '78b4ff45-3c8b-5ab9-a211-85d6a19ffb27', '3.2', 'Market research', 1, '## Purpose of market research
+Reducing risk by understanding customers, competitors and trends.
+
+## Primary research
+Questionnaires, interviews, focus groups, observation, test marketing.
+**Pros**: up to date, specific. **Cons**: costly, slow.
+
+## Secondary research
+Government data, reports, internet, trade journals.
+**Pros**: cheap, quick. **Cons**: may be out of date or not specific.
+
+## Sampling methods
+| Method | How |
+|---|---|
+| **Random** | Everyone equally likely to be chosen |
+| **Quota** | Fixed numbers from each group |
+| **Stratified** | Random within each group |
+| **Cluster** | Chosen areas |
+| **Convenience** | Whoever is available |
+
+## Quantitative vs qualitative
+Numbers vs opinions and reasons.
+
+## Analysing data
+Mean, median, mode, range; correlation; reliability depends on sample size and bias.
+
+> Exam tip: discuss the reliability and cost of research methods.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('23f90102-965b-588f-a43f-7238b3fee715', '78b4ff45-3c8b-5ab9-a211-85d6a19ffb27', '3.3', 'The marketing mix', 2, '## The 4Ps (and 7Ps for services)
+Product, Price, Promotion, Place (+ People, Process, Physical evidence).
+
+## Product
+Product life cycle: introduction → growth → maturity → decline. **Extension strategies**: new markets, new features, rebranding.
+
+## Price
+| Method | When |
+|---|---|
+| Cost-plus | Simple, ensures profit |
+| Penetration | Entering a market |
+| Skimming | New, innovative products |
+| Competitive | Many rivals |
+| Psychological | $9.99 |
+| Dynamic | Changes with demand |
+
+## Promotion
+Above-the-line (TV, online ads) vs below-the-line (sales promotion, PR, direct marketing). Social media and influencers.
+
+## Place
+Channels of distribution: direct, via retailer, via wholesaler, e-commerce.
+
+## Integrated mix
+All elements must fit the target market.
+
+> Exam tip: always tie the mix to the product''s stage in its life cycle.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d469d027-3147-5952-ac2b-4189774f4efd', '661dad7d-d6d9-56cf-a0eb-62a7efd18a73', '4.1', 'The nature of operations', 0, '## Operations
+The transformation of **inputs** into **outputs**, adding value.
+
+## Efficiency and productivity
+- **Labour productivity** = output ÷ workers
+- **Capital productivity** = output ÷ capital
+Improving productivity: training, technology, motivation, better methods.
+
+## Production methods
+| Method | Features |
+|---|---|
+| **Job** | One-off, customised |
+| **Batch** | Groups of identical items |
+| **Flow** | Continuous, mass production |
+| **Mass customisation** | Flow with personalised features |
+
+## Labour- vs capital-intensive
+Depends on cost of labour, technology, scale.
+
+## Sustainability
+Reducing waste, renewable energy, ethical sourcing.
+
+> Exam tip: recommend a method that fits the demand pattern and product.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('652a3288-e63a-5d9e-a7a9-04c7c79658d9', '661dad7d-d6d9-56cf-a0eb-62a7efd18a73', '4.2', 'Inventory management', 1, '## Why hold inventory?
+Meet demand, avoid production stoppages, buy in bulk.
+
+## Costs of holding inventory
+Storage, insurance, opportunity cost of capital, risk of theft, waste or obsolescence.
+
+## Inventory control chart
+Shows maximum level, reorder level, buffer inventory and lead time.
+- **Reorder level** = buffer + (lead time × usage rate)
+
+## Just-in-time (JIT)
+**Pros**: less storage, less waste, more working capital.
+**Cons**: relies on reliable suppliers; no buffer if demand spikes; higher ordering costs.
+
+## Just-in-case
+Holding extra stock for safety.
+
+> Exam tip: evaluate JIT in the context of the business''s supply chain.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('36f65156-63c6-5eba-ab6f-251409e746de', '661dad7d-d6d9-56cf-a0eb-62a7efd18a73', '4.3', 'Capacity utilisation and outsourcing', 2, '## Capacity utilisation
+**Capacity utilisation = actual output ÷ maximum output × 100**
+
+## High utilisation
+Lower unit fixed costs, but no room for extra orders or maintenance, staff stress.
+
+## Low utilisation
+Higher unit costs; may need to rationalise.
+
+## Improving utilisation
+Increase sales (marketing), reduce capacity (rationalise), subcontract spare capacity.
+
+## Outsourcing
+Using an external business for a function (e.g. IT, payroll, manufacturing).
+**Benefits**: lower costs, specialist expertise, flexibility.
+**Drawbacks**: loss of control, quality risks, reliance on supplier, ethical concerns.
+
+> Exam tip: around 90% utilisation is often considered efficient.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('f6e8f9f3-69a0-5384-ad0c-240d53ba23d8', 'b670fcda-eae4-5884-a1cc-5237b2ca6afa', '5.1', 'Business finance', 0, '## Why businesses need finance
+Start-up capital, working capital, expansion, research, unexpected costs.
+
+## Working capital
+**Working capital = current assets − current liabilities**
+
+Too little: cannot pay bills. Too much: idle resources.
+
+## Liquidity vs profit
+A profitable business can still fail if it runs out of cash.
+
+## Insolvency
+- **Bankruptcy** (individuals) / **liquidation** (companies): assets sold to pay debts
+- **Administration**: attempt to rescue the business
+
+> Exam tip: distinguish cash from profit in every finance answer.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('45503959-ab4d-5ea6-a6df-1e9efed8457c', 'b670fcda-eae4-5884-a1cc-5237b2ca6afa', '5.2', 'Sources of finance', 1, '## Internal sources
+Retained earnings, sale of assets, reducing working capital.
+
+## External sources
+| Source | Term | Notes |
+|---|---|---|
+| **Overdraft** | Short | Flexible, high interest |
+| **Trade credit** | Short | Pay suppliers later |
+| **Debt factoring** | Short | Sell receivables for immediate cash |
+| **Bank loan** | Medium/long | Fixed repayments, interest |
+| **Leasing / hire purchase** | Medium | Use assets without buying outright |
+| **Share issue** | Long | No repayment, loss of control |
+| **Venture capital** | Long | Finance + expertise for a share |
+| **Crowdfunding** | Varies | Many small investors online |
+| **Microfinance** | Short/medium | Small loans for small businesses |
+
+## Choosing a source
+Purpose, amount, cost, legal structure, control, existing debt.
+
+> Exam tip: match the length of finance to the length of the need.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6c74942b-b7a9-555b-a256-18ccc5b31870', 'b670fcda-eae4-5884-a1cc-5237b2ca6afa', '5.3', 'Forecasting and managing cash flows', 2, '## Cash flow forecasts
+Expected **cash inflows**, **outflows**, **net cash flow**, **opening and closing balances**.
+
+**Closing balance = opening balance + net cash flow**
+
+## Uses
+Plan for shortfalls, arrange overdrafts, support loan applications.
+
+## Limitations
+Based on estimates; unexpected events.
+
+## Improving cash flow
+- Faster customer payments (shorter credit, discounts)
+- Delay payments to suppliers
+- Debt factoring, sale and leaseback
+- Reduce inventory
+
+## Causes of cash flow problems
+Overtrading, poor credit control, seasonal demand, unexpected costs.
+
+> Exam tip: each method has a downside (e.g. delaying payments harms supplier relationships).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6b697e85-3623-56a9-a6c1-fde2750316e1', 'b670fcda-eae4-5884-a1cc-5237b2ca6afa', '5.4', 'Costs', 3, '## Types of cost
+- **Fixed**: don''t change with output (rent)
+- **Variable**: change with output (raw materials)
+- **Direct/indirect**: can or can''t be linked to one product
+- **Marginal cost**: cost of one more unit
+
+## Contribution
+**Contribution per unit = price − variable cost per unit**
+
+## Break-even
+**Break-even output = fixed costs ÷ contribution per unit**
+**Margin of safety = actual output − break-even output**
+
+## Break-even chart
+Shows revenue, total costs, fixed costs and the break-even point.
+
+## Limitations
+Assumes all output is sold, constant prices and costs, a single product.
+
+> Exam tip: show every step of your calculations, with units.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('09167c46-7e04-5dc8-a975-c808c9401e8a', 'b670fcda-eae4-5884-a1cc-5237b2ca6afa', '5.5', 'Budgets', 4, '## Budgets
+Financial plans for the future, e.g. sales, cost and profit budgets.
+
+## Purposes
+Planning, coordinating, controlling, motivating, allocating resources.
+
+## Setting budgets
+- **Incremental**: based on last year plus a %
+- **Zero-based**: every item justified from scratch
+- **Flexible**: adjusts to the actual level of output
+
+## Variance analysis
+**Variance = actual − budgeted**
+- **Favourable**: higher revenue or lower costs than budgeted
+- **Adverse**: lower revenue or higher costs
+
+## Limitations
+Can be unrealistic, rigid, time-consuming; may cause short-term thinking.
+
+> Exam tip: explain *possible causes* of variances, not just whether they''re adverse.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0c519315-5240-5136-aaf1-b92cdafd5de3', '16d13ffb-73e8-5d37-a33d-6d4155fc7631', '6.1', 'External influences on business activity', 0, '## PESTLE
+| Factor | Examples |
+|---|---|
+| **Political** | Stability, trade policy, government spending |
+| **Economic** | Interest rates, inflation, exchange rates, unemployment, growth |
+| **Social** | Demographics, lifestyles, ethics |
+| **Technological** | Automation, e-commerce, AI |
+| **Legal** | Employment, consumer, competition, health and safety laws |
+| **Environmental** | Climate change, pollution regulations, sustainability |
+
+## Economic influences in detail
+- **Interest rates ↑**: higher borrowing costs, lower consumer spending
+- **Exchange rate ↑**: exports dearer, imports cheaper
+- **Inflation**: rising costs, uncertainty
+- **Business cycle**: demand varies
+
+## Globalisation and multinationals
+Access to new markets, lower costs, but cultural and legal challenges.
+
+> Exam tip: pick the 2–3 factors most relevant to the case study.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('92b7d34c-e851-5c37-a550-e853399a0fad', '16d13ffb-73e8-5d37-a33d-6d4155fc7631', '6.2', 'Business strategy', 1, '## Strategic analysis
+- **SWOT**: internal strengths and weaknesses, external opportunities and threats
+- **PESTLE**: external environment
+- **Porter''s five forces**: rivalry, new entrants, substitutes, buyer power, supplier power
+- **Boston Matrix**: product portfolio (stars, cash cows, question marks, dogs)
+
+## Strategic choice
+- **Ansoff''s matrix**: market penetration, product development, market development, diversification
+- **Porter''s generic strategies**: cost leadership, differentiation, focus
+- **Force-field analysis** and **decision trees**
+
+## Strategic implementation
+Planning, change management, corporate culture, project management, contingency planning, crisis management.
+
+## Core competencies
+Unique, hard-to-copy strengths.
+
+> Exam tip: Paper 4 rewards a justified recommendation, not just analysis.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d3af693d-9abf-514b-a71b-5d932f41b585', '91c8dd69-77c7-57ff-aa92-288fada94def', '7.1', 'Organisational structure', 0, '## Organisational structure
+- **Hierarchy**: levels of authority
+- **Span of control**: subordinates per manager
+- **Chain of command**: line of authority
+
+## Types
+| Structure | Features |
+|---|---|
+| **Functional** | By department |
+| **Product/regional** | By product or area |
+| **Matrix** | Project teams across functions |
+| **Flat** | Few levels, wide spans |
+| **Tall** | Many levels, narrow spans |
+
+## Centralisation vs decentralisation
+Central control vs delegated authority.
+
+## Delayering and delegation
+Delayering cuts costs and speeds communication but may overload managers.
+
+> Exam tip: the right structure depends on size, culture and strategy.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('798b06bb-2703-552d-a8d8-33caf75447f0', '91c8dd69-77c7-57ff-aa92-288fada94def', '7.2', 'Business communication', 1, '## Communication process
+Sender → message → medium → receiver → feedback.
+
+## Methods
+Face-to-face, written, electronic (email, intranet, video calls), visual.
+
+## Barriers
+Language/jargon, too many layers, poor medium, information overload, attitudes, distance and time zones.
+
+## Formal vs informal
+Official channels vs the "grapevine".
+
+## Importance
+Coordination, motivation, decision-making, customer relationships.
+
+> Exam tip: link poor communication to its effects on motivation and efficiency.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('a2dcc4c7-44b0-59bf-a19a-b428df7ae2b4', '91c8dd69-77c7-57ff-aa92-288fada94def', '7.3', 'Leadership', 2, '## Leadership theories
+- **Trait theory**: leaders have certain qualities
+- **Situational/contingency**: the best style depends on the situation
+- **Tannenbaum–Schmidt continuum**: from boss-centred to subordinate-centred
+
+## Emotional intelligence (Goleman)
+Self-awareness, self-regulation, motivation, empathy, social skills.
+
+## Informal leaders
+Influence through respect, not position.
+
+## Leadership vs management
+Leaders set direction and inspire; managers plan and control.
+
+> Exam tip: recommend a style based on the business''s situation and workforce.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c85e05e8-f427-586c-a467-a36488f7fa01', '91c8dd69-77c7-57ff-aa92-288fada94def', '7.4', 'Human resource management strategy', 3, '## HRM strategy
+Aligns HR with corporate objectives.
+- **Hard HRM**: workers as a cost; short-term contracts, central control
+- **Soft HRM**: workers as assets; training, empowerment, long-term
+
+## Labour flexibility
+Part-time, temporary, zero-hours contracts, home working, multi-skilling.
+
+## Measuring performance
+- Labour productivity, absenteeism, labour turnover, health and safety
+
+## Employer–employee relations
+Trade unions, collective bargaining, works councils, employee participation, conflict resolution (conciliation, arbitration).
+
+## Management by objectives (MBO)
+Agreeing targets with employees.
+
+> Exam tip: compare hard and soft approaches with reference to the business''s objectives.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('f9be1c12-4200-5843-a9f4-4bbbdb41b405', '11db61d0-45a1-5af3-a75e-015ceba34ee1', '8.1', 'Marketing analysis', 0, '## Elasticity of demand
+| Type | Formula | Use |
+|---|---|---|
+| **PED** | %ΔQd ÷ %ΔP | Pricing decisions |
+| **YED** | %ΔQd ÷ %ΔY | Planning for economic change |
+| **Promotional elasticity** | %ΔQd ÷ %Δ promotion spending | Judging advertising |
+| **XED** | %ΔQd(A) ÷ %ΔP(B) | Competitor price changes |
+
+## Sales forecasting
+- **Quantitative**: moving averages, extrapolation, correlation
+- **Qualitative**: expert opinion, Delphi technique, consumer surveys
+
+**Moving average** smooths fluctuations to show the trend. Variations from the trend show seasonal patterns.
+
+## Limitations
+Forecasts assume the past predicts the future; external shocks.
+
+> Exam tip: "correlation does not prove causation" is a strong evaluative point.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fb62ca56-619a-5c7e-aa9c-9ad763b83602', '11db61d0-45a1-5af3-a75e-015ceba34ee1', '8.2', 'Marketing strategy', 1, '## Marketing plans
+Objectives → research → strategy → marketing mix → budget → monitoring.
+
+## New product development
+Idea → screening → concept testing → development → test marketing → launch. **R&D** drives innovation.
+
+## International marketing
+**Reasons**: growth, saturated home market, spreading risk.
+**Problems**: culture, language, legal, exchange rates, logistics.
+
+## Strategies
+| Strategy | Approach |
+|---|---|
+| **Pan-global** | Same mix everywhere |
+| **Global localisation (glocalisation)** | Adapt to local needs |
+
+## Methods of entry
+Exporting, licensing, franchising, joint ventures, FDI.
+
+## Technology and marketing
+Social media, digital promotion, AI, data analysis.
+
+> Exam tip: weigh economies of scale (standardise) against local fit (adapt).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d0eb7e2c-d973-504b-ad5f-14f5870bea92', '12f9dd98-012f-5b0e-a17e-9e8d93e875d3', '9.1', 'Location and scale', 0, '## Location factors
+- **Quantitative**: land, labour, transport costs, grants (investment appraisal, break-even)
+- **Qualitative**: infrastructure, quality of life, political stability, culture
+
+## International location
+**Offshoring** and **reshoring**; multinational location decisions.
+
+## Scale
+- **Economies of scale**: purchasing, technical, financial, managerial, marketing
+- **Diseconomies of scale**: communication, coordination, motivation
+
+> Exam tip: weigh cost savings against risks such as quality and reputation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ec4ef212-d4b6-5249-ad23-7b2401055016', '12f9dd98-012f-5b0e-a17e-9e8d93e875d3', '9.2', 'Quality management', 1, '## Quality
+Meeting customer expectations consistently.
+
+## Approaches
+| Approach | Features |
+|---|---|
+| **Quality control** | Inspect at the end |
+| **Quality assurance** | Check at every stage |
+| **TQM** | Quality is everyone''s job |
+
+## Methods
+Kaizen, quality circles, benchmarking, internal and external quality standards (e.g. ISO).
+
+## Costs and benefits
+Training and checks cost money, but reduce waste, returns and complaints, and improve reputation.
+
+> Exam tip: link quality to competitive advantage.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('17658ecb-3555-5e37-accf-7a3fa554bfeb', '12f9dd98-012f-5b0e-a17e-9e8d93e875d3', '9.3', 'Operations strategy', 2, '## Operations strategy
+Aligning operations with corporate objectives.
+
+## Lean production
+Minimising waste. Techniques: JIT, kaizen, cell production, simultaneous engineering.
+
+## Flexibility and innovation
+Process innovation (how things are made) and product innovation.
+
+## Project management
+**Critical path analysis (CPA)**:
+- **EST**: earliest start time
+- **LFT**: latest finish time
+- **Total float = LFT − duration − EST**
+- Critical activities have zero float
+
+## Enterprise resource planning (ERP)
+Software that integrates all operations data.
+
+> Exam tip: practise drawing network diagrams with nodes, ESTs and LFTs.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1694ec7b-0d48-56b9-ac50-c5fe7382197f', '90f47c60-e2ce-5cce-a041-0ff36e1a3f23', '10.1', 'Financial statements', 0, '## Income statement
+Revenue − cost of sales = **gross profit**
+Gross profit − expenses = **operating profit**
+Operating profit − interest − tax = **profit for the year**
+Profit is then split between **dividends** and **retained earnings**.
+
+## Statement of financial position
+- **Non-current assets**, **current assets**
+- **Current liabilities**, **non-current liabilities**
+- **Equity**: share capital + retained earnings
+
+## Depreciation
+Straight-line: **(cost − residual value) ÷ useful life**
+
+## Inventory valuation
+Lower of cost and net realisable value.
+
+> Exam tip: be able to amend a statement after a transaction.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2ad8133c-4206-536e-a075-7ff3821fd655', '90f47c60-e2ce-5cce-a041-0ff36e1a3f23', '10.2', 'Analysis of published accounts', 1, '## Ratio analysis
+| Type | Ratio | Formula |
+|---|---|---|
+| Profitability | Gross margin | GP ÷ revenue × 100 |
+| Profitability | Profit margin | Profit ÷ revenue × 100 |
+| Profitability | ROCE | Operating profit ÷ capital employed × 100 |
+| Liquidity | Current ratio | CA ÷ CL |
+| Liquidity | Acid test | (CA − inventory) ÷ CL |
+| Efficiency | Inventory turnover | Cost of sales ÷ average inventory |
+| Efficiency | Receivables days | Receivables ÷ revenue × 365 |
+| Efficiency | Payables days | Payables ÷ cost of sales × 365 |
+| Gearing | Gearing | Non-current liabilities ÷ capital employed × 100 |
+| Investor | Dividend yield | Dividend per share ÷ share price × 100 |
+| Investor | P/E ratio | Share price ÷ earnings per share |
+
+## Limitations
+Historic data, different accounting methods, inflation, window dressing, ignore qualitative factors.
+
+> Exam tip: compare ratios over time or with competitors, never in isolation.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('79fdea29-49cd-57aa-a286-e35fec96bf69', '90f47c60-e2ce-5cce-a041-0ff36e1a3f23', '10.3', 'Investment appraisal', 2, '## Methods
+- **Payback period**: time to recover the cost
+- **ARR** = average annual profit ÷ initial investment × 100
+- **NPV**: sum of discounted cash flows − initial cost. Positive NPV = worthwhile
+- **IRR**: discount rate where NPV = 0
+
+## Discounting
+Money now is worth more than money later (time value of money). Multiply future cash by a discount factor.
+
+## Evaluation
+| Method | Pro | Con |
+|---|---|---|
+| Payback | Simple, focuses on risk | Ignores later cash flows |
+| ARR | Uses all cash flows | Ignores timing |
+| NPV | Time value of money | Depends on discount rate chosen |
+
+## Qualitative factors
+Objectives, ethics, risk, reliability of forecasts.
+
+> Exam tip: always conclude with a recommendation that considers qualitative factors.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('8e980faa-f49d-5f4f-a3f0-4689dfd7fc25', '90f47c60-e2ce-5cce-a041-0ff36e1a3f23', '10.4', 'Finance and accounting strategy', 3, '## Finance and accounting strategy
+Planning how finance supports corporate objectives.
+
+## Working capital management
+Controlling inventory, receivables and payables to balance liquidity and profitability.
+
+## Choosing finance for strategy
+Debt vs equity: control, cost, gearing, risk.
+
+## Window dressing
+Presenting accounts more favourably (e.g. delaying expenses). Limits the reliability of ratios.
+
+## Budgets and variances at A Level
+Using variance analysis to make strategic decisions.
+
+## Contribution and costing decisions
+Contribution decisions such as special orders, make or buy.
+
+> Exam tip: connect financial choices to the wider strategy of the business.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2e31934a-1801-5d46-a104-486d7b9e6c90', '08fef34a-b7c3-59a9-a7bb-4f7397a308f8', '1.1', 'Data representation', 0, '## Number systems
+- **Binary** (base 2), **denary** (base 10), **hexadecimal** (base 16: 0–9, A–F)
+- One hex digit = 4 bits (a nibble)
+
+## Binary prefixes vs decimal prefixes
+| Binary | Size | Decimal | Size |
+|---|---|---|---|
+| kibi (KiB) | 2¹⁰ = 1024 | kilo (kB) | 10³ |
+| mebi (MiB) | 2²⁰ | mega (MB) | 10⁶ |
+| gibi (GiB) | 2³⁰ | giga (GB) | 10⁹ |
+| tebi (TiB) | 2⁴⁰ | tera (TB) | 10¹² |
+
+## Negative numbers
+- **One''s complement**: flip all bits
+- **Two''s complement**: flip all bits and add 1. MSB has negative place value (−128 in 8 bits)
+
+## Binary addition and overflow
+Overflow happens when the result is too big for the number of bits.
+
+## BCD
+Each denary digit stored as 4 bits. Used in calculators and clocks.
+
+## Character sets
+ASCII (7-bit, 128 chars), extended ASCII (8-bit), **Unicode** (all languages and emoji).
+
+> Exam tip: show your working for conversions.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('1fa2a6f2-6473-5b30-aa1f-020a356ab0ab', '08fef34a-b7c3-59a9-a7bb-4f7397a308f8', '1.2', 'Multimedia', 1, '## Bitmap images
+- **Pixel**: smallest element
+- **Colour depth**: bits per pixel
+- **Resolution**: number of pixels
+- **File header**: dimensions, colour depth, compression type
+
+**File size = width × height × colour depth** (bits)
+
+## Vector graphics
+Stored as **drawing objects** and **properties** (shape, coordinates, colour) in a **drawing list**. Scale without losing quality.
+
+## Bitmap vs vector
+Bitmaps suit photos; vectors suit logos and diagrams.
+
+## Sound
+- **Sampling rate**: samples per second
+- **Sampling resolution**: bits per sample
+
+**File size = sampling rate × resolution × length (s)**
+
+Higher rate/resolution = more accurate, larger file.
+
+> Exam tip: always convert bits to bytes (÷ 8) when asked for bytes.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('67a620f7-7311-56a1-aff6-0d3921f50554', '08fef34a-b7c3-59a9-a7bb-4f7397a308f8', '1.3', 'Compression', 2, '## Why compress?
+Smaller files: faster transfer, less storage, less bandwidth.
+
+## Lossless
+Original data fully restored. Needed for text and program files.
+- **Run-length encoding (RLE)**: store a value and how many times it repeats
+  e.g. AAAABBB → 4A3B
+
+## Lossy
+Some data permanently removed. Used for images, sound, video.
+- Removing sounds outside human hearing (perceptual coding)
+- Reducing colour depth or resolution
+
+> Exam tip: justify the choice: lossy for streaming, lossless for documents.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7eb0b18c-b818-50da-ab26-2cbff0b336c0', '7148887c-4456-5a2c-a407-523f31481bf9', '2.1', 'Networks including the internet', 0, '## Network types
+- **LAN**: small area, owned by one organisation
+- **WAN**: large area, uses third-party links
+- **Client-server** vs **peer-to-peer**
+- **Cloud computing**: public and private clouds
+
+## Topologies
+Bus, star, mesh, hybrid. Star is most common (central switch).
+
+## Transmission media
+- **Wired**: copper, fibre-optic
+- **Wireless**: radio, microwave, satellite
+
+## Hardware
+Switch, router, NIC, WNIC, WAP, bridge, repeater, modem.
+
+## Ethernet and CSMA/CD
+Devices listen before sending; on a collision they wait a random time.
+
+## The internet and the World Wide Web
+- **Internet**: global network infrastructure
+- **WWW**: web pages accessed via the internet
+
+## IP addresses
+- **IPv4**: 32-bit; **IPv6**: 128-bit hex
+- **Public vs private**, **static vs dynamic**
+- **Subnetting**
+
+## DNS and URLs
+DNS resolves domain names to IP addresses.
+
+> Exam tip: distinguish the internet from the World Wide Web.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c6926965-ed42-5cf0-a35e-570310a0d2e9', '3abbd874-da40-5f90-abb9-91734dfe3d58', '3.1', 'Computers and their components', 0, '## Input and output devices
+Keyboards, scanners, microphones, touchscreens, 3D printers, speakers, actuators.
+
+## Primary memory
+| Type | Features |
+|---|---|
+| **RAM** | Volatile, read/write |
+| **SRAM** | Flip-flops, fast, no refresh, used for cache |
+| **DRAM** | Capacitors, needs refreshing, cheaper, main memory |
+| **ROM / PROM / EPROM / EEPROM** | Non-volatile |
+
+## Secondary storage
+- **Magnetic** (HDD): platters, read-write heads
+- **Optical**: lasers, pits and lands
+- **Solid state**: NAND flash, no moving parts
+
+## Embedded systems
+A microprocessor inside a larger device with a dedicated function.
+
+## Sensors and actuators
+Used in monitoring and control systems with feedback.
+
+> Exam tip: be ready to describe how a laser printer, SSD or touchscreen works step by step.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('eb495a7b-d5fe-59e5-ae2a-55b27284465f', '3abbd874-da40-5f90-abb9-91734dfe3d58', '3.2', 'Logic gates and logic circuits', 1, '## Logic gates
+| Gate | Output is 1 when |
+|---|---|
+| **NOT** | Input is 0 |
+| **AND** | Both inputs are 1 |
+| **OR** | At least one input is 1 |
+| **NAND** | Not both 1 |
+| **NOR** | Both 0 |
+| **XOR** | Inputs differ |
+
+## Logic circuits
+Combine gates to solve problems. Construct a circuit from a written statement, a truth table or a logic expression.
+
+## Truth tables
+List every combination of inputs: 2 inputs = 4 rows, 3 inputs = 8 rows.
+
+> Exam tip: use standard gate symbols and don''t miss any input rows.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('f162847d-4028-5050-a5fe-4d5d3411b56a', '1d28e8ee-4ca8-5089-a7d0-e1e9809c66fe', '4.1', 'Central Processing Unit (CPU) architecture', 0, '## Von Neumann architecture
+Stored program concept: data and instructions share the same memory.
+
+## Registers
+| Register | Purpose |
+|---|---|
+| **PC** | Address of next instruction |
+| **MAR** | Address to read/write |
+| **MDR** | Data read or to be written |
+| **CIR** | Current instruction |
+| **ACC** | Results of calculations |
+| **IX** | Index register |
+| **Status register** | Flags (carry, overflow, zero, negative) |
+
+## Components
+ALU, CU, system clock, immediate access store; buses: **address**, **data**, **control**.
+
+## Fetch-execute cycle (RTN)
+MAR ← [PC]; PC ← [PC] + 1; MDR ← [[MAR]]; CIR ← [MDR]; decode; execute.
+
+## Interrupts
+Checked at the end of each cycle; ISR handles them.
+
+## Performance
+Clock speed, number of cores, cache size, bus width.
+
+> Exam tip: learn the register transfer notation for the fetch stage.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('c5d13997-3bf9-5d27-a79d-6300d0615a35', '1d28e8ee-4ca8-5089-a7d0-e1e9809c66fe', '4.2', 'Assembly language', 1, '## Assembly language
+Uses **mnemonics** (LDM, LDD, ADD, JMP, CMP). An **assembler** translates to machine code.
+
+## Two-pass assembler
+1. First pass builds the **symbol table** (labels → addresses)
+2. Second pass generates machine code
+
+## Addressing modes
+| Mode | Example | Meaning |
+|---|---|---|
+| **Immediate** | LDM #5 | Load value 5 |
+| **Direct** | LDD 100 | Load contents of address 100 |
+| **Indirect** | LDI 100 | Address 100 holds the address of the data |
+| **Indexed** | LDX 100 | Address 100 + IX |
+| **Relative** | JMR #3 | Address relative to the current instruction |
+
+## Instruction groups
+Data movement, I/O, arithmetic, unconditional/conditional jumps, compare.
+
+> Exam tip: practise tracing assembly programs in a trace table.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b9adc94b-ec46-556d-ab1c-b72db78bc7d6', '1d28e8ee-4ca8-5089-a7d0-e1e9809c66fe', '4.3', 'Bit manipulation', 2, '## Shifts
+- **Logical**: 0 enters vacated positions
+- **Arithmetic**: keeps the sign bit on right shifts
+- **Cyclic**: bits wrap round
+
+Left shift ×2, right shift ÷2 (for positive numbers).
+
+## Bit masks
+| Operation | Use |
+|---|---|
+| **AND** with mask | Test or clear bits |
+| **OR** with mask | Set bits to 1 |
+| **XOR** with mask | Toggle bits |
+
+## Uses
+Monitoring and control systems: each bit can represent a sensor or device state.
+
+> Exam tip: write the mask in binary first, then convert to the needed form.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('149c1304-8bd8-5aee-af71-e5201bf86764', '3a39c512-4b48-5875-aa5e-e030e755c232', '5.1', 'Operating systems', 0, '## Why an OS is needed
+Provides an interface and manages hardware and software.
+
+## Key management tasks
+Memory, file, security, hardware (drivers), process management; providing a user interface.
+
+## Utility software
+Disk formatter, virus checker, defragmentation, disk contents analysis/repair, file compression, backup.
+
+## Program libraries
+Pre-written code; **DLLs** are linked at run time, saving memory but creating dependencies.
+
+> Exam tip: give the *benefit* of each utility, not just its name.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('901203a7-c1e5-5767-abc0-8cd784a85129', '3a39c512-4b48-5875-aa5e-e030e755c232', '5.2', 'Language translators', 1, '## Translators
+| Translator | Translates | Output |
+|---|---|---|
+| **Assembler** | Assembly | Machine code |
+| **Compiler** | Whole high-level program | Executable |
+| **Interpreter** | One statement at a time | Runs directly |
+
+## Compiler vs interpreter
+- Compiler: faster run, code hidden, errors reported at end
+- Interpreter: easier debugging, needs translator each time
+
+## Java style
+Compiled to **intermediate code** (bytecode), then interpreted by a virtual machine: portable.
+
+## IDE features
+Coding (context-sensitive prompts, prettyprint), initial error detection (dynamic syntax checks), presentation (expand/collapse blocks), debugging (single stepping, breakpoints, variables/expressions report window).
+
+> Exam tip: match the translator to the scenario: development vs distribution.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('22af26c7-036a-55e1-a97a-6bf565c98961', '80ec01f7-8a53-56e8-a5cd-76f2a3263a82', '6.1', 'Data security', 0, '## Security, privacy and integrity
+- **Security**: protecting data from loss or unauthorised access
+- **Privacy**: keeping personal data confidential
+- **Integrity**: data is accurate and consistent
+
+## Threats
+Malware (viruses, worms, spyware, ransomware), hacking, phishing, pharming, denial of service.
+
+## Protection
+User accounts, passwords, biometrics, two-step verification, firewalls, anti-virus, anti-spyware, encryption, access rights, backups, disk mirroring.
+
+> Exam tip: name the threat *and* the specific measure that counters it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('bf8ca0e9-0f1d-5d6f-afd4-1324ef381056', '80ec01f7-8a53-56e8-a5cd-76f2a3263a82', '6.2', 'Data integrity', 1, '## Validation
+Checks data is **reasonable**:
+- Range, format, length, presence, existence, type, check digit
+
+## Verification
+Checks data is **copied accurately**:
+- **Entry**: visual check, double entry
+- **Transfer**: parity check (byte and block), checksum
+
+## Parity
+Even or odd parity: a parity bit makes the number of 1s even/odd. Parity blocks can find the exact bit in error.
+
+> Exam tip: validation ≠ verification. Learn the difference clearly.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('5a3c6ebe-0311-5b1f-aaef-7da5d452ecfd', '0002c071-df03-578a-a739-f38cb6afc577', '7.1', 'Ethics and ownership', 0, '## Ethics
+Acting responsibly as a computing professional. Codes of conduct (e.g. BCS, IEEE): public interest, competence, integrity, duty to employers.
+
+## Ownership and copyright
+Protects the creator''s work; copying without permission is illegal.
+
+## Software licensing
+| Type | Features |
+|---|---|
+| **Free Software Foundation** | Freedom to use, study, change, share |
+| **Open Source Initiative** | Source code available |
+| **Shareware** | Try before you buy |
+| **Commercial** | Paid, restrictions |
+
+## Artificial intelligence
+Social, economic and environmental impacts: job changes, bias, privacy, accountability.
+
+> Exam tip: give specific consequences of unethical behaviour.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('466c8c52-c551-577d-a2ee-1f44646e049f', '0604fc0c-cd36-5bf3-ac62-fedc95cfaf42', '8.1', 'Database concepts', 0, '## Flat file vs relational
+Flat files cause **redundancy** and **inconsistency**. Relational databases use linked tables.
+
+## Terms
+Entity, table, record (tuple), field (attribute), primary key, candidate key, secondary key, foreign key, relationship (1:1, 1:M, M:M), referential integrity, indexing.
+
+## E-R diagrams
+Show entities and relationships. M:M must be resolved with a link table.
+
+## Normalisation
+- **1NF**: no repeating groups
+- **2NF**: 1NF + no partial dependencies
+- **3NF**: 2NF + no non-key dependencies
+
+> Exam tip: when normalising, show each table with its primary key underlined.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e8a91b50-7471-5054-a458-fcf8c6c0359d', '0604fc0c-cd36-5bf3-ac62-fedc95cfaf42', '8.2', 'Database Management Systems (DBMS)', 1, '## DBMS features
+- **Data dictionary**: metadata
+- **Data modelling**
+- **Logical schema**
+- **Data integrity** and **security** (passwords, access rights, backups)
+
+## Developer interface and query processor
+Lets developers create forms and reports; the query processor runs queries.
+
+## Benefits
+Reduced redundancy, consistency, controlled access, program-data independence.
+
+> Exam tip: explain how a DBMS prevents inconsistency.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('0e27f9ce-7a86-5ad9-a8c8-32296fc47c42', '0604fc0c-cd36-5bf3-ac62-fedc95cfaf42', '8.3', 'Data Definition Language (DDL) and Data Manipulation Language (DML)', 2, '## DDL (Data Definition Language)
+```
+CREATE DATABASE School;
+CREATE TABLE Student (
+  StudentID VARCHAR(6) PRIMARY KEY,
+  Name VARCHAR(30),
+  DOB DATE
+);
+ALTER TABLE Student ADD Email VARCHAR(40);
+```
+
+## DML (Data Manipulation Language)
+```
+SELECT Name, DOB FROM Student
+WHERE DOB > ''2009-01-01''
+ORDER BY Name;
+
+INSERT INTO Student VALUES (''S001'', ''Ava'', ''2009-05-14'', NULL);
+UPDATE Student SET Name = ''Ava K'' WHERE StudentID = ''S001'';
+DELETE FROM Student WHERE StudentID = ''S001'';
+```
+
+## Joins and aggregates
+INNER JOIN, GROUP BY, COUNT, SUM, AVG.
+
+> Exam tip: end every SQL statement with a semicolon and check field names match the question.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('72d4a1fc-d8e6-5508-ae61-93b1bd7fc1f0', '30cc2767-9ba1-54c2-a39a-1ca520b1c915', '9.1', 'Computational thinking skills', 0, '## Computational thinking
+- **Abstraction**: remove unnecessary detail
+- **Decomposition**: break into sub-problems
+- **Pattern recognition** and **algorithmic thinking**
+
+## Algorithms
+A sequence of steps to solve a problem. Written in **structured English**, **flowcharts** or **pseudocode**.
+
+> Exam tip: always identify inputs, processes and outputs first.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('7cb7d1fa-b4f4-5fe3-aa22-9d07e0f56eab', '30cc2767-9ba1-54c2-a39a-1ca520b1c915', '9.2', 'Algorithms', 1, '## Cambridge pseudocode basics
+```
+DECLARE Total : INTEGER
+DECLARE Count : INTEGER
+Total ← 0
+FOR Count ← 1 TO 10
+    INPUT Num
+    Total ← Total + Num
+NEXT Count
+OUTPUT "Average: ", Total / 10
+```
+
+## Selection
+```
+IF Mark >= 50 THEN
+    OUTPUT "Pass"
+ELSE
+    OUTPUT "Fail"
+ENDIF
+```
+
+## Iteration
+- **FOR … NEXT**: count-controlled
+- **WHILE … ENDWHILE**: pre-condition
+- **REPEAT … UNTIL**: post-condition
+
+## Standard algorithms
+Linear search, bubble sort, totalling, counting, finding max/min.
+
+## Stepwise refinement
+Break each step down until it can be coded.
+
+> Exam tip: indent consistently and declare every variable.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6ed5bae5-4561-58d9-af39-1082de159b88', 'ba3c9a65-80e3-5ca1-a9af-da7bda0d56a5', '10.1', 'Data types and records', 0, '## Data types
+INTEGER, REAL, CHAR, STRING, BOOLEAN, DATE.
+
+## Records
+```
+TYPE StudentRecord
+    DECLARE Name : STRING
+    DECLARE Age : INTEGER
+ENDTYPE
+DECLARE Pupil : StudentRecord
+Pupil.Name ← "Lina"
+```
+
+> Exam tip: choose the most appropriate data type and justify it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ebe6831a-0a54-5249-a11b-78640d4b76bc', 'ba3c9a65-80e3-5ca1-a9af-da7bda0d56a5', '10.2', 'Arrays', 1, '## Arrays
+```
+DECLARE Marks : ARRAY[1:30] OF INTEGER
+DECLARE Grid : ARRAY[1:3, 1:3] OF CHAR
+```
+- **Index**: position of an element
+- **Lower/upper bound**
+
+## Bubble sort
+```
+FOR Pass ← 1 TO N - 1
+    FOR i ← 1 TO N - Pass
+        IF A[i] > A[i + 1] THEN
+            Temp ← A[i]
+            A[i] ← A[i + 1]
+            A[i + 1] ← Temp
+        ENDIF
+    NEXT i
+NEXT Pass
+```
+
+## Linear search
+Compare each element with the target until found or the end is reached.
+
+> Exam tip: a flag variable can stop the sort early when no swaps occur.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('9130138b-ffd1-5d32-a998-c673bda89f67', 'ba3c9a65-80e3-5ca1-a9af-da7bda0d56a5', '10.3', 'Files', 2, '## Text files
+```
+OPENFILE "names.txt" FOR WRITE
+WRITEFILE "names.txt", "Ali"
+CLOSEFILE "names.txt"
+
+OPENFILE "names.txt" FOR READ
+WHILE NOT EOF("names.txt")
+    READFILE "names.txt", Line
+    OUTPUT Line
+ENDWHILE
+CLOSEFILE "names.txt"
+```
+Modes: **READ**, **WRITE** (overwrites), **APPEND**.
+
+## Why use files?
+Data persists after the program ends.
+
+> Exam tip: always CLOSEFILE when finished.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('836801d0-41b0-5c55-a99e-bae09539bec7', 'ba3c9a65-80e3-5ca1-a9af-da7bda0d56a5', '10.4', 'Introduction to Abstract Data Types (ADT)', 3, '## Abstract data types (ADTs)
+A collection of data and the operations on it.
+
+| ADT | Principle | Operations |
+|---|---|---|
+| **Stack** | LIFO | Push, pop; top pointer |
+| **Queue** | FIFO | Enqueue, dequeue; front and rear pointers |
+| **Linked list** | Nodes with pointers | Insert, delete, search; start pointer, free list |
+
+## Implementing with arrays
+Stacks and queues use an array plus pointers. A **circular queue** reuses space.
+
+> Exam tip: check for full/empty conditions before push/enqueue or pop/dequeue.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('ffdd807c-1c3b-5ed6-a83f-5166dad97626', 'bfcfb4be-3c7f-5228-a27f-c4e08c65ad8f', '11.1', 'Programming basics', 0, '## Variables and constants
+```
+DECLARE Name : STRING
+CONSTANT Pi = 3.142
+```
+
+## Built-in functions
+| Function | Example | Result |
+|---|---|---|
+| LENGTH | LENGTH("Hello") | 5 |
+| MID | MID("Hello", 2, 3) | "ell" |
+| LEFT / RIGHT | LEFT("Hello", 2) | "He" |
+| UCASE / LCASE | UCASE("a") | "A" |
+| INT | INT(7.9) | 7 |
+| RAND | RAND(10) | 0 to < 10 |
+| NUM_TO_STR / STR_TO_NUM | | conversions |
+
+## Input/output
+INPUT and OUTPUT.
+
+> Exam tip: check the pseudocode guide for exact function names.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2f6ad45a-aa7e-5c4e-aa13-f10a651d2438', 'bfcfb4be-3c7f-5228-a27f-c4e08c65ad8f', '11.2', 'Constructs', 1, '## Selection
+```
+CASE OF Grade
+    ''A'' : OUTPUT "Excellent"
+    ''B'' : OUTPUT "Good"
+    OTHERWISE OUTPUT "Keep going"
+ENDCASE
+```
+
+## Iteration
+```
+WHILE Total < 100
+    INPUT Num
+    Total ← Total + Num
+ENDWHILE
+
+REPEAT
+    INPUT Password
+UNTIL Password = "secret"
+```
+
+## Nested constructs
+Loops and selections inside each other.
+
+> Exam tip: choose a loop to match the problem: known count → FOR.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e306670c-c257-5480-ae4d-e01585cabe92', 'bfcfb4be-3c7f-5228-a27f-c4e08c65ad8f', '11.3', 'Structured programming', 2, '## Procedures and functions
+```
+PROCEDURE Greet(BYVAL Name : STRING)
+    OUTPUT "Hi ", Name
+ENDPROCEDURE
+
+FUNCTION Square(N : INTEGER) RETURNS INTEGER
+    RETURN N * N
+ENDFUNCTION
+
+CALL Greet("Sam")
+Result ← Square(4)
+```
+
+## Parameters
+- **BYVAL**: copy passed; original unchanged
+- **BYREF**: reference passed; original can change
+
+## Local vs global variables
+Local is safer; global is accessible everywhere.
+
+## Benefits of subroutines
+Reuse, easier testing, teamwork, readability.
+
+> Exam tip: state the return type of every function.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('9721b8ee-bdaf-5438-ac56-6af816d8e52d', 'a7496429-e8e4-5086-a7d7-a4cffd40cf1a', '12.1', 'Program development life cycle', 0, '## Program development life cycle
+Analysis → design → coding → testing → maintenance.
+
+## Models
+| Model | Features |
+|---|---|
+| **Waterfall** | Linear, each stage done once |
+| **Iterative** | Repeated cycles, incremental |
+| **RAD** | Prototypes, user feedback, fast |
+
+> Exam tip: give a reason why a model fits a scenario.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('aeac2e30-91bc-516d-a02c-92b8eb7ca952', 'a7496429-e8e4-5086-a7d7-a4cffd40cf1a', '12.2', 'Program design', 1, '## Design tools
+- **Structure charts**: modules, parameters, selection and iteration symbols
+- **Flowcharts**
+- **Pseudocode**
+- **State-transition diagrams**: states, transitions, events
+
+## Top-down design
+Decomposition into modules.
+
+> Exam tip: practise turning structure charts into pseudocode headers.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('fd0c71e4-8682-56ac-ae8c-9678b69d95ce', 'a7496429-e8e4-5086-a7d7-a4cffd40cf1a', '12.3', 'Program testing and maintenance', 2, '## Types of error
+- **Syntax**: grammar of the language
+- **Logic**: wrong results
+- **Run-time**: crash (e.g. division by zero)
+
+## Test data
+Normal, abnormal (erroneous), extreme, boundary.
+
+## Testing methods
+Dry run (trace table), walkthrough, white-box, black-box, integration, alpha, beta, acceptance, stub testing.
+
+## Maintenance
+- **Corrective**: fix errors
+- **Adaptive**: new requirements
+- **Perfective**: improve performance
+
+> Exam tip: write a test plan with expected outcomes.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('01d9447c-301c-59ca-ab1f-0055c0fcdefa', '6562a7cc-792f-5e3d-a2a3-7457c0537035', '13.1', 'User-defined data types', 0, '## User-defined data types
+- **Non-composite**: enumerated, pointer
+- **Composite**: record, set, class
+
+```
+TYPE Season = (Spring, Summer, Autumn, Winter)
+TYPE IntPointer = ^INTEGER
+TYPE LetterSet = SET OF CHAR
+```
+
+## Why use them?
+Model real-world data, improve readability and reduce errors.
+
+> Exam tip: choose a type and explain why it suits the data.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('278df5fe-17d5-57f5-aeaf-d7676f2780c3', '6562a7cc-792f-5e3d-a2a3-7457c0537035', '13.2', 'File organisation and access', 1, '## File organisation
+| Method | Description |
+|---|---|
+| **Serial** | Records stored in arrival order |
+| **Sequential** | Records stored in key order |
+| **Random** | Address calculated by hashing |
+
+## Access methods
+- **Sequential access**: read records in order
+- **Direct access**: go straight to the record (using an index or hash)
+
+## Hashing
+Address = hash(key). **Collisions** are handled by open hashing (next free space) or overflow areas.
+
+> Exam tip: match the method to the use: payroll (sequential batch) vs booking system (direct).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b457ceaa-321f-588a-a588-93c9a4722d0e', '6562a7cc-792f-5e3d-a2a3-7457c0537035', '13.3', 'Floating-point numbers, representation and manipulation', 2, '## Floating-point representation
+**Number = mantissa × 2^exponent** (both two''s complement)
+
+## Normalisation
+- Positive mantissa starts **0.1**
+- Negative mantissa starts **1.0**
+Maximises precision.
+
+## Precision vs range
+- More mantissa bits → more **precision**
+- More exponent bits → more **range**
+
+## Errors
+- **Rounding errors**: some values can''t be stored exactly (e.g. 0.1)
+- **Overflow**: too large; **underflow**: too small
+
+> Exam tip: practise converting between denary and floating-point, showing each step.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2065bdaf-f868-5974-a3e6-407170e20af8', '65a56281-9deb-5f5b-ac26-255c32357f12', '14.1', 'Protocols', 0, '## Why protocols?
+Rules that let devices communicate.
+
+## TCP/IP stack
+| Layer | Protocols |
+|---|---|
+| **Application** | HTTP, FTP, POP3, IMAP, SMTP, BitTorrent |
+| **Transport** | TCP, UDP |
+| **Internet (network)** | IP |
+| **Link** | Ethernet, Wi-Fi |
+
+## Key protocols
+- **HTTP(S)**: web pages
+- **FTP**: file transfer
+- **SMTP**: send email; **POP3/IMAP**: retrieve
+- **BitTorrent**: P2P (trackers, seeds, peers, swarm)
+
+> Exam tip: describe what happens at each layer when data is sent.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('e3a3ca3c-831c-585a-a01b-4de0be20cd93', '65a56281-9deb-5f5b-ac26-255c32357f12', '14.2', 'Circuit switching, packet switching', 1, '## Circuit switching
+A dedicated path is set up for the whole communication.
+**Pros**: data in order, constant quality. **Cons**: wastes bandwidth, setup time.
+
+## Packet switching
+Data split into packets with headers (source, destination, sequence number); each routed independently.
+**Pros**: efficient, robust. **Cons**: packets may arrive out of order or be lost, delays.
+
+## Routers
+Use routing tables to forward packets.
+
+> Exam tip: compare both methods for a given use, e.g. video calls.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('921e4df9-35c9-5521-aa0b-f8f87f9fa5af', '3866a7b8-b66c-5766-aa95-99e33137a315', '15.1', 'Processors, parallel processing and virtual machines', 0, '## RISC vs CISC
+| RISC | CISC |
+|---|---|
+| Few simple instructions | Many complex instructions |
+| Fixed-length | Variable-length |
+| Many registers | Fewer registers |
+| Easy to pipeline | Harder to pipeline |
+
+## Pipelining
+Instruction stages overlap. Interrupts and branches can disrupt the pipeline.
+
+## Parallel processing (Flynn''s taxonomy)
+SISD, SIMD, MISD, MIMD. Massively parallel computers.
+
+## Virtual machines
+Software emulation of a computer. **Pros**: run multiple OSs, testing, security. **Cons**: slower, needs resources.
+
+> Exam tip: give a real example of each type of parallel processing.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('b3a34ff5-fb4c-5bd4-ae20-0f10cc708dc8', '3866a7b8-b66c-5766-aa95-99e33137a315', '15.2', 'Boolean algebra and logic circuits', 1, '## Boolean algebra laws
+- **Identity**: A.1 = A, A + 0 = A
+- **Null**: A.0 = 0, A + 1 = 1
+- **Idempotent**: A.A = A, A + A = A
+- **Inverse**: A.¬A = 0, A + ¬A = 1
+- **Absorption**: A + A.B = A
+- **De Morgan''s**: ¬(A.B) = ¬A + ¬B; ¬(A + B) = ¬A.¬B
+
+## Karnaugh maps
+Group 1s in powers of 2 to simplify expressions.
+
+## Adders and flip-flops
+- **Half adder**: Sum = A XOR B, Carry = A AND B
+- **Full adder**: adds a carry in
+- **SR and JK flip-flops**: store one bit
+
+> Exam tip: draw K-maps with Gray-code ordering (00, 01, 11, 10).') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('2ca2e0a8-8851-5486-a010-cf1a8deaba76', 'e8356ae1-bf24-5bec-ab32-f35e797d3a40', '16.1', 'Purposes of an operating system (OS)', 0, '## Maximising resources
+The OS manages the CPU, memory and I/O to maximise use.
+
+## Process states
+Ready, running, blocked. The **scheduler** moves processes between states.
+
+## Scheduling algorithms
+First come first served, shortest job first, shortest remaining time, round robin.
+
+## Interrupts
+Low-level scheduler handles interrupts.
+
+## Memory management
+- **Paging**: fixed-size pages and frames
+- **Segmentation**: variable-size segments
+- **Virtual memory**: uses disk as extra RAM
+- **Page replacement**; **disk thrashing**
+
+> Exam tip: describe how virtual memory works step by step.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('301f9158-f35f-5f8f-a82c-cca9b2eccf05', 'e8356ae1-bf24-5bec-ab32-f35e797d3a40', '16.2', 'Translation software', 1, '## Stages of compilation
+1. **Lexical analysis**: tokens, symbol table
+2. **Syntax analysis**: parse against grammar
+3. **Code generation**
+4. **Optimisation**
+
+## Grammar
+- **BNF** and **syntax diagrams** define language rules
+
+```
+<digit> ::= 0|1|2|3|4|5|6|7|8|9
+<integer> ::= <digit>|<digit><integer>
+```
+
+## Reverse Polish notation (RPN)
+Operators follow operands. Evaluated with a **stack**: (A + B) × C → A B + C ×
+
+> Exam tip: practise converting infix to RPN and evaluating with a stack.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('08f42bd7-5d93-574a-aa3b-216d89b09b4c', '562e73ea-0572-5f33-a4ba-4e3addf1bbbe', '17.1', 'Encryption, encryption protocols and digital certificates', 0, '## Encryption terms
+Plaintext, ciphertext, key, encryption, decryption.
+
+## Symmetric vs asymmetric
+| Symmetric | Asymmetric |
+|---|---|
+| One shared key | Public and private key pair |
+| Fast | Slower |
+| Key distribution problem | Solves key distribution |
+
+## Quantum cryptography
+Uses photons; eavesdropping changes their state, so it''s detected.
+
+## SSL/TLS
+Handshake: agree encryption, exchange certificates and keys, then encrypt data (HTTPS).
+
+## Digital signatures and certificates
+- **Signature**: hash of message encrypted with sender''s **private** key; verified with the **public** key
+- **Certificate**: issued by a **Certificate Authority**, binds a public key to an identity
+
+> Exam tip: state exactly which key is used at each step.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('044aea83-4b34-54ac-a658-7edf8bbadb79', 'afb57e98-3eae-591b-a6a5-9bf40bd6c033', '18.1', 'Artificial Intelligence (AI)', 0, '## Graphs in AI
+Nodes and edges represent states or locations.
+- **Dijkstra''s algorithm**: shortest path from a start node
+- **A***: adds a heuristic (estimated distance to goal) for efficiency
+
+## Machine learning
+| Type | Data |
+|---|---|
+| **Supervised** | Labelled data |
+| **Unsupervised** | Unlabelled; finds patterns (clustering) |
+| **Reinforcement** | Rewards and penalties |
+
+## Artificial neural networks
+Input, hidden and output layers; weights; **back propagation** reduces error.
+**Deep learning**: many hidden layers.
+
+## Regression
+Predicting values from data.
+
+> Exam tip: practise tracing Dijkstra''s on a small graph in a table.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('3f50b6cf-1874-5a6e-afc8-73be052106db', 'b8085493-dcd1-5eb2-ab97-83d17ea204a0', '19.1', 'Algorithms', 0, '## Searching
+- **Linear search**: O(n)
+- **Binary search**: O(log n), sorted data
+
+```
+Low ← 1
+High ← N
+Found ← FALSE
+WHILE Low <= High AND NOT Found
+    Mid ← (Low + High) DIV 2
+    IF A[Mid] = Target THEN
+        Found ← TRUE
+    ELSE
+        IF A[Mid] < Target THEN
+            Low ← Mid + 1
+        ELSE
+            High ← Mid - 1
+        ENDIF
+    ENDIF
+ENDWHILE
+```
+
+## Sorting
+Bubble sort and **insertion sort**; Big O notation for time and space complexity.
+
+## ADTs
+Linked lists, stacks, queues, binary trees, graphs, dictionaries: implemented with arrays and pointers.
+
+> Exam tip: learn Big O for each standard algorithm.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6ffd6ff9-aebc-507c-a9f1-18eedf7f959a', 'b8085493-dcd1-5eb2-ab97-83d17ea204a0', '19.2', 'Recursion', 1, '## Recursion
+A subroutine that **calls itself**. It must have:
+1. A **base case** (stopping condition)
+2. A **general case** that moves towards the base case
+
+```
+FUNCTION Factorial(N : INTEGER) RETURNS INTEGER
+    IF N = 0 THEN
+        RETURN 1
+    ELSE
+        RETURN N * Factorial(N - 1)
+    ENDIF
+ENDFUNCTION
+```
+
+## How it works
+Each call pushes a **stack frame** (parameters, local variables, return address). Frames are popped as calls return.
+
+## Recursion vs iteration
+Recursion is elegant but uses more memory and risks **stack overflow**.
+
+> Exam tip: practise tracing recursive calls in a table.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('6c05a17f-ea03-50b1-a531-57541875260c', 'b76b6a87-098c-5437-a17f-8996bc45c1e8', '20.1', 'Programming paradigms', 0, '## Programming paradigms
+- **Low-level**: assembly, addressing modes
+- **Imperative (procedural)**: step-by-step instructions
+- **Object-oriented**: classes and objects
+- **Declarative**: facts and rules (Prolog)
+
+## OOP terms
+Class, object, attribute, method, constructor, **encapsulation**, **inheritance**, **polymorphism**, containment (aggregation), getters and setters.
+
+```
+CLASS Pet
+    PRIVATE Name : STRING
+    PUBLIC PROCEDURE NEW(GivenName : STRING)
+        Name ← GivenName
+    ENDPROCEDURE
+    PUBLIC FUNCTION GetName() RETURNS STRING
+        RETURN Name
+    ENDFUNCTION
+ENDCLASS
+```
+
+## Declarative (Prolog)
+```
+parent(ana, ben).
+grandparent(X, Z) :- parent(X, Y), parent(Y, Z).
+```
+
+> Exam tip: Paper 4 is practical: practise writing classes in your chosen language.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
+insert into parts (id, chapter_id, number, title, sort, body) values ('d05c7a00-b88e-5fd4-a8e4-0afcaa1ca0e9', 'b76b6a87-098c-5437-a17f-8996bc45c1e8', '20.2', 'File processing and exception handling', 1, '## File processing
+Serial, sequential and random files.
+
+```
+OPENFILE "data.dat" FOR RANDOM
+SEEK "data.dat", 5
+GETRECORD "data.dat", Student
+PUTRECORD "data.dat", Student
+CLOSEFILE "data.dat"
+```
+
+## Exception handling
+Catches run-time errors (file not found, division by zero, invalid input) so the program doesn''t crash.
+
+```
+try:
+    f = open("data.txt")
+except FileNotFoundError:
+    print("File missing")
+```
+
+> Exam tip: always explain *why* an exception might occur in the context given.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 commit;

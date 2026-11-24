@@ -14,3 +14,6 @@ export const inLevel = (tier: string, level: LevelId) => LEVELS.find((l) => l.id
 export function groupByLevel<T extends { tier: string }>(items: T[]) {
   return LEVELS.map((l) => ({ level: l, items: items.filter((i) => l.tiers.includes(i.tier)) })).filter((g) => g.items.length);
 }
+/** Which student tiers a course is meant for: A Level students still revise AS content, but AS students don't get A Level work. */
+export const studentTiersFor = (courseTier: string | null | undefined): string[] =>
+  courseTier === "AS" ? ["AS", "A"] : courseTier === "A" ? ["A"] : ["O"];

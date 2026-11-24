@@ -33,12 +33,19 @@ select pg_temp.as_user(:'ava'); select delete_chat((select id from chat_messages
 select count(*) as now_1_after_own_delete from chat_messages;
 do $$ declare i int; begin for i in 1..10 loop perform post_chat('spam ' || i); end loop; raise exception 'no rate limit!';
 exception when others then if sqlerrm like '%slow down%' then raise notice 'ok: chat rate limited'; else raise; end if; end $$;
--- a mixed AS-level battle has no questions yet
+-- a mixed AS-level battle only draws AS questions
 select create_battle('1v1', null, 3, 'AS') as ascode \gset
 reset role; insert into battle_players(battle_id, user_id, team) select id, '00000000-0000-0000-0000-000000000004', 2 from battles where code = :'ascode'; set role authenticated;
 select pg_temp.as_user(:'ava');
-do $$ begin perform start_battle((select id from battles where tier = 'AS' limit 1)); raise exception 'started with no AS questions!';
-exception when others then if sqlerrm like '%no questions available%' then raise notice 'ok: level-filtered questions'; else raise; end if; end $$;
+select start_battle((select id from battles where tier = 'AS' limit 1));
+reset role;
+do $$ begin
+  if exists (select 1 from battle_rounds r join battles b on b.id = r.battle_id join questions q on q.id = r.question_id
+             join courses c on c.id = q.course_id where b.tier = 'AS' and c.tier <> 'AS') then raise exception 'AS battle used non-AS questions'; end if;
+  if (select count(*) from battle_rounds r join battles b on b.id = r.battle_id where b.tier = 'AS') <> 3 then raise exception 'AS battle has wrong round count'; end if;
+  raise notice 'ok: level-filtered questions';
+end $$;
+set role authenticated; select pg_temp.as_user(:'ava');
 -- party leave by leader disbands
 select party_leave(); select count(*) as parties_left_should_be_0 from parties;
 -- exams: one attempt, closing time, focus count

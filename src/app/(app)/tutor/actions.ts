@@ -10,6 +10,7 @@ import { requireTutor } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { postToDiscord, siteUrl } from "@/lib/discord";
+import { studentTiersFor } from "@/lib/levels";
 
 const uuid = z.string().uuid();
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -418,7 +419,7 @@ export async function createExam(fd: FormData) {
   if (error) await fail(error.message);
   if (status !== "draft") {
     const { data: c } = await admin.from("courses").select("title, tier").eq("id", course).single();
-    const { data: studs } = await admin.from("profiles").select("id").eq("status", "approved").eq("role", "student").eq("tier", c?.tier || "O");
+    const { data: studs } = await admin.from("profiles").select("id").eq("status", "approved").eq("role", "student").in("tier", studentTiersFor(c?.tier));
     const when = status === "scheduled" ? `Opens ${str(fd, "opens_at").replace("T", " ")}` : "Open now";
     if (studs?.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `📝 New exam: ${str(fd, "title")}`, body: `${c?.title} · ${when}`, link: "/practice" })));
     await postToDiscord("", [{ title: `📝 New exam: ${str(fd, "title")}`, description: `${c?.title} · ${count} questions · ${minutes} min · ${when}${closes ? ` · closes ${str(fd, "closes_at").replace("T", " ")}` : ""}`, color: 0xa855f7, url: siteUrl() + "/practice" }]);

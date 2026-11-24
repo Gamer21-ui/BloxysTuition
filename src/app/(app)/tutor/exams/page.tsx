@@ -6,6 +6,7 @@ import { fmtDateTime } from "@/lib/utils";
 import { groupByLevel } from "@/lib/levels";
 import { StatusForm } from "../status-form";
 import { createExam, deleteExam, updateExam } from "../actions";
+import { studentTiersFor } from "@/lib/levels";
 
 export const metadata: Metadata = { title: "Exams (tutor)" };
 export const dynamic = "force-dynamic";
@@ -57,7 +58,7 @@ export default async function TutorExams() {
       <div className="space-y-4">
         {list.map((e) => {
           const mine = attempts.filter((a) => a.quiz_id === e.id);
-          const who = (studs || []).filter((s) => s.tier === e.course?.tier || mine.some((a) => a.user_id === s.id));
+          const who = (studs || []).filter((s) => studentTiersFor(e.course?.tier).includes(s.tier) || mine.some((a) => a.user_id === s.id));
           const done = new Set(mine.filter((a) => a.finished_at).map((a) => a.user_id));
           return (
             <details key={e.id} className="card">
