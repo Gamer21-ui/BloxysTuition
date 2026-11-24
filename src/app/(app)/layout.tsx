@@ -18,8 +18,9 @@ export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const me = await requireApproved();
-  // new students pick their subjects before anything else
-  if (me.role === "student" && !me.subjects?.length) redirect("/subjects");
+  // new students pick their subjects before anything else.
+  // (undefined = the database update hasn't been run yet, so don't send anyone to the picker)
+  if (me.role === "student" && me.subjects !== undefined && !me.subjects?.length) redirect("/subjects");
   const sb = await createClient();
   const tutor = me.role === "tutor";
   const now = new Date().toISOString();
