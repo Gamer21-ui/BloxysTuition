@@ -12,13 +12,15 @@ type Result = {
   score: number; total: number; time_ms: number; flagged: boolean; xp: number; multiplier: number;
   leveled_up: boolean; level_after: number; review_added?: number; results: ReviewResult[];
 };
-type Saved = { attempt: string; qs: ReviewQ[]; started: number; answers: Record<string, number>; flags: string[] };
+type Saved = { attempt: string; qs: ReviewQ[]; started: number; answers: Record<string, number>; flags: string[]; away?: number };
 const LETTERS = ["A", "B", "C", "D", "E"];
 const mmss = (ms: number) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
 
-export function ExamPlayer(props: { quizId: string; title: string; subtitle: string; count: number; timeLimit: number; xpReward: number; color: string; real: boolean }) {
+export function ExamPlayer(props: { quizId: string; title: string; subtitle: string; count: number; timeLimit: number; xpReward: number; color: string; real: boolean; closesAt?: string | null; attemptsLeft?: number | null }) {
   const key = `fb_exam_${props.quizId}`;
   const limitMs = props.timeLimit * 1000;
+  const [warn, setWarn] = useState(false);
+  const awayNow = useRef(false);
   const [phase, setPhase] = useState<"intro" | "play" | "sending" | "done">("intro");
   const [saved, setSaved] = useState<Saved | null>(null);
   const [resumable, setResumable] = useState<Saved | null>(null);
@@ -44,7 +46,8 @@ export function ExamPlayer(props: { quizId: string; title: string; subtitle: str
     if (sending.current) return;
     sending.current = true;
     setPhase("sending"); setConfirm(false);
-    const { data, error } = await createClient().rpc("submit_quiz", { p_attempt: s.attempt, p_answers: s.answers });
+    const { data, error } = await createClient().rpc("submit_quiz", { p_attempt: s.attempt, p_answers: s.answers, p_focus_lost: s.away || 0 });
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     sending.current = false;
     if (error) { setErr(error.message); setPhase("play"); return; }
     try { localStorage.removeItem(key); } catch { /* ignore */ }
@@ -58,17 +61,52 @@ export function ExamPlayer(props: { quizId: string; title: string; subtitle: str
     return () => clearInterval(t);
   }, [phase]);
 
-  const left = saved ? limitMs - (now - saved.started) : limitMs;
+  // ends at the time limit, or when the exam closes, whichever comes first
+  const deadline = saved ? Math.min(saved.started + limitMs, props.closesAt ? +new Date(props.closesAt) : Infinity) : 0;
+  const left = saved ? deadline - now : limitMs;
   useEffect(() => { if (phase === "play" && saved && left <= 0) void submit(saved); }, [phase, saved, left, submit]);
 
+  // focus mode: full screen, and count every time the student leaves the exam screen
+  const goFull = () => { try { if (!document.fullscreenElement) document.documentElement.requestFullscreen?.().catch(() => {}); } catch { /* not supported (e.g. iPhone) */ } };
+  useEffect(() => {
+    if (phase !== "play") return;
+    const away = () => {
+      if (awayNow.current) return;
+      awayNow.current = true;
+      setSaved((s) => { if (!s) return s; const n = { ...s, away: (s.away || 0) + 1 }; try { localStorage.setItem(key, JSON.stringify(n)); } catch { /* ignore */ } return n; });
+      setWarn(true);
+    };
+    const back = () => { awayNow.current = false; };
+    const onVis = () => (document.hidden ? away() : back());
+    const onFs = () => { if (!document.fullscreenElement && document.fullscreenEnabled) away(); else back(); };
+    const block = (e: Event) => e.preventDefault();
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("blur", away);
+    window.addEventListener("focus", back);
+    document.addEventListener("fullscreenchange", onFs);
+    for (const ev of ["copy", "cut", "paste", "contextmenu"]) document.addEventListener(ev, block);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("blur", away);
+      window.removeEventListener("focus", back);
+      document.removeEventListener("fullscreenchange", onFs);
+      for (const ev of ["copy", "cut", "paste", "contextmenu"]) document.removeEventListener(ev, block);
+    };
+  }, [phase, key]);
+
   async function start() {
+    goFull();
     setErr(null);
     const { data, error } = await createClient().rpc("start_quiz", { p_quiz: props.quizId });
-    if (error) return setErr(error.message.includes("no questions") ? "No chapters are released yet for this subject." : error.message);
+    if (error) {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      const m = error.message;
+      return setErr(m.includes("no questions") ? "No chapters are released yet for this subject." : m.includes("no attempts") ? "You have no attempts left for this exam." : m.includes("closed") ? "This exam has closed." : m.includes("locked") ? "This exam is locked. Your tutor will open it." : m);
+    }
     persist({ attempt: data.attempt_id, qs: data.questions, started: Date.now(), answers: {}, flags: [] });
     setI(0); setNow(Date.now()); setPhase("play");
   }
-  function resume() { if (resumable) { setSaved(resumable); setResumable(null); setNow(Date.now()); setPhase("play"); } }
+  function resume() { if (resumable) { goFull(); setSaved(resumable); setResumable(null); setNow(Date.now()); setPhase("play"); } }
 
   const back = <Link href="/practice" className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden="true" /> Practice</Link>;
 
@@ -88,7 +126,10 @@ export function ExamPlayer(props: { quizId: string; title: string; subtitle: str
             <li>🔁 Move between questions, change answers and flag ones to come back to.</li>
             <li>🤫 No feedback until the end, just like the real thing.</li>
             <li>📚 Anything you get wrong goes into your mistakes deck.</li>
-            <li>✨ Up to {props.xpReward} XP for your first 2 attempts each day.</li>
+            <li>✨ Up to {props.xpReward} XP{props.attemptsLeft == null ? " for your first 2 attempts each day" : ""}.</li>
+            {props.attemptsLeft != null && <li>🎯 <b>{props.attemptsLeft} attempt{props.attemptsLeft === 1 ? "" : "s"} left.</b> Starting uses one.</li>}
+            {props.closesAt && <li>📅 Closes {new Date(props.closesAt).toLocaleString("en-GB", { timeZone: "Indian/Mauritius", dateStyle: "medium", timeStyle: "short" })}. Unfinished work is submitted then.</li>}
+            <li>🖥️ <b>Focus mode:</b> the exam goes full screen. Leaving it (switching tab or app) is counted and shown to your tutor.</li>
           </ul>
           {!props.real && <p className="mt-3 rounded border-2 border-line bg-surface2 p-2 text-xs text-muted">This subject has no multiple-choice paper in the real exam. This is a timed mixed-topic test to check your knowledge across the syllabus.</p>}
           {err && <p className="mt-3 font-bold text-bad">{err}</p>}
@@ -146,7 +187,17 @@ export function ExamPlayer(props: { quizId: string; title: string; subtitle: str
   const toggleFlag = () => persist({ ...saved, flags: flagged ? saved.flags.filter((x) => x !== q.id) : [...saved.flags, q.id] });
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl select-none">
+      {warn && (
+        <div className="fixed inset-0 z-[60] grid place-items-center bg-black/80 p-4" role="alertdialog" aria-modal="true">
+          <div className="card max-w-sm text-center">
+            <div className="text-4xl">👀</div>
+            <h2 className="mt-2 text-xl">You left the exam screen</h2>
+            <p className="mt-1 text-sm text-muted">That&apos;s {saved.away || 1} time{(saved.away || 1) === 1 ? "" : "s"} so far. Your tutor can see this count. Your timer kept running.</p>
+            <button className="btn btn-primary mt-4" onClick={() => { setWarn(false); goFull(); }}>Back to the exam</button>
+          </div>
+        </div>
+      )}
       <div className="sticky top-0 z-10 -mx-2 mb-4 flex items-center gap-3 bg-bg/90 px-2 py-2 backdrop-blur">
         <span className="font-bold">{props.title.split(" (")[0]}</span>
         <span className="text-sm text-muted">{answered}/{saved.qs.length} answered</span>

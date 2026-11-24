@@ -27,7 +27,7 @@ export default async function Students() {
         <div className="text-xs text-muted">{s.tier} Level · Lv {levelFromXp(s.xp)} · {s.xp} XP · 🔥 {s.streak} · joined {timeAgo(s.created_at)}</div>
       </Link>
       <StatusChip status={s.status} />
-      <StatusButtons id={s.id} status={s.status} />
+      <StatusButtons id={s.id} status={s.status} tier={s.tier} />
     </div>
   );
 

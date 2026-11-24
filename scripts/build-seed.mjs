@@ -44,7 +44,7 @@ COURSES.forEach((c, ci) => {
   const sp = uid("speedrun:" + c.slug);
   out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, sort) values (${q(sp)}, ${q(cid)}, null, ${q(c.title + " Speedrun")}, 'speedrun', 60, 150, 999) on conflict (id) do nothing;`);
   const ex = EXAMS[c.slug];
-  if (ex) out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort) values (${q(uid("exam:" + c.slug))}, ${q(cid)}, null, ${q(ex.title)}, 'exam', ${ex.xp}, ${ex.secs}, ${ex.count}, 1000) on conflict (id) do nothing;`);
+  if (ex) out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values (${q(uid("exam:" + c.slug))}, ${q(cid)}, null, ${q(ex.title)}, 'exam', ${ex.xp}, ${ex.secs}, ${ex.count}, 1000, 'locked') on conflict (id) do nothing;`);
   out.push(`insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values (${q(uid("review:" + c.slug))}, ${q(cid)}, null, ${q("Fix my mistakes")}, 'review', 0, 1001) on conflict (id) do nothing;`);
   c.chapters.forEach((ch, hi) => {
     const chid = uid(`chapter:${c.slug}:${ch.n}`);

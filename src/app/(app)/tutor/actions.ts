@@ -33,11 +33,13 @@ export async function tutorUploadUrl(bucket: "resources" | "solutions", folder: 
 }
 
 // ---------------------------------------------------------------- students
-export async function setStudentStatus(id: string, status: "approved" | "suspended" | "pending") {
+export async function setStudentStatus(id: string, status: "approved" | "suspended" | "pending", tier?: "O" | "AS" | "A") {
   await requireTutor();
   uuid.parse(id); z.enum(["approved", "suspended", "pending"]).parse(status);
   const admin = createAdminClient();
-  await admin.from("profiles").update({ status }).eq("id", id).neq("role", "tutor");
+  const patch: Record<string, string> = { status };
+  if (tier) patch.tier = z.enum(["O", "AS", "A"]).parse(tier);
+  await admin.from("profiles").update(patch).eq("id", id).neq("role", "tutor");
   if (status === "approved") {
     await admin.from("notifications").insert({ user_id: id, title: "You're in! 🎉", body: "Your tutor approved your account. Pick a theme and start your first quiz.", link: "/profile" });
   }
@@ -193,6 +195,7 @@ export async function setStatus(fd: FormData) {
   if (status === "scheduled" && !release_at) await fail("Pick a release date for scheduled items");
   await createAdminClient().from(table).update({ status, release_at }).eq("id", id);
   revalidatePath("/tutor/content", "layout");
+  revalidatePath("/tutor/exams");
 }
 
 export async function savePart(fd: FormData) {
@@ -393,4 +396,50 @@ export async function updateShopItem(fd: FormData) {
     active: fd.get("active") === "on",
   }).eq("id", uuid.parse(str(fd, "id")));
   revalidatePath("/tutor/shop");
+}
+
+// ---------------------------------------------------------------- exams
+export async function createExam(fd: FormData) {
+  await requireTutor();
+  const course = uuid.parse(str(fd, "course"));
+  const opens = mu(opt(fd, "opens_at"));
+  const closes = mu(opt(fd, "closes_at"));
+  if (opens && closes && closes <= opens) await fail("The closing time must be after the opening time");
+  const minutes = z.number().int().min(5).max(240).parse(num(fd, "minutes", 60));
+  const count = z.number().int().min(5).max(80).parse(num(fd, "count", 40));
+  const attempts = num(fd, "attempts", 1);
+  const status = fd.get("draft") === "on" ? "draft" : opens && opens > new Date().toISOString() ? "scheduled" : "published";
+  const admin = createAdminClient();
+  const { error } = await admin.from("quizzes").insert({
+    course_id: course, chapter_id: null, kind: "exam", title: z.string().min(3).max(120).parse(str(fd, "title")),
+    question_count: count, time_limit_sec: minutes * 60, xp_reward: z.number().int().min(0).max(2000).parse(num(fd, "xp", 200)),
+    status, release_at: status === "scheduled" ? opens : null, closes_at: closes, max_attempts: attempts > 0 ? attempts : null, sort: 900,
+  });
+  if (error) await fail(error.message);
+  if (status !== "draft") {
+    const { data: c } = await admin.from("courses").select("title, tier").eq("id", course).single();
+    const { data: studs } = await admin.from("profiles").select("id").eq("status", "approved").eq("role", "student").eq("tier", c?.tier || "O");
+    const when = status === "scheduled" ? `Opens ${str(fd, "opens_at").replace("T", " ")}` : "Open now";
+    if (studs?.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `📝 New exam: ${str(fd, "title")}`, body: `${c?.title} · ${when}`, link: "/practice" })));
+    await postToDiscord("", [{ title: `📝 New exam: ${str(fd, "title")}`, description: `${c?.title} · ${count} questions · ${minutes} min · ${when}${closes ? ` · closes ${str(fd, "closes_at").replace("T", " ")}` : ""}`, color: 0xa855f7, url: siteUrl() + "/practice" }]);
+  }
+  revalidatePath("/tutor/exams");
+}
+
+export async function updateExam(fd: FormData) {
+  await requireTutor();
+  const attempts = num(fd, "attempts", 0);
+  await createAdminClient().from("quizzes").update({
+    closes_at: mu(opt(fd, "closes_at")),
+    max_attempts: attempts > 0 ? attempts : null,
+    time_limit_sec: z.number().int().min(5).max(240).parse(num(fd, "minutes", 60)) * 60,
+    question_count: z.number().int().min(5).max(80).parse(num(fd, "count", 40)),
+  }).eq("id", uuid.parse(str(fd, "id"))).eq("kind", "exam");
+  revalidatePath("/tutor/exams");
+}
+
+export async function deleteExam(fd: FormData) {
+  await requireTutor();
+  await createAdminClient().from("quizzes").delete().eq("id", uuid.parse(str(fd, "id"))).eq("kind", "exam");
+  revalidatePath("/tutor/exams");
 }

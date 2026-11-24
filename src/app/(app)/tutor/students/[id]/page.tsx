@@ -66,7 +66,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
           <div className="text-muted">@{p.discord_username} · Lv {lvl} {rankName(lvl)} · {p.xp} XP · 🪙 {p.coins} · 🔥 {p.streak} (best {p.best_streak})</div>
         </div>
         <StatusChip status={p.status} />
-        <StatusButtons id={p.id} status={p.status} />
+        <StatusButtons id={p.id} status={p.status} tier={p.tier} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">

@@ -21,6 +21,8 @@ export default async function Profile() {
         level={levelFromXp(me.xp)}
         ownedHats={owned.filter((o) => o.kind === "hat").map((o) => o.code)}
         ownedPatterns={owned.filter((o) => o.kind === "pattern").map((o) => o.code)}
+        ownedFace={owned.filter((o) => o.kind === "face_acc").map((o) => o.code)}
+        ownedBack={owned.filter((o) => o.kind === "back").map((o) => o.code)}
         frame={me.frame}
         initial={{ mode: me.avatar_mode, blocky: me.blocky, displayName: me.display_name, roblox: me.roblox_username, robloxImg: me.roblox_headshot_url, discordImg: me.discord_avatar_url }}
       />

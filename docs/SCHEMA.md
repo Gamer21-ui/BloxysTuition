@@ -1,6 +1,6 @@
 # Database schema
 
-Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating, 0005 = exam mode + mistakes deck, 0006 = coin shop, 0007 = owner-only cosmetics (`shop_items.tutor_only`).
+Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functions, 0003 = security (RLS, grants, storage, realtime), 0004 = average topic rating, 0005 = exam mode + mistakes deck, 0006 = coin shop, 0007 = owner-only cosmetics (`shop_items.tutor_only`), 0008 = friends, parties, chat, battle levels, tutor-run exams, face/back avatar slots.
 
 ## People
 
@@ -19,7 +19,7 @@ Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functi
 | `chapters` | Syllabus chapter, with `status` (draft/locked/scheduled/published) and `release_at` |
 | `parts` | Lesson notes inside a chapter (Markdown body, optional video) |
 | `resources` | Files/links, `section` = `library` (ready-made) or `class` (your lecture notes) |
-| `quizzes` | `quiz` (per chapter), `speedrun`, `exam` (timed, draws `question_count` from released chapters) or `review` (mistakes deck), the last three per course |
+| `quizzes` | Exams also have `closes_at` and `max_attempts`; attempts record `focus_lost` (times the student left the exam screen). Kinds: `quiz` (per chapter), `speedrun`, `exam` (timed, draws `question_count` from released chapters) or `review` (mistakes deck), the last three per course |
 | `questions` | Prompt + options (no answer!) |
 | `question_keys` | The correct option index. Tutor-only. |
 | `quiz_attempts` | One per play: questions served, answers, score, time, XP, flagged |
@@ -33,6 +33,9 @@ Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functi
 | `achievements` / `user_achievements` | Badge definitions (criteria JSON) and who earned them |
 | `challenges` / `challenge_progress` | Daily/weekly/once quests and per-period progress |
 | `battles`, `battle_players`, `battle_rounds`, `battle_answers` | Live quiz battles |
+| `friendships` | Friend requests (pending/accepted) between two students |
+| `parties` / `party_members` / `party_invites` | Up to 4 friends; when the leader creates or joins a battle, members are added to it |
+| `chat_messages` | Chat, including battle requests (`kind = 'battle'` with code, mode, level) |
 | `shop_items` / `user_items` | Shop catalogue (unique per kind + code) and what each student owns. Equipped cosmetics live on `profiles` (`title`, `name_style`, `frame`, `blocky.hat`, `blocky.pattern`); `profiles.streak_freezes` counts freezes held |
 
 ## Class
@@ -50,6 +53,9 @@ Source of truth: `supabase/migrations/`. 0001 = tables, 0002 = game logic functi
 | `start_quiz(quiz)` / `submit_quiz(attempt, answers)` | student | Serve shuffled questions; mark, award XP, update quests and badges |
 | `create_battle`, `join_battle`, `leave_battle`, `start_battle`, `battle_question`, `answer_battle`, `tick_battle` | student | Battle lifecycle |
 | `get_leaderboard(kind)`, `profile_cards(ids)` | student | Public-safe views of other players |
+| `send_friend_request`, `respond_friend_request`, `remove_friend`, `student_directory` | student | Friends |
+| `party_invite`, `party_accept`, `party_decline`, `party_leave`, `party_kick` | student | Parties |
+| `post_chat(body, battle_code?)`, `delete_chat(id)` | student / tutor | Chat (rate-limited; tutor can delete anything) |
 | `buy_item(item)`, `equip_item(kind, code)` | student | Spend coins (checks level and balance) and equip/take off cosmetics |
 | `tutor_award`, `mark_attendance`, `grade_submission` | tutor | Award XP through the same ledger |
 

@@ -33,6 +33,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   const [err, setErr] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const phaseSeen = useRef<{ key: string; at: number }>({ key: "", at: Date.now() });
   const qKey = useRef("");
   const announced = useRef(false);
@@ -214,6 +215,10 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
             <p className="text-muted">Share the code <b className="text-ink">{code}</b> in Discord. {mode === "2v2" ? "Up to 2 per team." : "One each."} The host starts when both sides have someone.</p>
             <div className="mt-4 flex justify-center gap-3">
               {b.host_id === meId && <button className="btn btn-primary" disabled={team(1).length === 0 || team(2).length === 0} onClick={() => rpc("start_battle", { p_battle: battleId })}>Start battle</button>}
+              {amPlayer && <button className="btn btn-accent" disabled={shared} onClick={async () => {
+                const { error } = await sb.rpc("post_chat", { p_body: "", p_battle_code: code });
+                if (error) setErr(error.message); else setShared(true);
+              }}>{shared ? "Shared in chat ✔" : "Share in chat"}</button>}
               {amPlayer && <button className="btn btn-ghost" onClick={async () => { await rpc("leave_battle", { p_battle: battleId }); router.push("/battles"); }}>{b.host_id === meId ? "Cancel lobby" : "Leave"}</button>}
             </div>
           </div>

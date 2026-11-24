@@ -37,7 +37,10 @@ export interface BlockyConfig {
   shirt?: string;
   pants?: string;
   face?: "smile" | "cool" | "wink" | "grin" | "focused";
-  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking" | "wizard" | "cowboy" | "beanie" | "party" | "chef" | "ninja" | "owner_crown";
+  hat?: "none" | "cap" | "crown" | "tophat" | "headphones" | "halo" | "viking" | "wizard" | "cowboy" | "beanie" | "party" | "chef" | "ninja" | "owner_crown"
+    | "fedora" | "horns" | "frost_crown" | "neon_phones" | "bunny" | "mushroom" | "tricorn" | "kabuto" | "astronaut";
+  face_acc?: "none" | "shades" | "nerd" | "eyepatch" | "monocle" | "laser_visor";
+  back?: "none" | "angel_wings" | "demon_wings" | "butterfly" | "cape" | "blade" | "jetpack" | "shadow_aura";
   pattern?: "none" | "stars" | "checker" | "stripes" | "grass" | "galaxy" | "owner";
   bg?: string;
 }

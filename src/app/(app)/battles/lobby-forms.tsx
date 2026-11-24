@@ -6,18 +6,19 @@ import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
 import { groupByLevel } from "@/lib/levels";
 
-export function BattleLobbyForms({ courses }: { courses: { id: string; title: string; code: string; tier: string }[] }) {
+export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: string; title: string; code: string; tier: string }[]; myTier?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"1v1" | "2v2">("1v1");
   const [course, setCourse] = useState("");
   const [rounds, setRounds] = useState(5);
+  const [tier, setTier] = useState(myTier);
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function create() {
     setBusy(true); setErr(null);
-    const { data, error } = await createClient().rpc("create_battle", { p_mode: mode, p_course: course || null, p_rounds: rounds });
+    const { data, error } = await createClient().rpc("create_battle", { p_mode: mode, p_course: course || null, p_rounds: rounds, p_tier: course ? null : tier });
     setBusy(false);
     if (error) return setErr(error.message);
     router.push(`/battles/${data}`);
@@ -46,12 +47,20 @@ export function BattleLobbyForms({ courses }: { courses: { id: string; title: st
           <div>
             <label className="label" htmlFor="bc">Subject</label>
             <select id="bc" className="input" value={course} onChange={(e) => setCourse(e.target.value)}>
-              <option value="">Mixed (all subjects)</option>
+              <option value="">Mixed (all subjects at one level)</option>
               {groupByLevel(courses).map((g) => (
                 <optgroup key={g.level.id} label={g.level.label}>{g.items.map((c) => <option key={c.id} value={c.id}>{c.title.replace(/^(O|AS|A) Level /, "")}</option>)}</optgroup>
               ))}
             </select>
           </div>
+          {!course && (
+            <div>
+              <label className="label" htmlFor="bt">Level (for mixed)</label>
+              <select id="bt" className="input" value={tier} onChange={(e) => setTier(e.target.value)}>
+                <option value="O">O Level</option><option value="AS">AS Level</option><option value="A">A Level</option>
+              </select>
+            </div>
+          )}
           <div>
             <label className="label" htmlFor="br">Rounds</label>
             <select id="br" className="input" value={rounds} onChange={(e) => setRounds(+e.target.value)}>

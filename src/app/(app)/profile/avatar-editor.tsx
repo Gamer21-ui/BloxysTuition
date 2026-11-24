@@ -34,7 +34,7 @@ function Swatches({ value, options, onPick, label }: { value?: string; options: 
   );
 }
 
-export function AvatarEditor({ level, initial, ownedHats = [], ownedPatterns = [], frame }: { level: number; initial: Init; ownedHats?: string[]; ownedPatterns?: string[]; frame?: string | null }) {
+export function AvatarEditor({ level, initial, ownedHats = [], ownedPatterns = [], ownedFace = [], ownedBack = [], frame }: { level: number; initial: Init; ownedHats?: string[]; ownedPatterns?: string[]; ownedFace?: string[]; ownedBack?: string[]; frame?: string | null }) {
   const HATS = [...LEVEL_HATS, ...(ownedHats as NonNullable<BlockyConfig["hat"]>[])];
   const [mode, setMode] = useState(initial.mode);
   const [b, setB] = useState<Required<BlockyConfig>>({ ...BLOCKY_DEFAULT, ...(initial.blocky || {}) });
@@ -122,6 +122,18 @@ export function AvatarEditor({ level, initial, ownedHats = [], ownedPatterns = [
             })}
           </div>
         </div>
+        {([["face_acc", "Face item", ownedFace], ["back", "Back item", ownedBack]] as const).map(([slot, label, owned]) => (
+          <div key={slot}>
+            <div className="label">{label} {owned.length === 0 && <span className="text-muted">(get some in the <a className="underline" href="/shop">shop</a>)</span>}</div>
+            <div className="flex flex-wrap gap-2">
+              {["none", ...owned].map((code) => (
+                <button key={code} type="button" onClick={() => set(slot, code)} title={code} className={cn("overflow-hidden border-2 border-line", (b[slot] || "none") === code && "ring-2 ring-accent")} style={{ borderRadius: 8 }}>
+                  <BlockyAvatar config={{ ...b, [slot]: code }} size={48} />
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
         <div>
           <div className="label">Background pattern {ownedPatterns.length === 0 && <span className="text-muted">(buy more in the <a className="underline" href="/shop">shop</a>)</span>}</div>
           <div className="flex flex-wrap gap-2">

@@ -39,7 +39,9 @@ const blockySchema = z.object({
   pants: z.string().regex(/^#[0-9a-f]{6}$/i),
   bg: z.string().regex(/^#[0-9a-f]{6}$/i),
   face: z.enum(["smile", "cool", "wink", "grin", "focused"]),
-  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking", "wizard", "cowboy", "beanie", "party", "chef", "ninja", "owner_crown"]),
+  hat: z.enum(["none", "cap", "crown", "tophat", "headphones", "halo", "viking", "wizard", "cowboy", "beanie", "party", "chef", "ninja", "owner_crown", "fedora", "horns", "frost_crown", "neon_phones", "bunny", "mushroom", "tricorn", "kabuto", "astronaut"]),
+  face_acc: z.enum(["none", "shades", "nerd", "eyepatch", "monocle", "laser_visor"]).default("none"),
+  back: z.enum(["none", "angel_wings", "demon_wings", "butterfly", "cape", "blade", "jetpack", "shadow_aura"]).default("none"),
   pattern: z.enum(["none", "stars", "checker", "stripes", "grass", "galaxy", "owner"]).default("none"),
 });
 
@@ -54,6 +56,8 @@ export async function saveAvatar(input: { mode: string; blocky: unknown; display
     throw new Error("That hat is still locked");
   }
   if (blocky.pattern !== "none" && !owned.some((o) => o.kind === "pattern" && o.code === blocky.pattern)) throw new Error("You don't own that background");
+  if (blocky.face_acc !== "none" && !owned.some((o) => o.kind === "face_acc" && o.code === blocky.face_acc)) throw new Error("You don't own that face item");
+  if (blocky.back !== "none" && !owned.some((o) => o.kind === "back" && o.code === blocky.back)) throw new Error("You don't own that back item");
   // students can't write the avatar columns directly, so the server saves them after the checks above
   const { error } = await createAdminClient().from("profiles").update({ blocky, avatar_mode: mode, display_name: displayName }).eq("id", me.id);
   if (error) throw new Error(error.message);

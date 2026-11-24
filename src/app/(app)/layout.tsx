@@ -5,6 +5,7 @@ import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { MobileNav, Sidebar, type Badges } from "@/components/nav";
 import { MobileMenu } from "@/components/mobile-menu";
+import { PartyBanner } from "@/components/party-banner";
 import { NotificationBell } from "@/components/notification-bell";
 import { Avatar } from "@/components/avatar";
 import { NameTag } from "@/components/name-tag";
@@ -18,18 +19,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const sb = await createClient();
   const tutor = me.role === "tutor";
   const now = new Date().toISOString();
-  const [{ count }, { data: asg }, { data: subs }, { count: due }, pending, toMark] = await Promise.all([
+  const [{ count }, { data: asg }, { data: subs }, { count: due }, pending, toMark, { count: frReq }, { count: partyInv }] = await Promise.all([
     sb.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
     sb.from("assignments").select("id"),
     sb.from("submissions").select("assignment_id").eq("user_id", me.id),
     sb.from("review_items").select("question_id", { count: "exact", head: true }).eq("user_id", me.id).lte("due_at", now),
     tutor ? sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending") : Promise.resolve({ count: 0 }),
     tutor ? sb.from("submissions").select("id", { count: "exact", head: true }).is("graded_at", null) : Promise.resolve({ count: 0 }),
+    sb.from("friendships").select("requester", { count: "exact", head: true }).eq("addressee", me.id).eq("status", "pending"),
+    sb.from("party_invites").select("party_id", { count: "exact", head: true }).eq("to_id", me.id),
   ]);
   const handedIn = new Set((subs || []).map((s) => s.assignment_id));
   const badges: Badges = {
     "/homework": tutor ? 0 : (asg || []).filter((a) => !handedIn.has(a.id)).length,
     "/practice": due || 0,
+    "/friends": (frReq || 0) + (partyInv || 0),
     "/tutor/students": pending.count || 0,
     "/tutor/homework": toMark.count || 0,
   };
@@ -70,6 +74,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
       </div>
       <MobileNav isTutor={tutor} me={avatar(28)} />
+      <PartyBanner meId={me.id} />
     </div>
   );
 }

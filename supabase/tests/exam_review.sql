@@ -1,6 +1,9 @@
 -- Exam mode + mistakes deck. Runs after smoke.sql (users exist and are approved).
 \set ON_ERROR_STOP 1
 reset role;
+-- exams start locked; the tutor opens them
+select count(*) as exams_locked_should_be_4 from quizzes where kind = 'exam' and status = 'locked';
+update quizzes set status = 'published' where kind = 'exam';
 -- Ben sits the Accounting exam and answers everything wrong
 set role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-0000-0000-000000000003',false);

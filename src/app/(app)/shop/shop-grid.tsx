@@ -16,7 +16,7 @@ type Me = {
 };
 
 const TABS = [
-  { kind: "hat", label: "Hats" }, { kind: "pattern", label: "Backgrounds" }, { kind: "frame", label: "Frames" },
+  { kind: "hat", label: "Hats" }, { kind: "face_acc", label: "Face" }, { kind: "back", label: "Back" }, { kind: "pattern", label: "Backgrounds" }, { kind: "frame", label: "Frames" },
   { kind: "name_style", label: "Name colours" }, { kind: "title", label: "Titles" }, { kind: "streak_freeze", label: "Power-ups" },
 ];
 const RARITY: Record<string, string> = { common: "text-muted", rare: "text-accent", epic: "text-[#a855f7]", legendary: "text-xp" };
@@ -29,7 +29,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
   const has = (it: Item) => owned.includes(it.id) || !!it.tutor_only; // owner exclusives are free for the tutor
   const equipped = (it: Item) =>
     it.kind === "title" ? me.title === it.data.text : it.kind === "name_style" ? me.nameStyle === it.code : it.kind === "frame" ? me.frame === it.code
-      : it.kind === "hat" ? me.blocky?.hat === it.code : it.kind === "pattern" ? me.blocky?.pattern === it.code : false;
+      : it.kind === "hat" ? me.blocky?.hat === it.code : it.kind === "pattern" ? me.blocky?.pattern === it.code
+      : it.kind === "face_acc" ? me.blocky?.face_acc === it.code : it.kind === "back" ? me.blocky?.back === it.code : false;
 
   async function run(id: string, fn: "buy_item" | "equip_item", args: Record<string, unknown>, ok: string) {
     setBusy(id); setMsg(null);
@@ -45,6 +46,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
     switch (it.kind) {
       case "hat": return <BlockyAvatar config={{ ...blocky, hat: it.code as BlockyConfig["hat"] }} size={88} />;
       case "pattern": return <BlockyAvatar config={{ ...blocky, pattern: it.code as BlockyConfig["pattern"] }} size={88} />;
+      case "face_acc": return <BlockyAvatar config={{ ...blocky, face_acc: it.code as BlockyConfig["face_acc"] }} size={88} />;
+      case "back": return <BlockyAvatar config={{ ...blocky, back: it.code as BlockyConfig["back"] }} size={88} />;
       case "frame": return <Avatar name={me.name} mode={me.avatarMode} blocky={me.blocky} discordUrl={me.discordUrl} robloxUrl={me.robloxUrl} size={88} frame={it.code} />;
       case "name_style": return <div className="grid h-[88px] min-w-[150px] place-items-center px-2 font-display text-xl"><NameTag name={me.name} style={it.code} /></div>;
       case "title": return <div className="grid h-[88px] min-w-[150px] place-items-center px-2 text-center"><div><div className="font-display">{me.name}</div><div className="text-sm text-muted">{it.data.text}</div></div></div>;
@@ -91,7 +94,7 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
           );
         })}
       </div>
-      {(tab === "hat" || tab === "pattern") && <p className="mt-4 text-xs text-muted">Hats and backgrounds show on your blocky avatar. Pick “Blocky” or “Both” in your Profile to show it off.</p>}
+      {["hat", "pattern", "face_acc", "back"].includes(tab) && <p className="mt-4 text-xs text-muted">Hats, face items, back items and backgrounds show on your blocky avatar. Pick “Blocky” or “Both” in your Profile to show it off.</p>}
     </div>
   );
 }

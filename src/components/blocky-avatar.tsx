@@ -1,7 +1,8 @@
 import type { BlockyConfig } from "@/lib/types";
+import { PIXEL_BACK, PIXEL_FACE, PIXEL_HATS } from "@/components/pixel-items";
 
 export const BLOCKY_DEFAULT: Required<BlockyConfig> = {
-  skin: "#f5c89a", shirt: "#1cb0f6", pants: "#334155", face: "smile", hat: "none", bg: "#58cc02", pattern: "none",
+  skin: "#f5c89a", shirt: "#1cb0f6", pants: "#334155", face: "smile", hat: "none", bg: "#58cc02", pattern: "none", face_acc: "none", back: "none",
 };
 
 /** Free hats unlock with level (shown as locked in the editor until reached). Shop hats are bought with coins. */
@@ -26,6 +27,7 @@ function Face({ face }: { face: BlockyConfig["face"] }) {
 }
 
 function Hat({ hat }: { hat: BlockyConfig["hat"] }) {
+  if (hat && PIXEL_HATS[hat]) return <>{PIXEL_HATS[hat]()}</>;
   switch (hat) {
     case "cap":
       return (<g><rect x="27" y="10" width="46" height="12" rx="6" fill="#ef4444" /><rect x="60" y="18" width="24" height="5" rx="2" fill="#b91c1c" /></g>);
@@ -95,6 +97,7 @@ export function BlockyAvatar({ config, size = 64, className }: { config?: Blocky
     <svg viewBox="0 0 100 100" width={size} height={size} className={className} role="img" aria-label="Blocky avatar">
       <rect width="100" height="100" fill={c.bg} />
       <Pattern pattern={c.pattern} />
+      {c.back && c.back !== "none" && PIXEL_BACK[c.back]?.()}
       {/* legs */}
       <rect x="36" y="82" width="13" height="18" fill={c.pants} />
       <rect x="51" y="82" width="13" height="18" fill={c.pants} />
@@ -109,6 +112,7 @@ export function BlockyAvatar({ config, size = 64, className }: { config?: Blocky
       {/* head */}
       <rect x="29" y="14" width="42" height="42" rx="7" fill={c.skin} />
       <Face face={c.face} />
+      {c.face_acc && c.face_acc !== "none" && PIXEL_FACE[c.face_acc]?.()}
       <Hat hat={c.hat} />
     </svg>
   );

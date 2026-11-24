@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, NotebookPen, Settings, ShoppingBag,
+  BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, MessagesSquare, NotebookPen, Settings, ShoppingBag, UserPlus,
   Swords, Target, Trophy, Users, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,8 @@ export const STUDENT: Item[] = [
   { href: "/practice", label: "Exam prep", icon: GraduationCap },
   { href: "/challenges", label: "Quests", icon: Target },
   { href: "/battles", label: "Battles", icon: Swords },
+  { href: "/friends", label: "Friends", icon: UserPlus },
+  { href: "/chat", label: "Chat", icon: MessagesSquare },
   { href: "/homework", label: "Homework", icon: NotebookPen },
   { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
   { href: "/achievements", label: "Achievements", icon: Medal },
@@ -28,6 +30,7 @@ export const TUTOR: Item[] = [
   { href: "/tutor/students", label: "Students", icon: Users },
   { href: "/tutor/content", label: "Content", icon: BookOpen },
   { href: "/tutor/homework", label: "Homework", icon: ClipboardList },
+  { href: "/tutor/exams", label: "Exams", icon: GraduationCap },
   { href: "/tutor/attendance", label: "Attendance", icon: CalendarDays },
   { href: "/tutor/announcements", label: "Announce", icon: Megaphone },
   { href: "/tutor/challenges", label: "Challenges", icon: Gamepad2 },

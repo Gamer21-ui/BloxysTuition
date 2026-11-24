@@ -5,17 +5,21 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, SectionTitle } from "@/components/ui";
 import { timeAgo } from "@/lib/utils";
 import { BattleLobbyForms } from "./lobby-forms";
+import { MessagesSquare, Users } from "lucide-react";
+import { LEVELS, pickLevel, inLevel } from "@/lib/levels";
 
 export const metadata: Metadata = { title: "Battles" };
 export const dynamic = "force-dynamic";
 
-export default async function Battles() {
+export default async function Battles({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const me = await requireApproved();
+  const sp = (await searchParams).level;
+  const level = sp === "O" || sp === "A" ? pickLevel(sp) : null;
   const sb = await createClient();
   const since = new Date(Date.now() - 3 * 3600_000).toISOString();
   const [{ data: courses }, { data: open }, { data: mine }] = await Promise.all([
     sb.from("courses").select("id, title, code, tier").eq("active", true).order("sort"),
-    sb.from("battles").select("id, code, mode, status, created_at, round_count, course:courses(title), players:battle_players(user_id, team)")
+    sb.from("battles").select("id, code, mode, status, tier, created_at, round_count, course:courses(title), players:battle_players(user_id, team)")
       .in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
     sb.from("battle_players").select("score, team, battle:battles!inner(code, mode, status, winner_team, created_at, course:courses(title))")
       .eq("user_id", me.id).eq("battle.status", "finished").order("joined_at", { ascending: false }).limit(10),
@@ -25,19 +29,28 @@ export default async function Battles() {
     <div className="mx-auto max-w-4xl">
       <h1 className="page-title">⚔️ Quiz Battles</h1>
       <p className="text-muted">1v1 or 2v2. Same question for everyone, 20 seconds a round. Right answers score 100, plus up to 100 more for speed. Highest team total wins.</p>
-      <BattleLobbyForms courses={courses || []} />
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Link href="/friends" className="btn btn-ghost btn-sm"><Users size={14} aria-hidden="true" /> Party up with friends</Link>
+        <Link href="/chat" className="btn btn-ghost btn-sm"><MessagesSquare size={14} aria-hidden="true" /> Find players in chat</Link>
+      </div>
+      <BattleLobbyForms courses={courses || []} myTier={me.tier} />
 
-      <SectionTitle>Open lobbies</SectionTitle>
-      {!open?.length ? <Empty>No one is waiting right now. Create a battle and share the code in Discord!</Empty> : (
+      <SectionTitle action={
+        <div className="flex gap-1">
+          <Link href="/battles" className={`chip ${!level ? "bg-primary text-primary-ink" : ""}`}>All</Link>
+          {LEVELS.map((l) => <Link key={l.id} href={`/battles?level=${l.id}`} className={`chip ${level === l.id ? "bg-primary text-primary-ink" : ""}`}>{l.label}</Link>)}
+        </div>
+      }>Open lobbies</SectionTitle>
+      {!open?.filter((b) => !level || !b.tier || inLevel(b.tier, level)).length ? <Empty>No one is waiting right now. Create a battle and share the code in Discord!</Empty> : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {open.map((b) => {
+          {open.filter((b) => !level || !b.tier || inLevel(b.tier, level)).map((b) => {
             const players = (b.players as { user_id: string; team: number }[]) || [];
             const cap = b.mode === "1v1" ? 2 : 4;
             const inIt = players.some((p) => p.user_id === me.id);
             return (
               <Card key={b.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="font-display text-xl tracking-wider">{b.code} <span className="chip ml-1">{b.mode}</span></div>
+                  <div className="font-display text-xl tracking-wider">{b.code} <span className="chip ml-1">{b.mode}</span>{b.tier && <span className="chip ml-1">{b.tier === "O" ? "O" : b.tier} Level</span>}</div>
                   <div className="text-sm text-muted">{(b.course as { title?: string } | null)?.title || "All subjects"} · {b.round_count} rounds · {timeAgo(b.created_at)}</div>
                   <div className="text-sm">{players.length}/{cap} players {b.status === "live" && <span className="text-warn">· in progress</span>}</div>
                 </div>

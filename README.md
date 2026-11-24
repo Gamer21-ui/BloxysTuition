@@ -14,6 +14,9 @@ Think Google Classroom + Duolingo + a pinch of Roblox: lessons, quizzes, XP, lev
 | Courses → chapters → parts, plus **Library** and **Class notes** files | Mark chapters, parts, quizzes and files as draft / locked / scheduled / published |
 | Chapter quizzes (15 questions each), course speedruns, full answer review |
 | **Exam prep:** timed Paper 1 practice (Accounting 40 Q / 1h30, Economics 40 Q / 1h), mixed tests for Business & CS, score history | Edit any question, answer and explanation in the app |
+| **Friends & parties:** add friends, party up (4 max), the leader takes the party into battles | Choose a student's class (O / AS / A) when approving |
+| **Chat** with battle requests you can join in one tap, filtered by O / AS / A Level | Delete any chat message |
+| Exams with focus mode (full screen, leaving the page is counted) | **Exams:** create monthly exams with open/close times and attempt limits, see results |
 | **Coin shop:** hats, backgrounds, frames, name colours, titles, streak freezes (cosmetic only) | Set prices, level locks, switch items on/off |
 | **Level tabs** (O Level / AS & A Level) on every page that lists subjects | Same tabs on Content and Homework |
 | **Mistakes deck:** wrong answers come back after 1, 3 and 7 days until mastered | See each student's mistakes count | Edit lesson notes (Markdown), upload files, add quiz questions |

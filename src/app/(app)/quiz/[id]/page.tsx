@@ -8,7 +8,7 @@ import { ExamPlayer } from "./exam-player";
 export const metadata: Metadata = { title: "Quiz" };
 
 export default async function QuizPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireApproved();
+  const me = await requireApproved();
   const { id } = await params;
   const sb = await createClient();
   const { data: quiz } = await sb.from("quizzes").select("*, courses(title, slug, tier, color), chapters(number, title)").eq("id", id).single();
@@ -16,10 +16,12 @@ export default async function QuizPage({ params }: { params: Promise<{ id: strin
   const course = quiz.courses as unknown as { title: string; slug: string; tier: string; color: string };
   const ch = quiz.chapters as unknown as { number: string; title: string } | null;
   if (quiz.kind === "exam") {
+    const { count: used } = await sb.from("quiz_attempts").select("id", { count: "exact", head: true }).eq("quiz_id", quiz.id).eq("user_id", me.id);
     return (
       <ExamPlayer quizId={quiz.id} title={quiz.title} subtitle={course.title} count={quiz.question_count || 40}
         timeLimit={quiz.time_limit_sec || 3600} xpReward={quiz.xp_reward} color={course.color}
-        real={course.slug === "o-accounting" || course.slug === "o-economics"} />
+        real={course.slug === "o-accounting" || course.slug === "o-economics"}
+        closesAt={quiz.closes_at} attemptsLeft={quiz.max_attempts ? Math.max(0, quiz.max_attempts - (used || 0)) : null} />
     );
   }
   return (

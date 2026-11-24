@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Clock, GraduationCap, RefreshCcw } from "lucide-react";
+import { CalendarClock, Clock, GraduationCap, Lock, RefreshCcw } from "lucide-react";
 import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, SectionTitle } from "@/components/ui";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 const EXAMS_START = new Date("2027-10-01T00:00:00+04:00"); // Cambridge Oct/Nov series
 
 type Course = { id: string; title: string; color: string; sort: number; tier: string };
-type Quiz = { id: string; course_id: string; kind: string; title: string; status: string; release_at: string | null; time_limit_sec: number | null; question_count: number | null };
+type Quiz = { id: string; course_id: string; kind: string; title: string; status: string; release_at: string | null; time_limit_sec: number | null; question_count: number | null; closes_at: string | null; max_attempts: number | null; sort: number };
 
 export default async function Practice({ searchParams }: { searchParams: Promise<{ level?: string }> }) {
   const me = await requireApproved();
@@ -24,19 +24,30 @@ export default async function Practice({ searchParams }: { searchParams: Promise
   const sb = await createClient();
   const [{ data: courses }, { data: quizzes }, { data: deck }, { data: attempts }] = await Promise.all([
     sb.from("courses").select("id, title, color, sort, tier").eq("active", true).order("sort"),
-    sb.from("quizzes").select("id, course_id, kind, title, status, release_at, time_limit_sec, question_count").in("kind", ["exam", "review"]),
+    sb.from("quizzes").select("id, course_id, kind, title, status, release_at, time_limit_sec, question_count, closes_at, max_attempts, sort").in("kind", ["exam", "review"]),
     sb.from("review_items").select("course_id, due_at, box").eq("user_id", me.id),
     sb.from("quiz_attempts").select("quiz_id, score, total, finished_at, time_ms, flagged, quiz:quizzes!inner(kind, course_id)")
-      .eq("user_id", me.id).eq("quiz.kind", "exam").not("finished_at", "is", null).order("finished_at"),
+      .eq("user_id", me.id).eq("quiz.kind", "exam").order("started_at"),
   ]);
   const allCourses = (courses as Course[]) || [];
   const cs = allCourses.filter((c) => inLevel(c.tier, level));
-  const qz = ((quizzes as Quiz[]) || []).filter((q) => isLive(q.status, q.release_at));
+  const allQz = (quizzes as Quiz[]) || [];
+  const qz = allQz.filter((q) => isLive(q.status, q.release_at));
   const now = Date.now();
   const items = (deck || []).filter((d) => cs.some((c) => c.id === d.course_id));
   const dueTotal = items.filter((d) => +new Date(d.due_at) <= now).length;
-  type Att = { score: number; total: number; finished_at: string; time_ms: number; flagged: boolean; quiz: { course_id: string } };
-  const exams = ((attempts as unknown as Att[]) || []).filter((a) => !a.flagged && cs.some((c) => c.id === a.quiz.course_id));
+  type Att = { quiz_id: string; score: number; total: number; finished_at: string | null; time_ms: number; flagged: boolean; quiz: { course_id: string } };
+  const allAtts = (attempts as unknown as Att[]) || [];
+  const exams = allAtts.filter((a) => a.finished_at && !a.flagged && cs.some((c) => c.id === a.quiz.course_id));
+  const examList = allQz.filter((q) => q.kind === "exam" && cs.some((c) => c.id === q.course_id))
+    .map((q) => {
+      const open = isLive(q.status, q.release_at) && (!q.closes_at || +new Date(q.closes_at) > now);
+      const used = allAtts.filter((a) => a.quiz_id === q.id).length;
+      const left = q.max_attempts ? Math.max(0, q.max_attempts - used) : null;
+      const state = q.closes_at && +new Date(q.closes_at) <= now ? "closed" : open ? (left === 0 ? "done" : "open") : q.status === "scheduled" ? "soon" : "locked";
+      return { q, state, left, mine: allAtts.filter((a) => a.quiz_id === q.id && a.finished_at && !a.flagged) };
+    })
+    .sort((a, b) => ["open", "soon", "done", "closed", "locked"].indexOf(a.state) - ["open", "soon", "done", "closed", "locked"].indexOf(b.state) || b.q.sort - a.q.sort);
   const weeks = Math.max(0, Math.ceil((+EXAMS_START - now) / (7 * 86400_000)));
 
   // chart: one row per attempt, value in that subject's column
@@ -77,30 +88,34 @@ export default async function Practice({ searchParams }: { searchParams: Promise
         })}
       </div>
 
-      <SectionTitle>🎓 Timed exam practice</SectionTitle>
+      <SectionTitle>🎓 Exams</SectionTitle>
+      {!examList.length && <Empty>No exams yet. Your tutor will open them here.</Empty>}
       <div className="grid gap-3 sm:grid-cols-2">
-        {cs.map((c) => {
-          const ex = qz.find((q) => q.kind === "exam" && q.course_id === c.id);
-          if (!ex) return null;
-          const mine = exams.filter((a) => a.quiz.course_id === c.id);
+        {examList.map(({ q, state, left, mine }) => {
+          const c = cs.find((x) => x.id === q.course_id)!;
           const pcts = mine.map((a) => Math.round((100 * a.score) / a.total));
           const best = pcts.length ? Math.max(...pcts) : null;
-          const last = pcts.length ? pcts[pcts.length - 1] : null;
           return (
-            <Card key={c.id} className="flex flex-col gap-2">
+            <Card key={q.id} className={`flex flex-col gap-2 ${state === "open" ? "ring-2 ring-primary" : state === "locked" || state === "closed" ? "opacity-70" : ""}`}>
               <div className="flex items-start gap-3">
-                <div className="grid h-11 w-11 shrink-0 place-items-center text-white" style={{ background: c.color, borderRadius: "calc(var(--radius)*.6)" }}><GraduationCap size={22} aria-hidden="true" /></div>
-                <div>
-                  <div className="font-bold">{c.title.replace(/^O Level /, "")}</div>
-                  <div className="text-sm text-muted">{ex.title}</div>
+                <div className="grid h-11 w-11 shrink-0 place-items-center text-white" style={{ background: c.color, borderRadius: "calc(var(--radius)*.6)" }}>
+                  {state === "locked" ? <Lock size={20} aria-hidden="true" /> : <GraduationCap size={22} aria-hidden="true" />}
+                </div>
+                <div className="min-w-0">
+                  <div className="font-bold">{q.title}</div>
+                  <div className="text-sm text-muted">{c.title.replace(/^(O|AS|A) Level /, "")} · {q.question_count} questions · {Math.round((q.time_limit_sec || 0) / 60)} min</div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-2 text-center text-sm">
-                <div className="rounded bg-surface2 p-2"><div className="font-display text-xl">{mine.length}</div>attempts</div>
-                <div className="rounded bg-surface2 p-2"><div className="font-display text-xl">{last === null ? "–" : `${last}%`}</div>last</div>
-                <div className="rounded bg-surface2 p-2"><div className="font-display text-xl">{best === null ? "–" : `${best}%`}</div>best</div>
+              <div className="flex flex-wrap gap-1.5 text-xs">
+                {q.closes_at && state !== "closed" && <span className="chip"><CalendarClock size={12} aria-hidden="true" /> closes {timeUntil(q.closes_at)}</span>}
+                {left !== null && <span className="chip">{left} attempt{left === 1 ? "" : "s"} left</span>}
+                {best !== null && <span className="chip">best {best}%</span>}
               </div>
-              <Link href={`/quiz/${ex.id}`} className="btn btn-primary mt-1">Start timed test</Link>
+              {state === "open" && <Link href={`/quiz/${q.id}`} className="btn btn-primary mt-auto">Start exam</Link>}
+              {state === "soon" && <span className="btn btn-ghost pointer-events-none mt-auto">Opens {q.release_at ? fmtDate(q.release_at, { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "soon"}</span>}
+              {state === "locked" && <span className="btn btn-ghost pointer-events-none mt-auto">Locked: your tutor will open it</span>}
+              {state === "done" && <span className="btn btn-ghost pointer-events-none mt-auto">Done ✔</span>}
+              {state === "closed" && <span className="btn btn-ghost pointer-events-none mt-auto">Closed</span>}
             </Card>
           );
         })}
