@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
 
 const muDay = (iso: string) => new Date(new Date(iso).getTime() + 4 * 3600_000).toISOString().slice(0, 10);
 
-export default async function TutorHome() {
+export default async function TutorHome({ searchParams }: { searchParams: Promise<{ subject?: string }> }) {
+  const pick = (await searchParams).subject || "";
   await requireTutor();
   const admin = createAdminClient();
   const d14 = new Date(Date.now() - 14 * 86400_000).toISOString();
@@ -20,7 +21,7 @@ export default async function TutorHome() {
     admin.from("profiles").select("id, display_name, status, last_seen_at").eq("role", "student"),
     admin.from("xp_events").select("user_id, amount, created_at").gte("created_at", d14),
     admin.from("attendance").select("status, session:class_sessions!inner(held_on)").gte("session.held_on", d30.slice(0, 10)),
-    admin.from("quiz_attempts").select("user_id, score, total, flagged, quiz:quizzes(kind, chapter:chapters(id, number, title), course:courses(code, title, tier, sort))").not("finished_at", "is", null).gte("started_at", d30),
+    admin.from("quiz_attempts").select("user_id, score, total, flagged, finished_at, quiz:quizzes(kind, chapter:chapters(id, number, title), course:courses(slug, code, title, tier, sort))").not("finished_at", "is", null).gte("started_at", d30),
     admin.from("submissions").select("id", { count: "exact", head: true }).is("graded_at", null),
   ]);
 
@@ -45,27 +46,39 @@ export default async function TutorHome() {
   const lastWeek = new Set((xp || []).filter((e) => +new Date(e.created_at) < weekAgo).map((e) => e.user_id));
   const retained = [...lastWeek].filter((u) => thisWeek.has(u)).length;
 
-  type QA = { score: number; total: number; flagged: boolean; quiz: { kind: string; chapter: { id: string; number: string; title: string } | null; course: { code: string; title: string; tier: string; sort: number } | null } | null };
+  type QA = { user_id: string; score: number; total: number; flagged: boolean; finished_at: string; quiz: { kind: string; chapter: { id: string; number: string; title: string } | null; course: { slug: string; code: string; title: string; tier: string; sort: number } | null } | null };
   const qa = (atts as unknown as QA[]) || [];
   const byCourse: Record<string, { s: number; t: number }> = {};
-  const byChapter: Record<string, { name: string; course: string; tier: string; sort: number; s: number; t: number; n: number }> = {};
+  type Stu = { tries: number; best: number; last: number; lastAt: string };
+  const byChapter: Record<string, { name: string; course: string; slug: string; tier: string; sort: number; s: number; t: number; n: number; students: Record<string, Stu> }> = {};
   for (const a of qa) {
     const c = a.quiz?.course?.title || "Other";
     byCourse[c] ??= { s: 0, t: 0 }; byCourse[c].s += a.score; byCourse[c].t += a.total;
     const ch = a.quiz?.chapter;
-    if (ch && a.quiz?.kind === "quiz") {
-      byChapter[ch.id] ??= { name: `${ch.number} ${ch.title}`, course: a.quiz.course?.title || "Other", tier: a.quiz.course?.tier || "O", sort: a.quiz.course?.sort ?? 99, s: 0, t: 0, n: 0 };
-      byChapter[ch.id].s += a.score; byChapter[ch.id].t += a.total; byChapter[ch.id].n++;
+    if (ch && a.quiz?.kind === "quiz" && !a.flagged && a.total) {
+      const b = (byChapter[ch.id] ??= { name: `${ch.number} ${ch.title}`, course: a.quiz.course?.title || "Other", slug: a.quiz.course?.slug || "", tier: a.quiz.course?.tier || "O", sort: a.quiz.course?.sort ?? 99, s: 0, t: 0, n: 0, students: {} });
+      b.s += a.score; b.t += a.total; b.n++;
+      const pct = Math.round((100 * a.score) / a.total);
+      const st = (b.students[a.user_id] ??= { tries: 0, best: 0, last: pct, lastAt: a.finished_at });
+      st.tries++; st.best = Math.max(st.best, pct);
+      if (a.finished_at >= st.lastAt) { st.last = pct; st.lastAt = a.finished_at; }
     }
   }
   const courseBars = Object.entries(byCourse).map(([name, v]) => ({ name: name.replace(/ \(.*\)$/, ""), pct: v.t ? Math.round((100 * v.s) / v.t) : 0 }));
-  const weakAll = Object.values(byChapter).filter((c) => c.n >= 2).map((c) => ({ ...c, pct: Math.round((100 * c.s) / c.t) })).sort((a, b) => a.pct - b.pct);
-  // one card per class (O Level / AS & A Level), split by subject, 3 weakest chapters each
+  const names = new Map((studs || []).map((x) => [x.id, x.display_name]));
+  const weakAll = Object.values(byChapter).map((c) => ({ ...c, pct: Math.round((100 * c.s) / c.t) })).sort((a, b) => a.pct - b.pct);
+  // subjects with chapter-quiz activity in the last 30 days, for the filter chips
+  const subjects = [...new Map(weakAll.map((c) => [c.slug, { slug: c.slug, title: c.course, sort: c.sort, tries: 0 }])).values()].sort((a, b) => a.sort - b.sort);
+  for (const sub of subjects) sub.tries = weakAll.filter((c) => c.slug === sub.slug).reduce((t, c) => t + c.n, 0);
+  const picked = subjects.find((x) => x.slug === pick);
+  // All: one card per class, 3 weakest chapters per subject. One subject: every chapter with activity.
   const weakByLevel = LEVELS.map((l) => {
-    const rows = weakAll.filter((c) => l.tiers.includes(c.tier));
-    const courses = [...new Set(rows.sort((a, b) => a.sort - b.sort || a.pct - b.pct).map((r) => r.course))];
-    return { level: l, courses: courses.map((name) => ({ name, rows: rows.filter((r) => r.course === name).sort((a, b) => a.pct - b.pct).slice(0, 3) })) };
-  });
+    const rows = weakAll.filter((c) => l.tiers.includes(c.tier) && (!picked || c.slug === picked.slug));
+    const courses = [...new Set([...rows].sort((a, b) => a.sort - b.sort).map((r) => r.course))];
+    return { level: l, courses: courses.map((name) => ({ name, rows: rows.filter((r) => r.course === name).slice(0, picked ? 99 : 3) })) };
+  }).filter((g) => !picked || g.courses.length);
+  const tone = (p: number) => (p < 50 ? "text-bad" : p < 70 ? "text-warn" : "text-good");
+  const ago = (iso: string) => { const d = Math.floor((Date.now() - +new Date(iso)) / 86400_000); return d <= 0 ? "today" : d === 1 ? "yesterday" : `${d} days ago`; };
   const a = att || [];
   const attPct = a.length ? Math.round((100 * a.filter((r) => r.status === "present" || r.status === "late").length) / a.length) : null;
   const flagged = qa.filter((x) => x.flagged).length;
@@ -92,7 +105,19 @@ export default async function TutorHome() {
         <Card><h2 className="mb-2 text-lg">Engagement, last 14 days</h2><XpLine data={days} /></Card>
         <Card><h2 className="mb-2 text-lg">Average quiz score by subject (30 days)</h2>{courseBars.length ? <ScoreBars data={courseBars} /> : <p className="text-muted">No quizzes yet.</p>}</Card>
       </div>
+      <div id="weak" className="scroll-mt-20" />
       <SectionTitle>Weakest chapters (class average, 30 days)</SectionTitle>
+      {subjects.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          <Link href="/tutor#weak" className={`btn btn-sm ${!picked ? "btn-primary" : "btn-ghost"}`}>All subjects</Link>
+          {subjects.map((x) => (
+            <Link key={x.slug} href={`/tutor?subject=${x.slug}#weak`} className={`btn btn-sm ${picked?.slug === x.slug ? "btn-primary" : "btn-ghost"}`}>
+              {x.title} <span className="opacity-70">({x.tries})</span>
+            </Link>
+          ))}
+        </div>
+      )}
+      <p className="mb-3 text-sm text-muted">Tap a chapter to see who did it. Suspiciously fast attempts are left out.</p>
       <div className="grid gap-4 lg:grid-cols-2">
         {weakByLevel.map(({ level, courses }) => (
           <Card key={level.id} className="p-0">
@@ -100,14 +125,35 @@ export default async function TutorHome() {
             {courses.length ? courses.map((c) => (
               <div key={c.name} className="border-b border-line last:border-0">
                 <div className="px-4 pt-2.5 text-xs font-bold uppercase text-muted">{c.name}</div>
-                {c.rows.map((w) => (
-                  <div key={w.name} className="flex items-center justify-between gap-3 px-4 py-2">
-                    <span className="min-w-0">{w.name}</span>
-                    <span className={`shrink-0 ${w.pct < 50 ? "font-bold text-bad" : w.pct < 70 ? "font-bold text-warn" : "font-bold text-good"}`}>{w.pct}% · {w.n} tries</span>
-                  </div>
-                ))}
+                {c.rows.map((w) => {
+                  const people = Object.entries(w.students).sort((a, b) => a[1].best - b[1].best);
+                  return (
+                    <details key={w.name} className="group px-4 py-2">
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                        <span className="min-w-0"><span className="mr-1 inline-block text-muted transition group-open:rotate-90">›</span>{w.name}</span>
+                        <span className={`shrink-0 font-bold ${tone(w.pct)}`}>{w.pct}% <span className="font-normal text-muted">· {people.length} student{people.length === 1 ? "" : "s"} · {w.n} {w.n === 1 ? "try" : "tries"}</span></span>
+                      </summary>
+                      <div className="mt-2 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead><tr className="text-left text-xs text-muted"><th className="py-1 pr-2">Student</th><th className="pr-2">Tries</th><th className="pr-2">Best</th><th className="pr-2">Latest</th><th>Last done</th></tr></thead>
+                          <tbody>
+                            {people.map(([id, st]) => (
+                              <tr key={id} className="border-t border-line">
+                                <td className="py-1.5 pr-2"><Link href={`/tutor/students/${id}`} className="font-bold hover:underline">{names.get(id) || "Student"}</Link></td>
+                                <td className="pr-2">{st.tries}</td>
+                                <td className={`pr-2 font-bold ${tone(st.best)}`}>{st.best}%</td>
+                                <td className={`pr-2 ${tone(st.last)}`}>{st.last}%</td>
+                                <td className="whitespace-nowrap text-muted">{ago(st.lastAt)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </details>
+                  );
+                })}
               </div>
-            )) : <p className="p-4 text-muted">Needs at least 2 attempts on a chapter quiz.</p>}
+            )) : <p className="p-4 text-muted">No chapter quizzes done in the last 30 days.</p>}
           </Card>
         ))}
       </div>
