@@ -74,3 +74,14 @@ select blocky->>'face_acc' as face_should_be_shades from profiles where id = aut
 do $$ begin perform equip_item('back', 'jetpack'); raise exception 'equipped unowned jetpack!';
 exception when others then if sqlerrm like '%do not own%' then raise notice 'ok: back slot ownership checked'; else raise; end if; end $$;
 reset role;
+-- subjects: students pick from their own level only
+reset role;
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ declare r text[]; begin
+  r := set_my_subjects(array['economics', 'accounting', 'made-up']);
+  if (select tier from profiles where id = auth.uid()) = 'O' and r <> array['accounting', 'economics'] then raise exception 'bad O subjects: %', r; end if;
+  begin perform set_my_subjects(array['made-up']); raise exception 'accepted an empty pick';
+  exception when others then if sqlerrm not like '%at least one%' then raise; end if; end;
+  raise notice 'ok: subjects saved as %', r;
+end $$;
+reset role;

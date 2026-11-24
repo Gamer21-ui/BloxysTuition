@@ -6,6 +6,7 @@ import { fmtDateTime } from "@/lib/utils";
 import { SubmitBox } from "./submit-box";
 import { LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
+import { takes } from "@/lib/subjects";
 
 
 export const metadata: Metadata = { title: "Homework" };
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 type A = {
   id: string; title: string; kind: string; instructions: string | null; file_path: string | null; due_at: string | null;
   max_score: number; xp_reward: number; answers_released: boolean; solution_path: string | null; mark_scheme_path: string | null;
-  solution_video_url: string | null; course: { title: string; color: string; tier: string } | null;
+  solution_video_url: string | null; course: { title: string; color: string; tier: string; slug: string } | null;
 };
 type S = { assignment_id: string; file_paths: string[]; text_answer: string | null; submitted_at: string; score: number | null; feedback: string | null; graded_at: string | null };
 
@@ -25,11 +26,11 @@ export default async function Homework({ searchParams }: { searchParams: Promise
   const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
   const [{ data: as }, { data: subs }] = await Promise.all([
-    sb.from("assignments").select("id, title, kind, instructions, file_path, due_at, max_score, xp_reward, answers_released, solution_path, mark_scheme_path, solution_video_url, course:courses(title, color, tier)").order("due_at", { ascending: true, nullsFirst: false }),
+    sb.from("assignments").select("id, title, kind, instructions, file_path, due_at, max_score, xp_reward, answers_released, solution_path, mark_scheme_path, solution_video_url, course:courses(title, color, tier, slug)").order("due_at", { ascending: true, nullsFirst: false }),
     sb.from("submissions").select("assignment_id, file_paths, text_answer, submitted_at, score, feedback, graded_at").eq("user_id", me.id),
   ]);
   const byA = new Map((subs as S[] | null || []).map((s) => [s.assignment_id, s]));
-  const all = (as as unknown as A[]) || [];
+  const all = ((as as unknown as A[]) || []).filter((a) => !a.course || takes(me, a.course.slug));
   const list = all.filter((a) => inLevel(a.course?.tier || "O", level));
   const count = (l: "O" | "A") => all.filter((a) => inLevel(a.course?.tier || "O", l) && !byA.has(a.id)).length;
   const todo = list.filter((a) => !byA.has(a.id));

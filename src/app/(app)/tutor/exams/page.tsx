@@ -7,6 +7,7 @@ import { groupByLevel } from "@/lib/levels";
 import { StatusForm } from "../status-form";
 import { createExam, deleteExam, updateExam } from "../actions";
 import { studentTiersFor } from "@/lib/levels";
+import { subjectOf } from "@/lib/subjects";
 
 export const metadata: Metadata = { title: "Exams (tutor)" };
 export const dynamic = "force-dynamic";
@@ -14,7 +15,7 @@ export const dynamic = "force-dynamic";
 const toLocal = (iso: string | null) => (iso ? new Date(new Date(iso).getTime() + 4 * 3600_000).toISOString().slice(0, 16) : "");
 const mmss = (ms: number) => `${Math.floor(ms / 60000)}m ${String(Math.round((ms % 60000) / 1000)).padStart(2, "0")}s`;
 
-type Exam = { id: string; title: string; status: string; release_at: string | null; closes_at: string | null; max_attempts: number | null; time_limit_sec: number; question_count: number; course: { title: string; tier: string } };
+type Exam = { id: string; title: string; status: string; release_at: string | null; closes_at: string | null; max_attempts: number | null; time_limit_sec: number; question_count: number; course: { title: string; tier: string; slug: string } };
 type Att = { quiz_id: string; user_id: string; score: number | null; total: number | null; time_ms: number | null; focus_lost: number; flagged: boolean; finished_at: string | null; started_at: string };
 
 export default async function TutorExams() {
@@ -24,9 +25,9 @@ export default async function TutorExams() {
   const month = now.toLocaleString("en-GB", { month: "long", year: "numeric", timeZone: "Indian/Mauritius" });
   const [{ data: courses }, { data: exams }, { data: atts }, { data: studs }] = await Promise.all([
     admin.from("courses").select("id, title, tier").order("sort"),
-    admin.from("quizzes").select("id, title, status, release_at, closes_at, max_attempts, time_limit_sec, question_count, course:courses(title, tier)").eq("kind", "exam").order("sort", { ascending: false }),
+    admin.from("quizzes").select("id, title, status, release_at, closes_at, max_attempts, time_limit_sec, question_count, course:courses(title, tier, slug)").eq("kind", "exam").order("sort", { ascending: false }),
     admin.from("quiz_attempts").select("quiz_id, user_id, score, total, time_ms, focus_lost, flagged, finished_at, started_at, quiz:quizzes!inner(kind)").eq("quiz.kind", "exam").order("started_at"),
-    admin.from("profiles").select("id, display_name, tier").eq("role", "student").eq("status", "approved").order("display_name"),
+    admin.from("profiles").select("id, display_name, tier, subjects").eq("role", "student").eq("status", "approved").order("display_name"),
   ]);
   const list = (exams as unknown as Exam[]) || [];
   const attempts = (atts as unknown as Att[]) || [];
@@ -58,7 +59,7 @@ export default async function TutorExams() {
       <div className="space-y-4">
         {list.map((e) => {
           const mine = attempts.filter((a) => a.quiz_id === e.id);
-          const who = (studs || []).filter((s) => studentTiersFor(e.course?.tier).includes(s.tier) || mine.some((a) => a.user_id === s.id));
+          const who = (studs || []).filter((s) => (studentTiersFor(e.course?.tier).includes(s.tier) && (!s.subjects?.length || !e.course || s.subjects.includes(subjectOf(e.course.slug)))) || mine.some((a) => a.user_id === s.id));
           const done = new Set(mine.filter((a) => a.finished_at).map((a) => a.user_id));
           return (
             <details key={e.id} className="card">

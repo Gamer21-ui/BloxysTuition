@@ -10,6 +10,7 @@ export interface Profile {
   role: "student" | "tutor";
   status: "pending" | "approved" | "suspended";
   tier: Tier;
+  subjects: string[] | null;
   contact: string | null;
   parent_name: string | null;
   parent_contact: string | null;

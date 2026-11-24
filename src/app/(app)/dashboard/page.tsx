@@ -11,18 +11,19 @@ import { AchievementBadge } from "@/components/badge";
 import { Icon } from "@/components/icon";
 import { Bar, Card, SectionTitle } from "@/components/ui";
 import { fmtDateTime, timeAgo } from "@/lib/utils";
+import { takes } from "@/lib/subjects";
 
 export const metadata: Metadata = { title: "Home" };
 
 export default async function Dashboard() {
   const me = await requireApproved();
   const sb = await createClient();
-  const [challenges, courses, { data: ach }, { data: assignments }, { data: subs }, { data: att }, { data: notes }, { data: ann }] =
+  const [challenges, allCourses, { data: ach }, { data: assignments }, { data: subs }, { data: att }, { data: notes }, { data: ann }] =
     await Promise.all([
       getChallenges(me.id),
       getCourseProgress(me.id),
       sb.from("user_achievements").select("earned_at, achievements(title, icon, rarity)").eq("user_id", me.id).order("earned_at", { ascending: false }).limit(6),
-      sb.from("assignments").select("id, title, due_at, kind").order("due_at", { ascending: true, nullsFirst: false }).limit(20),
+      sb.from("assignments").select("id, title, due_at, kind, course:courses(slug)").order("due_at", { ascending: true, nullsFirst: false }).limit(20),
       sb.from("submissions").select("assignment_id").eq("user_id", me.id),
       sb.from("attendance").select("status").eq("user_id", me.id),
       sb.from("notifications").select("*").order("created_at", { ascending: false }).limit(5),
@@ -30,9 +31,10 @@ export default async function Dashboard() {
     ]);
   const { count: dueMistakes } = await sb.from("review_items").select("question_id", { count: "exact", head: true })
     .eq("user_id", me.id).lte("due_at", new Date().toISOString());
+  const courses = allCourses.filter((c) => takes(me, c.slug));
   const lp = levelProgress(me.xp);
   const submitted = new Set((subs || []).map((s) => s.assignment_id));
-  const upcoming = (assignments || []).filter((a) => !submitted.has(a.id)).slice(0, 4);
+  const upcoming = ((assignments || []) as unknown as { id: string; title: string; due_at: string | null; kind: string; course: { slug: string } | null }[]).filter((a) => !submitted.has(a.id) && (!a.course || takes(me, a.course.slug))).slice(0, 4);
   const attended = (att || []).filter((a) => a.status === "present" || a.status === "late").length;
   const attPct = att && att.length ? Math.round((attended / att.length) * 100) : null;
   const daily = challenges.filter((c) => c.period === "daily");

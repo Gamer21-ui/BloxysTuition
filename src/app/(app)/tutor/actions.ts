@@ -10,7 +10,8 @@ import { requireTutor } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { postToDiscord, siteUrl } from "@/lib/discord";
-import { studentTiersFor } from "@/lib/levels";
+import { levelOfTier, studentTiersFor } from "@/lib/levels";
+import { subjectOf } from "@/lib/subjects";
 
 const uuid = z.string().uuid();
 const str = (fd: FormData, k: string) => String(fd.get(k) ?? "").trim();
@@ -38,11 +39,16 @@ export async function setStudentStatus(id: string, status: "approved" | "suspend
   await requireTutor();
   uuid.parse(id); z.enum(["approved", "suspended", "pending"]).parse(status);
   const admin = createAdminClient();
-  const patch: Record<string, string> = { status };
-  if (tier) patch.tier = z.enum(["O", "AS", "A"]).parse(tier);
+  const patch: Record<string, string | null> = { status };
+  if (tier) {
+    patch.tier = z.enum(["O", "AS", "A"]).parse(tier);
+    // moving between O Level and AS/A means a different subject list, so the student picks again
+    const { data: cur } = await admin.from("profiles").select("tier").eq("id", id).single();
+    if (cur && levelOfTier(cur.tier) !== levelOfTier(tier)) patch.subjects = null;
+  }
   await admin.from("profiles").update(patch).eq("id", id).neq("role", "tutor");
   if (status === "approved") {
-    await admin.from("notifications").insert({ user_id: id, title: "You're in! 🎉", body: "Your tutor approved your account. Pick a theme and start your first quiz.", link: "/profile" });
+    await admin.from("notifications").insert({ user_id: id, title: "You're in! 🎉", body: "Your tutor approved your account. Pick your subjects and start your first quiz.", link: "/subjects" });
   }
   revalidatePath("/tutor/students");
 }
@@ -278,6 +284,15 @@ export async function deleteQuestion(fd: FormData) {
   revalidatePath("/tutor/content", "layout");
 }
 
+/** Approved students who take this course: right level (AS work also goes to A Level) and the subject picked (or nothing picked yet). */
+async function studentsFor(admin: ReturnType<typeof createAdminClient>, courseId: string) {
+  const { data: c } = await admin.from("courses").select("slug, tier").eq("id", courseId).single();
+  let q = admin.from("profiles").select("id").eq("status", "approved").eq("role", "student").in("tier", studentTiersFor(c?.tier));
+  if (c) q = q.or(`subjects.is.null,subjects.cs.{${subjectOf(c.slug)}}`);
+  const { data } = await q;
+  return data || [];
+}
+
 // ---------------------------------------------------------------- homework
 export async function createAssignment(input: Record<string, string | null>) {
   await requireTutor();
@@ -292,8 +307,8 @@ export async function createAssignment(input: Record<string, string | null>) {
     due_at: mu(a.due), max_score: a.max_score, xp_reward: a.xp_reward, file_path: a.file_path,
   }).select("id").single();
   if (error) await fail(error.message);
-  const { data: studs } = await admin.from("profiles").select("id").eq("status", "approved").eq("role", "student");
-  if (studs?.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `New ${a.kind}: ${a.title}`, link: `/homework#${data!.id}` })));
+  const studs = await studentsFor(admin, a.course);
+  if (studs.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `New ${a.kind}: ${a.title}`, link: `/homework#${data!.id}` })));
   await postToDiscord("", [{ title: `📚 New ${a.kind}: ${a.title}`, description: a.due ? `Due ${a.due.replace("T", " ")}` : "No deadline", color: 0x1cb0f6, url: siteUrl() + "/homework" }]);
   revalidatePath("/tutor/homework");
 }
@@ -419,9 +434,9 @@ export async function createExam(fd: FormData) {
   if (error) await fail(error.message);
   if (status !== "draft") {
     const { data: c } = await admin.from("courses").select("title, tier").eq("id", course).single();
-    const { data: studs } = await admin.from("profiles").select("id").eq("status", "approved").eq("role", "student").in("tier", studentTiersFor(c?.tier));
+    const studs = await studentsFor(admin, course);
     const when = status === "scheduled" ? `Opens ${str(fd, "opens_at").replace("T", " ")}` : "Open now";
-    if (studs?.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `📝 New exam: ${str(fd, "title")}`, body: `${c?.title} · ${when}`, link: "/practice" })));
+    if (studs.length) await admin.from("notifications").insert(studs.map((s) => ({ user_id: s.id, title: `📝 New exam: ${str(fd, "title")}`, body: `${c?.title} · ${when}`, link: "/practice" })));
     await postToDiscord("", [{ title: `📝 New exam: ${str(fd, "title")}`, description: `${c?.title} · ${count} questions · ${minutes} min · ${when}${closes ? ` · closes ${str(fd, "closes_at").replace("T", " ")}` : ""}`, color: 0xa855f7, url: siteUrl() + "/practice" }]);
   }
   revalidatePath("/tutor/exams");

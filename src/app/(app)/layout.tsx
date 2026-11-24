@@ -11,17 +11,21 @@ import { Avatar } from "@/components/avatar";
 import { NameTag } from "@/components/name-tag";
 import { BRAND } from "@/lib/brand";
 import { levelProgress, rankName } from "@/lib/xp";
+import { redirect } from "next/navigation";
+import { takes } from "@/lib/subjects";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const me = await requireApproved();
+  // new students pick their subjects before anything else
+  if (me.role === "student" && !me.subjects?.length) redirect("/subjects");
   const sb = await createClient();
   const tutor = me.role === "tutor";
   const now = new Date().toISOString();
   const [{ count }, { data: asg }, { data: subs }, { count: due }, pending, toMark, { count: frReq }, { count: partyInv }] = await Promise.all([
     sb.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
-    sb.from("assignments").select("id"),
+    sb.from("assignments").select("id, course:courses(slug)"),
     sb.from("submissions").select("assignment_id").eq("user_id", me.id),
     sb.from("review_items").select("question_id", { count: "exact", head: true }).eq("user_id", me.id).lte("due_at", now),
     tutor ? sb.from("profiles").select("id", { count: "exact", head: true }).eq("status", "pending") : Promise.resolve({ count: 0 }),
@@ -31,7 +35,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   ]);
   const handedIn = new Set((subs || []).map((s) => s.assignment_id));
   const badges: Badges = {
-    "/homework": tutor ? 0 : (asg || []).filter((a) => !handedIn.has(a.id)).length,
+    "/homework": tutor ? 0 : ((asg || []) as unknown as { id: string; course: { slug: string } | null }[]).filter((a) => !handedIn.has(a.id) && (!a.course || takes(me, a.course.slug))).length,
     "/practice": due || 0,
     "/friends": (frReq || 0) + (partyInv || 0),
     "/tutor/students": pending.count || 0,

@@ -7,6 +7,7 @@ import { Icon } from "@/components/icon";
 import { Bar } from "@/components/ui";
 import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
+import { takes } from "@/lib/subjects";
 
 
 export const metadata: Metadata = { title: "Courses" };
@@ -15,16 +16,17 @@ export default async function Courses({ searchParams }: { searchParams: Promise<
   const me = await requireApproved();
   const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
-  const [courses, { data: topics }] = await Promise.all([
+  const [allCourses, { data: topics }] = await Promise.all([
     getCourseProgress(me.id),
     sb.from("student_topics").select("label, chapter:chapters(number, title, course:courses(slug, code))").eq("student_id", me.id),
   ]);
+  const courses = allCourses.filter((c) => takes(me, c.slug));
   type T = { label: string; chapter: { number: string; title: string; course: { slug: string; code: string } } | null };
   const tp = ((topics as unknown as T[]) || []).filter((t) => t.chapter);
   return (
     <div>
       <h1 className="page-title">Courses</h1>
-      <p className="mt-1 text-muted">Pick a subject. Chapters unlock as your tutor releases them.</p>
+      <p className="mt-1 text-muted">Pick a subject. Chapters unlock as your tutor releases them.{me.role === "student" && <> <Link href="/subjects" className="font-bold text-accent hover:underline">Change my subjects</Link></>}</p>
       {tp.length > 0 && (
         <div className="card mt-5 space-y-2">
           <div className="font-bold">From your tutor</div>

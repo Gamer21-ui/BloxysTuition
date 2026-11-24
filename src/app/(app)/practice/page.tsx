@@ -8,6 +8,7 @@ import { fmtDate, isLive, timeUntil } from "@/lib/utils";
 import { ScoreChart } from "./score-chart";
 import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
+import { takes } from "@/lib/subjects";
 
 
 export const metadata: Metadata = { title: "Exam prep" };
@@ -23,13 +24,13 @@ export default async function Practice({ searchParams }: { searchParams: Promise
   const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
   const [{ data: courses }, { data: quizzes }, { data: deck }, { data: attempts }] = await Promise.all([
-    sb.from("courses").select("id, title, color, sort, tier").eq("active", true).order("sort"),
+    sb.from("courses").select("id, slug, title, color, sort, tier").eq("active", true).order("sort"),
     sb.from("quizzes").select("id, course_id, kind, title, status, release_at, time_limit_sec, question_count, closes_at, max_attempts, sort").in("kind", ["exam", "review"]),
     sb.from("review_items").select("course_id, due_at, box").eq("user_id", me.id),
     sb.from("quiz_attempts").select("quiz_id, score, total, finished_at, time_ms, flagged, quiz:quizzes!inner(kind, course_id)")
       .eq("user_id", me.id).eq("quiz.kind", "exam").order("started_at"),
   ]);
-  const allCourses = (courses as Course[]) || [];
+  const allCourses = ((courses as (Course & { slug: string })[]) || []).filter((c) => takes(me, c.slug));
   const cs = allCourses.filter((c) => inLevel(c.tier, level));
   const allQz = (quizzes as Quiz[]) || [];
   const qz = allQz.filter((q) => isLive(q.status, q.release_at));
