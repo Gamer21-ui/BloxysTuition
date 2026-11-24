@@ -55,7 +55,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
     }
   };
 
-  const list = items.filter((i) => i.kind === tab);
+  // owner exclusives first, so the tutor finds them without scrolling
+  const list = items.filter((i) => i.kind === tab).sort((a, b) => Number(!!b.tutor_only) - Number(!!a.tutor_only));
   return (
     <div className="mt-5">
       <div className="sticky top-0 z-10 -mx-2 flex flex-wrap items-center gap-2 bg-bg/90 px-2 py-2 backdrop-blur">

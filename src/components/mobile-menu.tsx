@@ -55,7 +55,7 @@ export function MobileMenu(p: Props) {
           <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu">
             <motion.div className="absolute inset-0 bg-black/50" onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
             <motion.aside
-              className="absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col overflow-y-auto [&>*]:shrink-0 bg-surface px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-2xl"
+              className="absolute inset-y-0 left-0 flex w-[88%] max-w-sm flex-col overflow-y-auto overscroll-contain [&>*]:shrink-0 bg-surface px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))] shadow-2xl"
               initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }} transition={{ type: "tween", duration: 0.22 }}
             >
               <div className="flex items-start gap-3">

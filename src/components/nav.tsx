@@ -60,7 +60,7 @@ export function Sidebar({ isTutor, badges = {} }: { isTutor: boolean; badges?: B
     </Link>
   );
   return (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 border-r-2 border-line bg-surface p-3 lg:flex">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain border-r-2 border-line bg-surface p-3 lg:flex [&>*]:shrink-0">
       <Link href="/dashboard" className="mb-4 px-2 pt-2 font-display text-xl leading-tight text-primary">{BRAND.short}<span className="block text-xs text-muted font-body">Academic Comeback</span></Link>
       <nav aria-label="Main" className="flex flex-col gap-1">{STUDENT.map(link)}</nav>
       {isTutor && (
