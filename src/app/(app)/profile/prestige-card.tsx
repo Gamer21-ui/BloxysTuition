@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 import { Confetti } from "@/components/confetti";
 import { PrestigeBadge } from "@/components/prestige-badge";
-import { MAX_PRESTIGE, PRESTIGE_LEVEL, prestigeRewards } from "@/lib/prestige";
+import { MAX_PRESTIGE, PRESTIGE_LEVEL, prestigeBoost, prestigeRewards } from "@/lib/prestige";
 import { levelProgress, xpForLevel } from "@/lib/xp";
 
 export function PrestigeCard({ xp, prestige, lifetime }: { xp: number; prestige: number; lifetime: number }) {
@@ -31,13 +31,13 @@ export function PrestigeCard({ xp, prestige, lifetime }: { xp: number; prestige:
       {done && <Confetti count={90} />}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2 font-display text-xl">Prestige <PrestigeBadge n={prestige} /></div>
-        <div className="text-xs text-muted">Lifetime XP: {(lifetime + xp).toLocaleString()}</div>
+        <div className="text-right text-xs text-muted">Lifetime XP: {(lifetime + xp).toLocaleString()}{prestige > 0 && <div className="font-bold text-good">XP boost ×{prestigeBoost(prestige).toFixed(2)}</div>}</div>
       </div>
       {prestige >= MAX_PRESTIGE ? (
         <p className="text-sm">💠 You&apos;re <b>Master Prestige</b>, the highest there is. Legend.</p>
       ) : (
         <>
-          <p className="text-sm text-muted">Reach <b className="text-ink">Level {PRESTIGE_LEVEL}</b> to prestige: your level goes back to 1, you keep everything you own and every unlock,
+          <p className="text-sm text-muted">Reach <b className="text-ink">Level {PRESTIGE_LEVEL}</b> to prestige (optional: you can also just keep levelling). Your level goes back to 1, you keep everything you own and every unlock,
             and you get <b className="text-ink">{prestigeRewards(next).join(", ")}</b>.</p>
           <div>
             <div className="mb-1 flex justify-between text-xs font-bold text-muted"><span>Level {lp.level} / {PRESTIGE_LEVEL}</span><span>{Math.round(pct)}%</span></div>

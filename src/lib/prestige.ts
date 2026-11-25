@@ -11,8 +11,10 @@ export const emblem = (n: number) => (n >= MAX_PRESTIGE ? { label: "💠 MASTER"
 export const unlockLevel = (xp: number, prestige = 0) => (prestige > 0 ? Math.max(levelFromXp(xp), PRESTIGE_LEVEL) : levelFromXp(xp));
 
 export const prestigeCoins = (n: number) => 500 * n;
+/** XP multiplier from prestige: +0.15x each. Mirrors award_xp() in SQL. */
+export const prestigeBoost = (n: number) => 1 + 0.15 * n;
 export function prestigeRewards(n: number) {
-  const r = [`${prestigeCoins(n)} coins`, n === MAX_PRESTIGE ? "💠 Master Prestige title" : `⭐ Prestige ${n} title`];
+  const r = [`a permanent ${prestigeBoost(n).toFixed(2)}× XP boost`, `${prestigeCoins(n)} coins`, n === MAX_PRESTIGE ? "💠 Master Prestige title" : `⭐ Prestige ${n} title`];
   if (n === 1) r.push("Prestige Frame");
   if (n === 5) r.push("Prestige name style");
   if (n === MAX_PRESTIGE) r.push("Master Prestige Frame");

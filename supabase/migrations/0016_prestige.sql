@@ -1,4 +1,5 @@
 -- Prestige (like CoD): at Level 20 a student can reset their level to 1 for a Prestige emblem and rewards.
+-- Each prestige also gives +0.15x XP on everything (P1 = 1.15x … P10 = 2.5x). Students who don't prestige keep levelling.
 -- Their XP moves into lifetime_xp, so the All-time XP leaderboard still counts it. Nothing they own is lost,
 -- and level unlocks stay unlocked after their first prestige.
 alter table profiles add column if not exists prestige int not null default 0;
@@ -106,3 +107,79 @@ language sql stable security definer set search_path = public as $$
   limit p_limit;
 $$;
 grant execute on function get_leaderboard(text, int) to authenticated;
+
+
+-- ---------------------------------------------------------------- balance: gentler level curve
+-- Total XP for level L is now 40·L·(L-1) (was 50): Level 10 = 3 600, Level 20 = 15 200.
+-- About 8 weeks of regular study (5 days a week, classes, quests) to reach Level 20 and prestige.
+-- Everyone's level is worked out from their XP, so current students move up a little; nobody drops.
+create or replace function level_from_xp(x int) returns int language sql immutable as $$
+  select greatest(1, floor((1 + sqrt(1 + 4 * x / 40.0)) / 2)::int);
+$$;
+
+-- ---------------------------------------------------------------- prestige XP boost
+create or replace function award_xp(
+  p_user uuid, p_base int, p_reason text, p_ref text default null,
+  p_content_tier tier default null, p_coins int default 0, p_counts_study boolean default true
+) returns jsonb language plpgsql security definer set search_path = public as $$
+declare
+  prof profiles%rowtype;
+  mult numeric := 1;
+  gained int;
+  lvl_before int;
+  lvl_after int;
+  today date := today_local();
+  new_day boolean := false;
+  missed int;
+  keeps boolean;
+begin
+  select * into prof from profiles where id = p_user for update;
+  if not found or (p_base <= 0 and p_coins <= 0 and not p_counts_study) then
+    return jsonb_build_object('xp', 0, 'leveled_up', false);
+  end if;
+  if p_content_tier is not null then
+    mult := 1 + 0.25 * greatest(0, tier_rank(p_content_tier) - tier_rank(prof.tier));
+  end if;
+  mult := mult * (1 + 0.15 * coalesce(prof.prestige, 0));   -- prestige boost: +0.15x per prestige
+  gained := round(greatest(p_base, 0) * mult);
+  lvl_before := level_from_xp(prof.xp);
+
+  if gained > 0 or p_coins > 0 then
+    insert into xp_events(user_id, amount, coins, multiplier, reason, ref)
+    values (p_user, gained, p_coins, mult, p_reason, p_ref);
+    update profiles set xp = xp + gained, coins = coins + p_coins where id = p_user;
+  end if;
+
+  if p_counts_study and (prof.last_study_date is null or prof.last_study_date < today) then
+    new_day := true;
+    missed := case when prof.last_study_date is null then 999 else today - prof.last_study_date - 1 end;
+    -- streak continues if no day was missed, or if streak freezes cover every missed day
+    keeps := missed = 0 or (missed between 1 and prof.streak_freezes and prof.streak > 0);
+    update profiles set
+      streak = case when keeps then prof.streak + 1 else 1 end,
+      best_streak = greatest(prof.best_streak, case when keeps then prof.streak + 1 else 1 end),
+      streak_freezes = case when keeps and missed > 0 then prof.streak_freezes - missed else prof.streak_freezes end,
+      last_study_date = today
+    where id = p_user;
+    if keeps and missed > 0 then
+      perform notify(p_user, '🧊 Streak freeze used', 'You missed ' || missed || ' day' || case when missed > 1 then 's' else '' end
+        || ', but your ' || (prof.streak + 1) || '-day streak survived.', '/shop');
+    end if;
+  end if;
+
+  lvl_after := level_from_xp(prof.xp + gained);
+  if lvl_after > lvl_before then
+    perform notify(p_user, 'Level up! You reached Lv ' || lvl_after, null, '/dashboard');
+  end if;
+
+  if p_reason <> 'challenge' and gained > 0 then
+    perform bump_challenge(p_user, 'xp_earned', gained, null);
+  end if;
+  if new_day then
+    perform bump_challenge(p_user, 'study_days', 1, null);
+  end if;
+
+  return jsonb_build_object('xp', gained, 'multiplier', mult, 'level_before', lvl_before,
+                            'level_after', lvl_after, 'leveled_up', lvl_after > lvl_before);
+end $$;
+revoke execute on function award_xp(uuid,int,text,text,tier,int,boolean) from public, anon, authenticated;

@@ -226,3 +226,11 @@ do $$ declare p profiles%rowtype; begin
   raise notice 'ok: prestige 1, lifetime % XP, unlock level %', p.lifetime_xp, unlock_level(p.xp, p.prestige);
 end $$;
 select (select coins from profiles where id = :'ava') - :ava_coins as coins_gained;
+-- prestige boost: P1 earns 1.15x
+reset role;
+select award_xp(:'ava', 100, 'bonus', 'boost-test', null, 0, false) ->> 'xp' as boosted_xp;
+do $$ begin
+  if (select amount from xp_events where ref = 'boost-test') <> 115 then raise exception 'boost wrong: %', (select amount from xp_events where ref = 'boost-test'); end if;
+  if level_from_xp(15200) <> 20 or level_from_xp(15199) <> 19 then raise exception 'curve wrong'; end if;
+  raise notice 'ok: P1 boost 100 -> 115, Level 20 at 15200 XP';
+end $$;

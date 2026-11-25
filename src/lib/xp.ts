@@ -1,10 +1,10 @@
-/** Total XP needed to reach level L: 50 * L * (L - 1). Mirrors level_from_xp() in SQL. */
+/** Total XP needed to reach level L: 40 * L * (L - 1). Mirrors level_from_xp() in SQL. */
 export function xpForLevel(level: number) {
-  return 50 * level * (level - 1);
+  return 40 * level * (level - 1);
 }
 
 export function levelFromXp(xp: number) {
-  return Math.max(1, Math.floor((1 + Math.sqrt(1 + (4 * xp) / 50)) / 2));
+  return Math.max(1, Math.floor((1 + Math.sqrt(1 + (4 * xp) / 40)) / 2));
 }
 
 export function levelProgress(xp: number) {
