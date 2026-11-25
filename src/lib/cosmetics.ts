@@ -8,6 +8,7 @@ export const NAME_STYLES: Record<string, CSSProperties> = {
   sunset: { backgroundImage: "linear-gradient(90deg,#f97316,#ec4899)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
   gold: { backgroundImage: "linear-gradient(90deg,#b45309,#facc15,#b45309)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
   owner: {}, // animated: see .fb-owner-name in globals.css
+  prestige: { backgroundImage: "linear-gradient(90deg,#16a34a,#a3e635,#facc15)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", fontWeight: 800 },
   season: { backgroundImage: "linear-gradient(90deg,#7c3aed,#facc15,#ec4899,#7c3aed)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent", fontWeight: 800 },
   rainbow: { backgroundImage: "linear-gradient(90deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" },
 };
@@ -19,6 +20,8 @@ export const FRAMES: Record<string, string> = {
   fire: "linear-gradient(0deg,#dc2626,#f97316,#facc15)",
   diamond: "linear-gradient(135deg,#67e8f9,#e0f2fe,#a78bfa,#67e8f9)",
   season: "linear-gradient(135deg,#7c3aed,#facc15,#ec4899,#22d3ee,#7c3aed)",
+  prestige: "linear-gradient(135deg,#16a34a,#a3e635,#facc15,#16a34a)",
+  master: "linear-gradient(135deg,#facc15,#fff7ae,#f59e0b,#fde68a,#facc15)",
   owner: "", // animated: see .fb-owner-frame in globals.css
 };
 

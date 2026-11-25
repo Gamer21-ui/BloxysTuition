@@ -25,7 +25,7 @@ export default async function Students() {
       <Avatar name={s.display_name} mode={s.avatar_mode} discordUrl={s.discord_avatar_url} robloxUrl={s.roblox_headshot_url} blocky={s.blocky} size={40} />
       <Link href={`/tutor/students/${s.id}`} className="min-w-0 flex-1 hover:underline">
         <div className="font-bold">{s.display_name} <span className="text-sm font-normal text-muted">@{s.discord_username}</span></div>
-        <div className="text-xs text-muted">{s.tier} Level · {s.subjects?.length ? s.subjects.map(subjectName).join(", ") : s.status === "approved" ? "subjects not picked yet" : "no subjects yet"} · Lv {levelFromXp(s.xp)} · {s.xp} XP · 🔥 {s.streak} · joined {timeAgo(s.created_at)}</div>
+        <div className="text-xs text-muted">{s.tier} Level · {s.subjects?.length ? s.subjects.map(subjectName).join(", ") : s.status === "approved" ? "subjects not picked yet" : "no subjects yet"} · {s.prestige ? `P${s.prestige} ` : ""}Lv {levelFromXp(s.xp)} · {s.xp} XP · 🔥 {s.streak} · joined {timeAgo(s.created_at)}</div>
       </Link>
       <StatusChip status={s.status} />
       <StatusButtons id={s.id} status={s.status} tier={s.tier} />

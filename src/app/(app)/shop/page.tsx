@@ -3,6 +3,7 @@ import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { levelFromXp } from "@/lib/xp";
 import { ShopGrid, type Item } from "./shop-grid";
+import { unlockLevel } from "@/lib/prestige";
 
 export const metadata: Metadata = { title: "Shop" };
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export default async function Shop() {
         items={((items as Item[]) || []).filter((i) => (i.reward_only ? ownedIds.has(i.id) : i.active || (i.tutor_only && me.role === "tutor")))}
         owned={(mine || []).map((m) => m.item_id)}
         me={{
-          id: me.id, name: me.display_name, coins: me.coins, level: levelFromXp(me.xp), title: me.title, nameStyle: me.name_style,
+          id: me.id, name: me.display_name, coins: me.coins, level: unlockLevel(me.xp, me.prestige ?? 0), title: me.title, nameStyle: me.name_style,
           frame: me.frame, blocky: me.blocky, avatarMode: me.avatar_mode, discordUrl: me.discord_avatar_url, robloxUrl: me.roblox_headshot_url,
           freezes: me.streak_freezes, streak: me.streak,
         }}

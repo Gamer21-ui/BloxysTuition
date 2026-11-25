@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { announceBattle } from "../actions";
 import { playMusic, sfx, setSoundOn, soundOn, stopMusic, unlock } from "@/lib/battle-audio";
 import { rankOf, STYLES } from "@/lib/ranks";
+import { PrestigeBadge } from "@/components/prestige-badge";
 
 // Emotes are sent as an index into this list, so nobody can broadcast their own text.
 const EMOTES = ["👍", "😂", "😭", "🔥", "💀", "😎", "🤯", "👑", "GG", "Nice one!", "So close!", "Let's go!", "Good luck!", "Wow!"];
@@ -263,7 +264,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
             <div className={cn("min-w-0 sm:flex-1", side === 2 && "text-right")}>
               <div className="truncate text-sm font-bold sm:text-base"><NameTag name={c?.display_name || "…"} style={c?.name_style} /></div>
               <div className="truncate text-[11px] text-muted sm:text-xs">
-                {style === "ranked" && c?.rating !== undefined ? <span className="font-bold" style={{ color: rankOf(c.rating).color }}>{rankOf(c.rating).emoji} {c.rating}</span> : <>Lv {c?.level ?? "?"}</>}
+                {style === "ranked" && c?.rating !== undefined ? <span className="font-bold" style={{ color: rankOf(c.rating).color }}>{rankOf(c.rating).emoji} {c.rating}</span> : <><PrestigeBadge n={c?.prestige} /> Lv {c?.level ?? "?"}</>}
                 {p.user_id === b.host_id && " · host"}{mvp === p.user_id && " · ⭐ MVP"}
               </div>
               {b.status === "finished" && typeof p.rating_delta === "number" && (

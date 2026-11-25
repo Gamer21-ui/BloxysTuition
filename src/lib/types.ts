@@ -15,6 +15,8 @@ export interface Profile {
   rating?: number;
   ranked_played?: number;
   ranked_wins?: number;
+  prestige?: number;
+  lifetime_xp?: number;
   contact: string | null;
   parent_name: string | null;
   parent_contact: string | null;
@@ -63,4 +65,5 @@ export interface Card {
   frame?: string | null;
   rating?: number;
   ranked_played?: number;
+  prestige?: number;
 }

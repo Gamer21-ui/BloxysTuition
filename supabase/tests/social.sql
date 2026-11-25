@@ -207,3 +207,22 @@ set role authenticated; select pg_temp.as_user(:'ben');
 do $$ begin perform buy_item((select id from shop_items where code = 's1-xp-champ')); raise exception 'bought a reward item';
 exception when others then if sqlerrm not like '%not available%' then raise; end if; end $$;
 reset role;
+-- prestige: Level 20 resets to 1, keeps lifetime XP, gives coins + title + frame; can't prestige again at Level 1
+reset role;
+update profiles set xp = 19500 where id = :'ava';
+select coins as ava_coins from profiles where id = :'ava' \gset
+set role authenticated; select pg_temp.as_user(:'ava');
+select do_prestige();
+do $$ begin perform do_prestige(); raise exception 'prestiged twice';
+exception when others then if sqlerrm not like '%Level 20%' then raise; end if; end $$;
+select value from get_leaderboard('xp', 50) where id = current_setting('request.jwt.claim.sub')::uuid;
+reset role;
+do $$ declare p profiles%rowtype; begin
+  select * into p from profiles where display_name = 'Ava';
+  if p.prestige <> 1 or p.xp <> 0 or p.lifetime_xp < 19500 then raise exception 'bad prestige state: P% xp % life %', p.prestige, p.xp, p.lifetime_xp; end if;
+  if not exists (select 1 from user_items ui join shop_items si on si.id = ui.item_id where ui.user_id = p.id and si.code = 'prestige-1') then raise exception 'no prestige title'; end if;
+  if not exists (select 1 from user_items ui join shop_items si on si.id = ui.item_id where ui.user_id = p.id and si.kind = 'frame' and si.code = 'prestige') then raise exception 'no prestige frame'; end if;
+  if unlock_level(p.xp, p.prestige) < 20 then raise exception 'unlocks lost'; end if;
+  raise notice 'ok: prestige 1, lifetime % XP, unlock level %', p.lifetime_xp, unlock_level(p.xp, p.prestige);
+end $$;
+select (select coins from profiles where id = :'ava') - :ava_coins as coins_gained;

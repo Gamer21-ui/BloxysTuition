@@ -15,6 +15,8 @@ import { redirect } from "next/navigation";
 import { takes } from "@/lib/subjects";
 import { Tutorial } from "@/components/tutorial";
 import { LivePoll } from "@/components/live-poll";
+import { PrestigeBadge } from "@/components/prestige-badge";
+import { emblem } from "@/lib/prestige";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -58,7 +60,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
             <MobileMenu
               isTutor={tutor} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
-              handle={me.discord_username} level={lp.level} rank={rankName(lp.level)} xpInto={lp.into} xpNeeded={lp.needed} xpPct={lp.pct}
+              handle={me.discord_username} level={lp.level} rank={(me.prestige ? `${emblem(me.prestige).label} · ` : "") + rankName(lp.level)} xpInto={lp.into} xpNeeded={lp.needed} xpPct={lp.pct}
               coins={me.coins} streak={me.streak} freezes={me.streak_freezes ?? 0}
             />
             <Link href="/dashboard" className="font-display text-xl text-primary lg:hidden">{BRAND.short}</Link>
@@ -66,7 +68,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               {avatar(38)}
               <div className="min-w-0">
                 <div className="truncate font-display leading-tight"><NameTag name={me.display_name} style={me.name_style} /></div>
-                <div className="text-xs text-muted">Lv {lp.level}</div>
+                <div className="flex items-center gap-1 text-xs text-muted"><PrestigeBadge n={me.prestige} /> Lv {lp.level}</div>
               </div>
             </Link>
             <div className="ml-1 hidden w-40 lg:block" title={`${lp.into} / ${lp.needed} XP to next level`}>

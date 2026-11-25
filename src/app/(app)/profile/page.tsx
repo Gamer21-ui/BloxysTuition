@@ -8,6 +8,8 @@ import { ownedCodes } from "@/lib/shop";
 import Link from "next/link";
 import { subjectName } from "@/lib/subjects";
 import { ReplayTutorialButton } from "@/components/tutorial";
+import { PrestigeCard } from "./prestige-card";
+import { unlockLevel } from "@/lib/prestige";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -17,11 +19,15 @@ export default async function Profile() {
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="page-title">Profile</h1>
+      {me.role === "student" && me.prestige !== undefined && (<>
+        <SectionTitle>Prestige</SectionTitle>
+        <PrestigeCard xp={me.xp} prestige={me.prestige} lifetime={me.lifetime_xp ?? 0} />
+      </>)}
       <SectionTitle>Theme</SectionTitle>
       <ThemeSwitcher userId={me.id} initial={me.theme} />
       <SectionTitle>Avatar</SectionTitle>
       <AvatarEditor
-        level={levelFromXp(me.xp)}
+        level={unlockLevel(me.xp, me.prestige ?? 0)}
         ownedHats={owned.filter((o) => o.kind === "hat").map((o) => o.code)}
         ownedPatterns={owned.filter((o) => o.kind === "pattern").map((o) => o.code)}
         ownedFace={owned.filter((o) => o.kind === "face_acc").map((o) => o.code)}

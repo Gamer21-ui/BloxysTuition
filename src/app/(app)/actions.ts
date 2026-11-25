@@ -8,6 +8,7 @@ import { postToDiscord, siteUrl } from "@/lib/discord";
 import { levelFromXp, rankName } from "@/lib/xp";
 import { HAT_UNLOCKS } from "@/components/blocky-avatar";
 import { ownedCodes } from "@/lib/shop";
+import { unlockLevel } from "@/lib/prestige";
 
 /** Posts a level-up to Discord once per level. The level is read from the database, never trusted from the browser. */
 export async function announceLevelUp() {
@@ -19,7 +20,7 @@ export async function announceLevelUp() {
   if (level <= p.announced_level) return;
   await admin.from("profiles").update({ announced_level: level }).eq("id", me.id);
   await postToDiscord("", [{
-    title: `⬆️ ${p.display_name} reached Level ${level}!`,
+    title: `⬆️ ${p.display_name} reached Level ${level}!${me.prestige ? ` (Prestige ${me.prestige})` : ""}`,
     description: `New rank: **${rankName(level)}** · ${p.xp.toLocaleString()} XP total`,
     color: 0x58cc02,
     url: siteUrl() + "/leaderboard",
@@ -52,7 +53,7 @@ export async function saveAvatar(input: { mode: string; blocky: unknown; display
   const displayName = z.string().trim().min(2).max(32).parse(input.displayName);
   const owned = await ownedCodes(me.id, me.role === "tutor");
   const levelHat = HAT_UNLOCKS[blocky.hat];
-  if (levelHat !== undefined ? levelFromXp(me.xp) < levelHat : !owned.some((o) => o.kind === "hat" && o.code === blocky.hat)) {
+  if (levelHat !== undefined ? unlockLevel(me.xp, me.prestige ?? 0) < levelHat : !owned.some((o) => o.kind === "hat" && o.code === blocky.hat)) {
     throw new Error("That hat is still locked");
   }
   if (blocky.pattern !== "none" && !owned.some((o) => o.kind === "pattern" && o.code === blocky.pattern)) throw new Error("You don't own that background");
