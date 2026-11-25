@@ -23,14 +23,14 @@ const KINDS = [
 
 export default async function Leaderboard({ searchParams }: { searchParams: Promise<{ kind?: string }> }) {
   const me = await requireApproved();
-  const { kind = "season" } = await searchParams;
-  const k = KINDS.find((x) => x.k === kind) ?? KINDS[0];
   const sb = await createClient();
   await sb.rpc("season_tick"); // starts/ends seasons on time (also run by the daily cron)
-  const [{ data }, { data: seasons }] = await Promise.all([
-    sb.rpc("get_leaderboard", { p_kind: k.k, p_limit: 50 }),
-    sb.from("seasons").select("id, number, name, starts_at, ends_at, status").order("number", { ascending: false }).limit(4),
-  ]);
+  // seasons only exist once the seasons database update has been run; until then hide the Season tab
+  const { data: seasons, error: seasonErr } = await sb.from("seasons").select("id, number, name, starts_at, ends_at, status").order("number", { ascending: false }).limit(4);
+  const kinds = seasonErr ? KINDS.filter((x) => x.k !== "season") : KINDS;
+  const { kind = kinds[0].k } = await searchParams;
+  const k = kinds.find((x) => x.k === kind) ?? kinds[0];
+  const { data } = await sb.rpc("get_leaderboard", { p_kind: k.k, p_limit: 50 });
   type S = { id: number; number: number; name: string; starts_at: string; ends_at: string; status: "upcoming" | "active" | "ended" };
   const ss = (seasons as S[]) || [];
   const active = ss.find((x) => x.status === "active");
@@ -86,7 +86,7 @@ export default async function Leaderboard({ searchParams }: { searchParams: Prom
         </div>
       )}
       <div className="mt-4 flex flex-wrap gap-2">
-        {KINDS.map((x) => <Link key={x.k} href={`/leaderboard?kind=${x.k}`} className={`btn btn-sm ${x.k === k.k ? "btn-primary" : "btn-ghost"}`}>{x.label}</Link>)}
+        {kinds.map((x) => <Link key={x.k} href={`/leaderboard?kind=${x.k}`} className={`btn btn-sm ${x.k === k.k ? "btn-primary" : "btn-ghost"}`}>{x.label}</Link>)}
       </div>
       <div className="mt-6 space-y-2">
         {rows.length === 0 && <div className="card text-muted">{k.k === "season" && !active && upcoming

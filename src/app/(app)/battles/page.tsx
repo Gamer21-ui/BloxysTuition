@@ -23,7 +23,8 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
   const [{ data: courses }, { data: open }, { data: mine }] = await Promise.all([
     sb.from("courses").select("id, slug, title, code, tier, chapters(id, number, title, sort, status)").eq("active", true).order("sort"),
     sb.from("battles").select("id, code, mode, status, tier, subject, both_levels, style, created_at, round_count, course:courses(title), chapter:chapters(number, title), players:battle_players(user_id, team)")
-      .in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
+      .in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20)
+      .then(async (r) => (r.error ? await sb.from("battles").select("id, code, mode, status, tier, created_at, round_count, course:courses(title), players:battle_players(user_id, team)").in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20) as unknown as typeof r : r)),
     sb.from("battle_players").select("score, team, battle:battles!inner(code, mode, status, winner_team, created_at, course:courses(title))")
       .eq("user_id", me.id).eq("battle.status", "finished").order("joined_at", { ascending: false }).limit(10),
   ]);

@@ -83,8 +83,11 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
 
   const refresh = useCallback(async () => {
     const [{ data: bb }, { data: pp }, { data: aa }] = await Promise.all([
-      sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id, style, phase_ends_at").eq("id", battleId).single(),
-      sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at"),
+      // newer columns (style, rating) need the ranked database update; fall back so battles still work without it
+      sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id, style, phase_ends_at").eq("id", battleId).single()
+        .then(async (r) => (r.error ? await sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id").eq("id", battleId).single() as unknown as typeof r : r)),
+      sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at")
+        .then(async (r) => (r.error ? await sb.from("battle_players").select("user_id, team, score").eq("battle_id", battleId).order("joined_at") as unknown as typeof r : r)),
       sb.from("battle_answers").select("round_no, user_id, choice, correct, points").eq("battle_id", battleId),
     ]);
     if (bb) {

@@ -11,8 +11,10 @@ export default async function Shop() {
   const me = await requireApproved();
   const sb = await createClient();
   const [{ data: items }, { data: mine }] = await Promise.all([
-    // season rewards are hidden until you own them (the database only returns owned ones)
-    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only, active, reward_only").order("sort"),
+    // season rewards are hidden until you own them (the database only returns owned ones).
+    // If the seasons database update hasn't been run yet, fall back to the older columns so the shop still loads.
+    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only, active, reward_only").order("sort")
+      .then(async (r) => (r.error ? await sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only, active").eq("active", true).order("sort") as unknown as typeof r : r)),
     sb.from("user_items").select("item_id").eq("user_id", me.id),
   ]);
   const ownedIds = new Set((mine || []).map((m) => m.item_id));
