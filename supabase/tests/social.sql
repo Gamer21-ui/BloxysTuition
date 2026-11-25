@@ -234,3 +234,37 @@ do $$ begin
   if level_from_xp(15200) <> 20 or level_from_xp(15199) <> 19 then raise exception 'curve wrong'; end if;
   raise notice 'ok: P1 boost 100 -> 115, Level 20 at 15200 XP';
 end $$;
+-- power-ups + black market
+reset role;
+update profiles set coins = 20000, xp = 20000 where id = :'ava';
+insert into assignments(course_id, title, kind, due_at, max_score, xp_reward, status)
+select c.id, 'HW ' || g, 'homework', now() + interval '1 day', 10, 50, 'published' from courses c cross join generate_series(1, 4) g where c.slug = 'o-economics';
+set role authenticated; select pg_temp.as_user(:'ava');
+select buy_item((select id from shop_items where kind = 'powerup' and code = 'extension'));
+select use_extension((select id from assignments where title = 'HW 1'));
+do $$ begin perform use_extension((select id from assignments where title = 'HW 1')); raise exception 'extended twice';
+exception when others then if sqlerrm not like '%already extended%' then raise; end if; end $$;
+-- owner online so alerts can happen
+reset role; update profiles set last_seen_at = now() where role = 'tutor';
+set role authenticated; select pg_temp.as_user(:'ava');
+select black_market_status();
+select black_market_buy('skip', (select id from assignments where title = 'HW 2'));
+select black_market_buy('skip', (select id from assignments where title = 'HW 3'));
+select black_market_buy('skip', (select id from assignments where title = 'HW 4'));
+do $$ begin perform black_market_buy('skip', (select id from assignments where title = 'HW 1')); raise exception 'bought a 4th';
+exception when others then if sqlerrm not like '%broken%' then raise; end if; end $$;
+reset role;
+do $$ declare p profiles%rowtype; n int; alerts int; begin
+  select * into p from profiles where display_name = 'Ava';
+  if p.coins <> 20000 - 120 - 3 * 3500 or p.xp <> 20000 - 3 * 2500 then raise exception 'wrong price: coins % xp %', p.coins, p.xp; end if;
+  select count(*) into n from assignment_overrides where user_id = p.id and exempt;
+  select count(*) into alerts from black_market_log where user_id = p.id and owner_alerted;
+  if n <> 3 then raise exception 'expected 3 skipped, got %', n; end if;
+  if (select extra_hours from assignment_overrides ao join assignments a on a.id = ao.assignment_id where a.title = 'HW 1' and ao.user_id = p.id) <> 48 then raise exception 'no extension'; end if;
+  raise notice 'ok: extension +48h, 3 skips then broken, coins % xp %, owner alerted % of 3 times', p.coins, p.xp, alerts;
+end $$;
+-- tutor can't buy
+set role authenticated; select pg_temp.as_user(:'tutor_id');
+do $$ begin perform black_market_buy('bunk', gen_random_uuid()); raise exception 'tutor bought';
+exception when others then if sqlerrm not like '%owner%' then raise; end if; end $$;
+reset role;

@@ -17,6 +17,7 @@ import { Tutorial } from "@/components/tutorial";
 import { LivePoll } from "@/components/live-poll";
 import { PrestigeBadge } from "@/components/prestige-badge";
 import { emblem } from "@/lib/prestige";
+import { Heartbeat } from "@/components/heartbeat";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -39,9 +40,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     sb.from("friendships").select("requester", { count: "exact", head: true }).eq("addressee", me.id).eq("status", "pending"),
     sb.from("party_invites").select("party_id", { count: "exact", head: true }).eq("to_id", me.id),
   ]);
+  // skipped homework (black market) doesn't count as to-do; table may not exist before the update
+  const { data: skipped } = await sb.from("assignment_overrides").select("assignment_id").eq("user_id", me.id).eq("exempt", true);
+  const skippedIds = new Set((skipped || []).map((x) => x.assignment_id));
   const handedIn = new Set((subs || []).map((s) => s.assignment_id));
   const badges: Badges = {
-    "/homework": tutor ? 0 : ((asg || []) as unknown as { id: string; course: { slug: string } | null }[]).filter((a) => !handedIn.has(a.id) && (!a.course || takes(me, a.course.slug))).length,
+    "/homework": tutor ? 0 : ((asg || []) as unknown as { id: string; course: { slug: string } | null }[]).filter((a) => !handedIn.has(a.id) && !skippedIds.has(a.id) && (!a.course || takes(me, a.course.slug))).length,
     "/practice": due || 0,
     "/friends": (frReq || 0) + (partyInv || 0),
     "/tutor/students": pending.count || 0,
@@ -85,6 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <MobileNav isTutor={tutor} me={avatar(28)} />
       <PartyBanner meId={me.id} />
+      <Heartbeat />
       {!tutor && <LivePoll meId={me.id} />}
       {/* site tour: new students, or everyone after the tutor relaunches it (skipped until the database update is in) */}
       {site && me.tutorial_version !== undefined && (

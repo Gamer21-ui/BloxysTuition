@@ -120,12 +120,16 @@ export async function createReport(fd: FormData) {
     admin.from("profiles").select("display_name, parent_name, tier").eq("id", id).single(),
     admin.from("attendance").select("status, session:class_sessions!inner(held_on)").eq("user_id", id).gte("session.held_on", since.slice(0, 10)),
     admin.from("quiz_attempts").select("score, total, quiz:quizzes(course:courses(title, sort))").eq("user_id", id).not("finished_at", "is", null).gte("started_at", since),
-    admin.from("submissions").select("score, graded_at, submitted_at, assignment:assignments(max_score, due_at, course:courses(title))").eq("user_id", id).gte("submitted_at", since),
+    admin.from("submissions").select("assignment_id, score, graded_at, submitted_at, assignment:assignments(max_score, due_at, course:courses(title))").eq("user_id", id).gte("submitted_at", since),
     admin.from("assignments").select("id").eq("status", "published").gte("created_at", since),
     admin.from("xp_events").select("created_at").eq("user_id", id).gte("created_at", since),
     admin.from("student_topics").select("label, chapter:chapters(number, title, sort, course:courses(title, sort))").eq("student_id", id),
   ]);
   if (!p) await fail("Student not found");
+  // per-student homework changes: extensions move the deadline, skipped homework isn't counted as set
+  const { data: ovs } = await admin.from("assignment_overrides").select("assignment_id, extra_hours, exempt").eq("user_id", id);
+  const ovMap = new Map((ovs || []).map((o) => [o.assignment_id, o]));
+  const setCount = (set || []).filter((x) => !ovMap.get(x.id)?.exempt).length;
 
   const a = att || [];
   const count = (k: string) => a.filter((r) => r.status === k).length;
@@ -142,7 +146,8 @@ export async function createReport(fd: FormData) {
   let hwSum = 0, hwN = 0, onTime = 0;
   for (const r of subs || []) {
     const as = r.assignment as unknown as { max_score: number; due_at: string | null; course: { title: string } | null };
-    if (!as?.due_at || r.submitted_at <= as.due_at) onTime++;
+    const extra = (ovMap.get(r.assignment_id)?.extra_hours || 0) * 3600_000;
+    if (!as?.due_at || +new Date(r.submitted_at) <= +new Date(as.due_at) + extra) onTime++;
     if (r.graded_at && as?.max_score) {
       const frac = (r.score ?? 0) / as.max_score;
       hwSum += frac; hwN++;
@@ -169,7 +174,7 @@ export async function createReport(fd: FormData) {
     version: 2, student: p!.display_name, tier: p!.tier, days,
     attendance: { sessions: a.length, present: count("present"), late: count("late"), absent: count("absent"), excused: count("excused"), pct: pctOf(attended, a.length) },
     quizzes: { count: (q || []).length, avg_pct: pctOf(allQs, allQt) },
-    homework: { set: (set || []).length, handed_in: (subs || []).length, on_time: onTime, avg_pct: hwN ? Math.round((100 * hwSum) / hwN) : null },
+    homework: { set: setCount, handed_in: (subs || []).length, on_time: onTime, avg_pct: hwN ? Math.round((100 * hwSum) / hwN) : null },
     study_days: new Set((act || []).map((e) => muDate(e.created_at))).size,
     subjects,
     topics: Object.values(byCourse).sort((x, y) => x.sort - y.sort).map(({ sort: _s, ...g }) => g),

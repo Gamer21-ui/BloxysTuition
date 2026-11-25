@@ -7,6 +7,7 @@ import { SubmitBox } from "./submit-box";
 import { LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
 import { takes } from "@/lib/subjects";
+import { ExtendButton } from "./extend-button";
 
 
 export const metadata: Metadata = { title: "Homework" };
@@ -25,31 +26,41 @@ export default async function Homework({ searchParams }: { searchParams: Promise
   const me = await requireApproved();
   const level = pickLevel((await searchParams).level, me.tier);
   const sb = await createClient();
-  const [{ data: as }, { data: subs }] = await Promise.all([
+  const [{ data: as }, { data: subs }, { data: ovs }, { data: pu }] = await Promise.all([
     sb.from("assignments").select("id, title, kind, instructions, file_path, due_at, max_score, xp_reward, answers_released, solution_path, mark_scheme_path, solution_video_url, course:courses(title, color, tier, slug)").order("due_at", { ascending: true, nullsFirst: false }),
     sb.from("submissions").select("assignment_id, file_paths, text_answer, submitted_at, score, feedback, graded_at").eq("user_id", me.id),
+    sb.from("assignment_overrides").select("assignment_id, extra_hours, exempt").eq("user_id", me.id),
+    sb.from("user_powerups").select("qty").eq("user_id", me.id).eq("code", "extension").maybeSingle(),
   ]);
+  const ov = new Map((ovs || []).map((o) => [o.assignment_id, o]));
+  const extensions = pu?.qty ?? 0;
+  /** your due date, with any extension */
+  const dueOf = (a: A) => (a.due_at ? new Date(+new Date(a.due_at) + (ov.get(a.id)?.extra_hours || 0) * 3600_000).toISOString() : null);
+  const skipped = (a: A) => !!ov.get(a.id)?.exempt;
   const byA = new Map((subs as S[] | null || []).map((s) => [s.assignment_id, s]));
   const all = ((as as unknown as A[]) || []).filter((a) => !a.course || takes(me, a.course.slug));
   const list = all.filter((a) => inLevel(a.course?.tier || "O", level));
-  const count = (l: "O" | "A") => all.filter((a) => inLevel(a.course?.tier || "O", l) && !byA.has(a.id)).length;
-  const todo = list.filter((a) => !byA.has(a.id));
-  const done = list.filter((a) => byA.has(a.id));
+  const count = (l: "O" | "A") => all.filter((a) => inLevel(a.course?.tier || "O", l) && !byA.has(a.id) && !skipped(a)).length;
+  const todo = list.filter((a) => !byA.has(a.id) && !skipped(a));
+  const done = list.filter((a) => byA.has(a.id) || skipped(a));
 
   const Item = ({ a }: { a: A }) => {
     const s = byA.get(a.id);
-    const late = a.due_at && new Date(a.due_at) < new Date() && !s;
+    const due = dueOf(a);
+    const late = due && new Date(due) < new Date() && !s && !skipped(a);
+    const extended = (ov.get(a.id)?.extra_hours || 0) > 0;
     return (
       <Card className="space-y-3" id={a.id}>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <div className="text-xs font-bold uppercase" style={{ color: a.course?.color }}>{a.course?.title} · {a.kind}</div>
             <h3 className="text-xl">{a.title}</h3>
-            <div className={`text-sm ${late ? "text-bad" : "text-muted"}`}>{a.due_at ? `Due ${fmtDateTime(a.due_at)}` : "No deadline"} · up to {a.xp_reward + 20} XP</div>
+            <div className={`text-sm ${late ? "text-bad" : "text-muted"}`}>{due ? `Due ${fmtDateTime(due)}${extended ? " (⏳ extended)" : ""}` : "No deadline"} · up to {a.xp_reward + 20} XP</div>
           </div>
-          {s?.graded_at ? <span className="chip text-good">{s.score} / {a.max_score}</span> : s ? <span className="chip text-accent">handed in</span> : late ? <span className="chip text-bad">overdue</span> : <span className="chip text-warn">to do</span>}
+          {skipped(a) && !s ? <span className="chip">🕶️ skipped</span> : s?.graded_at ? <span className="chip text-good">{s.score} / {a.max_score}</span> : s ? <span className="chip text-accent">handed in</span> : late ? <span className="chip text-bad">overdue</span> : <span className="chip text-warn">to do</span>}
         </div>
         {a.instructions && <p className="whitespace-pre-wrap text-sm">{a.instructions}</p>}
+        {!s && !skipped(a) && a.due_at && !extended && Date.now() < +new Date(a.due_at) + 24 * 3600_000 && <ExtendButton id={a.id} have={extensions} />}
         {a.file_path && <a className="btn btn-ghost btn-sm" href={f("resources", a.file_path)} target="_blank" rel="noopener">📄 Download the questions</a>}
         {s?.feedback && <div className="rounded border-2 border-line bg-surface2 p-3 text-sm"><b>Feedback:</b> <span className="whitespace-pre-wrap">{s.feedback}</span></div>}
         {s && s.file_paths.length > 0 && (

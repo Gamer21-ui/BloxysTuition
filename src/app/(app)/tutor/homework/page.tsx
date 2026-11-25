@@ -20,10 +20,14 @@ export default async function TutorHomework({ searchParams }: { searchParams: Pr
   const [{ data: courses }, { data: chapters }, { data: as }, { count: studentCount }] = await Promise.all([
     admin.from("courses").select("id, title, tier").order("sort"),
     admin.from("chapters").select("id, course_id, number, title").order("sort"),
-    admin.from("assignments").select("*, course:courses(title, tier), submissions(id, file_paths, text_answer, submitted_at, score, feedback, graded_at, student:profiles(display_name))").order("created_at", { ascending: false }),
+    admin.from("assignments").select("*, course:courses(title, tier), submissions(id, user_id, file_paths, text_answer, submitted_at, score, feedback, graded_at, student:profiles(display_name))").order("created_at", { ascending: false }),
     admin.from("profiles").select("id", { count: "exact", head: true }).eq("role", "student").eq("status", "approved"),
   ]);
-  type Sub = { id: string; file_paths: string[]; text_answer: string | null; submitted_at: string; score: number | null; feedback: string | null; graded_at: string | null; student: { display_name: string } | null };
+  // homework extensions (a shop power-up) push that student's deadline back
+  const { data: ovs } = await admin.from("assignment_overrides").select("assignment_id, user_id, extra_hours").gt("extra_hours", 0);
+  const extraFor = (aid: string, uid: string) => (ovs || []).find((o) => o.assignment_id === aid && o.user_id === uid)?.extra_hours || 0;
+  const isLate = (due: string | null, sub: string, aid: string, uid: string) => !!due && +new Date(sub) > +new Date(due) + extraFor(aid, uid) * 3600_000;
+  type Sub = { id: string; user_id: string; file_paths: string[]; text_answer: string | null; submitted_at: string; score: number | null; feedback: string | null; graded_at: string | null; student: { display_name: string } | null };
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -50,7 +54,7 @@ export default async function TutorHomework({ searchParams }: { searchParams: Pr
                   <div key={s.id} className="rounded border-2 border-line p-3">
                     <div className="flex flex-wrap items-center gap-2 text-sm">
                       <b className="flex-1">{s.student?.display_name}</b>
-                      <span className={a.due_at && s.submitted_at > a.due_at ? "text-bad" : "text-muted"}>{fmtDateTime(s.submitted_at)}{a.due_at && s.submitted_at > a.due_at ? " (late)" : ""}</span>
+                      <span className={isLate(a.due_at, s.submitted_at, a.id, s.user_id) ? "text-bad" : "text-muted"}>{fmtDateTime(s.submitted_at)}{isLate(a.due_at, s.submitted_at, a.id, s.user_id) ? " (late)" : ""}{extraFor(a.id, s.user_id) > 0 ? " · ⏳ used an extension" : ""}</span>
                     </div>
                     <div className="mt-1 flex flex-wrap gap-2 text-sm">
                       {s.file_paths.map((p) => <a key={p} className="chip hover:underline" href={f("submissions", p)} target="_blank">{p.split("/").pop()?.replace(/^\d+-/, "")}</a>)}

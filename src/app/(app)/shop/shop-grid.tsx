@@ -21,7 +21,7 @@ const TABS = [
 ];
 const RARITY: Record<string, string> = { common: "text-muted", rare: "text-accent", epic: "text-[#a855f7]", legendary: "text-xp" };
 
-export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[]; me: Me }) {
+export function ShopGrid({ items, owned, me, powerups = {} }: { items: Item[]; owned: string[]; me: Me; powerups?: Record<string, number> }) {
   const router = useRouter();
   const [tab, setTab] = useState("hat");
   const [busy, setBusy] = useState<string | null>(null);
@@ -51,12 +51,13 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
       case "frame": return <Avatar name={me.name} mode={me.avatarMode} blocky={me.blocky} discordUrl={me.discordUrl} robloxUrl={me.robloxUrl} size={88} frame={it.code} />;
       case "name_style": return <div className="grid h-[88px] min-w-[150px] place-items-center px-2 font-display text-xl"><NameTag name={me.name} style={it.code} /></div>;
       case "title": return <div className="grid h-[88px] min-w-[150px] place-items-center px-2 text-center"><div><div className="font-display">{me.name}</div><div className="text-sm text-muted">{it.data.text}</div></div></div>;
+      case "powerup": return <div className="grid h-[88px] min-w-[150px] place-items-center text-5xl" aria-hidden="true">⏳</div>;
       default: return <div className="grid h-[88px] min-w-[150px] place-items-center text-accent"><Snowflake size={52} aria-hidden="true" /></div>;
     }
   };
 
   // owner exclusives and season rewards first
-  const list = items.filter((i) => i.kind === tab).sort((a, b) => Number(!!b.tutor_only || !!b.reward_only) - Number(!!a.tutor_only || !!a.reward_only));
+  const list = items.filter((i) => i.kind === tab || (tab === "streak_freeze" && i.kind === "powerup")).sort((a, b) => Number(!!b.tutor_only || !!b.reward_only) - Number(!!a.tutor_only || !!a.reward_only));
   return (
     <div className="mt-5">
       <div className="sticky top-0 z-10 -mx-2 flex flex-wrap items-center gap-2 bg-bg/90 px-2 py-2 backdrop-blur">
@@ -64,7 +65,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
         <span className="chip ml-auto text-base text-coin"><Coins size={16} aria-hidden="true" /> {me.coins.toLocaleString()}</span>
       </div>
       {msg && <p className={cn("mt-3 text-sm font-bold", msg.bad ? "text-bad" : "text-good")} role="status">{msg.text}</p>}
-      {tab === "streak_freeze" && <p className="mt-3 text-sm text-muted">You have <b>{me.freezes}/2</b> streak freezes. If you miss a day, one is used automatically so your {me.streak}-day streak survives.</p>}
+      {tab === "streak_freeze" && <p className="mt-3 text-sm text-muted">You have <b>{me.freezes}/2</b> streak freezes. If you miss a day, one is used automatically so your {me.streak}-day streak survives.
+        {items.some((i) => i.kind === "powerup") && <> You have <b>{powerups.extension || 0}/2</b> homework extensions: use one on the Homework page for +48 hours.</>}</p>}
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {list.map((it) => {
@@ -73,6 +75,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
           const locked = me.level < it.min_level;
           const poor = me.coins < it.price;
           const freeze = it.kind === "streak_freeze";
+          const power = it.kind === "powerup";
+          const held = powerups[it.code] || 0;
           return (
             <div key={it.id} className={cn("card flex flex-col items-center gap-2 text-center", on && "ring-2 ring-good", it.tutor_only && !on && "ring-2 ring-xp")}>
               <div className="relative">{preview(it)}{locked && <span className="absolute inset-0 grid place-items-center rounded bg-black/55 text-xs font-bold text-white"><span className="flex items-center gap-1"><Lock size={14} aria-hidden="true" /> Lv {it.min_level}</span></span>}</div>
@@ -80,9 +84,9 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
               <div className={cn("text-xs font-bold uppercase", it.tutor_only ? "fb-owner-name" : RARITY[it.rarity])}>{it.tutor_only ? "👑 Owner exclusive" : it.reward_only ? "🏆 Season reward" : it.rarity}</div>
               {it.description && <div className="text-xs text-muted">{it.description}</div>}
               <div className="mt-auto w-full pt-1">
-                {freeze || !own ? (
-                  <button className="btn btn-primary btn-sm w-full" disabled={busy === it.id || locked || poor || (freeze && me.freezes >= 2)}
-                    onClick={() => run(it.id, "buy_item", { p_item: it.id }, freeze ? "Streak freeze added 🧊" : `Bought ${it.name}! Equip it below.`)}>
+                {freeze || power || !own ? (
+                  <button className="btn btn-primary btn-sm w-full" disabled={busy === it.id || locked || poor || (freeze && me.freezes >= 2) || (power && held >= 2)}
+                    onClick={() => run(it.id, "buy_item", { p_item: it.id }, freeze ? "Streak freeze added 🧊" : power ? `${it.name} added! Use it on the Homework page.` : `Bought ${it.name}! Equip it below.`)}>
                     <Coins size={14} aria-hidden="true" /> {it.price}
                   </button>
                 ) : on ? (
