@@ -187,10 +187,11 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   }
   async function rematch() {
     // same settings as this battle
-    const { data: cur } = await sb.from("battles").select("course_id, tier, subject, both_levels, round_count").eq("id", battleId).single();
+    const { data: cur } = await sb.from("battles").select("course_id, chapter_id, tier, subject, both_levels, round_count").eq("id", battleId).single();
     const { data, error } = await sb.rpc("create_battle", {
       p_mode: mode, p_course: cur?.course_id ?? null, p_rounds: cur?.round_count || b?.round_count || 5,
       p_tier: cur?.course_id ? null : cur?.tier ?? null, p_subject: cur?.subject ?? null, p_both: !!cur?.both_levels,
+      ...(cur?.chapter_id ? { p_chapter: cur.chapter_id } : {}),
     });
     if (error) return setErr(error.message);
     router.push(`/battles/${data}`);

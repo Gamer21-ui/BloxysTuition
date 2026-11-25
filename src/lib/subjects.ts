@@ -18,3 +18,9 @@ export function battleLabel(b: { tier?: string | null; subject?: string | null; 
   const lvl = b.both_levels ? "AS + A Level" : b.tier === "O" ? "O Level" : b.tier === "AS" ? "AS Level" : b.tier === "A" ? "A Level" : "Any level";
   return b.subject ? `${lvl} ${subjectName(b.subject)}` : `${lvl} · Mixed`;
 }
+
+/** " · 4 Software" for a battle limited to one chapter (Supabase may hand the join back as an object or a one-item array). */
+export function chapterSuffix(ch: unknown) {
+  const c = (Array.isArray(ch) ? ch[0] : ch) as { number?: string; title?: string } | null | undefined;
+  return c?.title ? ` · ${c.number} ${c.title}` : "";
+}

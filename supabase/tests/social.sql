@@ -136,3 +136,15 @@ select pg_temp.as_user(:'ava');
 do $$ begin perform vote_poll((select id from polls order by created_at desc limit 1), 0); raise exception 'voted on a closed poll';
 exception when others then if sqlerrm not like '%closed%' then raise; end if; end $$;
 reset role;
+-- chapter-only battle: O Level CS · Software
+set role authenticated; select pg_temp.as_user(:'ava');
+select create_battle('1v1', null, 10, null, null, false, (select ch.id from chapters ch join courses c on c.id = ch.course_id where c.slug = 'o-computer-science' and ch.title ilike '%software%' limit 1)) as chcode \gset
+reset role; insert into battle_players(battle_id, user_id, team) select id, '00000000-0000-0000-0000-000000000004', 2 from battles where code = :'chcode';
+set role authenticated; select pg_temp.as_user(:'ava'); select start_battle((select id from battles where code = :'chcode'));
+reset role;
+do $$ declare n int; bad int; begin
+  select count(*), count(*) filter (where q.chapter_id <> b.chapter_id) into n, bad
+  from battle_rounds r join battles b on b.id = r.battle_id join questions q on q.id = r.question_id where b.chapter_id is not null;
+  if bad > 0 or n <> 10 then raise exception 'chapter battle wrong: % rounds, % off-chapter', n, bad; end if;
+  raise notice 'ok: chapter battle with % rounds', n;
+end $$;

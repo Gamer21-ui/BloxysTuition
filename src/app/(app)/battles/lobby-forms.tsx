@@ -9,15 +9,18 @@ import { subjectName, subjectOf } from "@/lib/subjects";
 type Lvl = "O" | "AS" | "A" | "ASA";
 const LVL_LABEL: Record<Lvl, string> = { O: "O Level", AS: "AS Level", A: "A Level", ASA: "AS + A Level (both)" };
 
-export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: string; slug: string; title: string; code: string; tier: string }[]; myTier?: string }) {
+export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: string; slug: string; title: string; code: string; tier: string; chapters?: { id: string; number: string; title: string; sort: number }[] }[]; myTier?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"1v1" | "2v2">("1v1");
   const [lvl, setLvl] = useState<Lvl>((myTier === "AS" || myTier === "A" ? myTier : "O") as Lvl);
   const [subject, setSubject] = useState("");
+  const [chapter, setChapter] = useState("");
   const [rounds, setRounds] = useState(5);
   // subjects that exist at the chosen level (AS + A shows anything at either)
   const atLevel = courses.filter((c) => (lvl === "ASA" ? c.tier === "AS" || c.tier === "A" : c.tier === lvl));
   const subjects = [...new Set(atLevel.map((c) => subjectOf(c.slug)))];
+  const picked = lvl !== "ASA" && subject ? atLevel.find((c) => subjectOf(c.slug) === subject) : undefined;
+  const chapters = [...(picked?.chapters || [])].sort((a, b) => a.sort - b.sort);
   const levels = (["O", "AS", "A", "ASA"] as Lvl[]).filter((l) => courses.some((c) => (l === "ASA" ? c.tier === "AS" || c.tier === "A" : c.tier === l)));
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -27,10 +30,12 @@ export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: str
     setBusy(true); setErr(null);
     // one level + one subject = that course; AS + A or "all subjects" = a mixed battle
     const course = lvl !== "ASA" && subject ? atLevel.find((c) => subjectOf(c.slug) === subject)?.id || null : null;
-    const { data, error } = await createClient().rpc("create_battle", {
+    const args: Record<string, unknown> = {
       p_mode: mode, p_course: course, p_rounds: rounds, p_tier: course ? null : lvl === "ASA" ? "A" : lvl,
       p_subject: course ? null : subject || null, p_both: lvl === "ASA",
-    });
+    };
+    if (course && chapter) args.p_chapter = chapter; // only sent when picked
+    const { data, error } = await createClient().rpc("create_battle", args);
     setBusy(false);
     if (error) return setErr(error.message);
     router.push(`/battles/${data}`);
@@ -58,17 +63,26 @@ export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: str
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
             <label className="label" htmlFor="bt">Level</label>
-            <select id="bt" className="input" value={lvl} onChange={(e) => { setLvl(e.target.value as Lvl); setSubject(""); }}>
+            <select id="bt" className="input" value={lvl} onChange={(e) => { setLvl(e.target.value as Lvl); setSubject(""); setChapter(""); }}>
               {levels.map((l) => <option key={l} value={l}>{LVL_LABEL[l]}</option>)}
             </select>
           </div>
           <div>
             <label className="label" htmlFor="bc">Subject</label>
-            <select id="bc" className="input" value={subject} onChange={(e) => setSubject(e.target.value)}>
+            <select id="bc" className="input" value={subject} onChange={(e) => { setSubject(e.target.value); setChapter(""); }}>
               <option value="">Mixed (all subjects)</option>
               {subjects.map((k) => <option key={k} value={k}>{subjectName(k)}</option>)}
             </select>
           </div>
+          {chapters.length > 0 && (
+            <div>
+              <label className="label" htmlFor="bch">Chapter</label>
+              <select id="bch" className="input" value={chapter} onChange={(e) => setChapter(e.target.value)}>
+                <option value="">All chapters</option>
+                {chapters.map((c) => <option key={c.id} value={c.id}>{c.number} {c.title}</option>)}
+              </select>
+            </div>
+          )}
           <div>
             <label className="label" htmlFor="br">Rounds</label>
             <select id="br" className="input" value={rounds} onChange={(e) => setRounds(+e.target.value)}>
