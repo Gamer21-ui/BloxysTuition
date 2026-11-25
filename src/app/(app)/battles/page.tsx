@@ -8,6 +8,7 @@ import { BattleLobbyForms } from "./lobby-forms";
 import { MessagesSquare, Users } from "lucide-react";
 import { LEVELS, pickLevel, inLevel } from "@/lib/levels";
 import { battleLabel, chapterSuffix } from "@/lib/subjects";
+import { nextRank, rankOf, STYLES, type Style } from "@/lib/ranks";
 
 export const metadata: Metadata = { title: "Battles" };
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
   const since = new Date(Date.now() - 3 * 3600_000).toISOString();
   const [{ data: courses }, { data: open }, { data: mine }] = await Promise.all([
     sb.from("courses").select("id, slug, title, code, tier, chapters(id, number, title, sort, status)").eq("active", true).order("sort"),
-    sb.from("battles").select("id, code, mode, status, tier, subject, both_levels, created_at, round_count, course:courses(title), chapter:chapters(number, title), players:battle_players(user_id, team)")
+    sb.from("battles").select("id, code, mode, status, tier, subject, both_levels, style, created_at, round_count, course:courses(title), chapter:chapters(number, title), players:battle_players(user_id, team)")
       .in("status", ["lobby", "live"]).gte("created_at", since).order("created_at", { ascending: false }).limit(20),
     sb.from("battle_players").select("score, team, battle:battles!inner(code, mode, status, winner_team, created_at, course:courses(title))")
       .eq("user_id", me.id).eq("battle.status", "finished").order("joined_at", { ascending: false }).limit(10),
@@ -34,6 +35,23 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
         <Link href="/friends" className="btn btn-ghost btn-sm"><Users size={14} aria-hidden="true" /> Party up with friends</Link>
         <Link href="/chat" className="btn btn-ghost btn-sm"><MessagesSquare size={14} aria-hidden="true" /> Find players in chat</Link>
       </div>
+      {me.role === "student" && typeof me.rating === "number" && (() => {
+        const r = rankOf(me.rating); const nx = nextRank(me.rating);
+        return (
+          <Card className="mt-4 flex flex-wrap items-center gap-4">
+            <div className="grid h-14 w-14 place-items-center rounded-2xl text-3xl" style={{ background: r.color + "33" }}>{r.emoji}</div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold uppercase tracking-wider text-muted">Your rank</div>
+              <div className="font-display text-2xl" style={{ color: r.color }}>{r.name} · {me.rating}</div>
+              <div className="text-sm text-muted">
+                {me.ranked_played ? `${me.ranked_wins ?? 0} wins from ${me.ranked_played} ranked battles` : "Play a 🏆 Ranked battle to get placed"}
+                {nx && ` · ${nx.need} to ${nx.emoji} ${nx.name}`}
+              </div>
+            </div>
+            <Link href="/leaderboard?kind=ranked" className="btn btn-ghost btn-sm">Ranked leaderboard</Link>
+          </Card>
+        );
+      })()}
       <BattleLobbyForms courses={courses || []} myTier={me.tier} />
 
       <SectionTitle action={
@@ -51,7 +69,7 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
             return (
               <Card key={b.id} className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="font-display text-xl tracking-wider">{b.code} <span className="chip ml-1">{b.mode}</span>{b.tier && <span className="chip ml-1">{b.both_levels ? "AS + A" : b.tier} Level</span>}</div>
+                  <div className="font-display text-xl tracking-wider">{b.code} <span className="chip ml-1">{b.mode}</span>{b.style && b.style !== "classic" && <span className="chip ml-1">{STYLES[b.style as Style]?.emoji} {STYLES[b.style as Style]?.label}</span>}{b.tier && <span className="chip ml-1">{b.both_levels ? "AS + A" : b.tier} Level</span>}</div>
                   <div className="text-sm text-muted">{battleLabel({ tier: b.tier, subject: b.subject, both_levels: b.both_levels, courseTitle: (b.course as { title?: string } | null)?.title })}{chapterSuffix(b.chapter)} · {b.round_count} rounds · {timeAgo(b.created_at)}</div>
                   <div className="text-sm">{players.length}/{cap} players {b.status === "live" && <span className="text-warn">· in progress</span>}</div>
                 </div>

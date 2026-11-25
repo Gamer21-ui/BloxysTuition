@@ -148,3 +148,29 @@ do $$ declare n int; bad int; begin
   if bad > 0 or n <> 10 then raise exception 'chapter battle wrong: % rounds, % off-chapter', n, bad; end if;
   raise notice 'ok: chapter battle with % rounds', n;
 end $$;
+-- ranked: winner gains, loser drops, same amount; pressure: an answer cuts the clock
+set role authenticated; select pg_temp.as_user(:'ava');
+select create_battle('1v1', null, 5, 'O', null, false, null, 'ranked') as rcode \gset
+reset role; insert into battle_players(battle_id, user_id, team) select id, '00000000-0000-0000-0000-000000000004', 2 from battles where code = :'rcode';
+select rating as ava_before from profiles where id = :'ava' \gset
+update battle_players set score = 500 where user_id = :'ava' and battle_id = (select id from battles where code = :'rcode');
+update battles set status = 'live' where code = :'rcode';
+select battle_finish((select id from battles where code = :'rcode'));
+select bp.team, bp.rating_delta, p.rating, p.ranked_played from battle_players bp join profiles p on p.id = bp.user_id
+  where bp.battle_id = (select id from battles where code = :'rcode') order by bp.team;
+do $$ begin
+  if (select count(*) from battle_players where rating_delta is not null and rating_delta > 0) < 1 then raise exception 'ranked winner got no rating'; end if;
+  raise notice 'ok: ranked rating applied';
+end $$;
+-- pressure
+set role authenticated; select pg_temp.as_user(:'ava');
+select create_battle('1v1', null, 3, 'O', null, false, null, 'pressure') as pcode \gset
+reset role; insert into battle_players(battle_id, user_id, team) select id, '00000000-0000-0000-0000-000000000004', 2 from battles where code = :'pcode';
+set role authenticated; select pg_temp.as_user(:'ava'); select start_battle((select id from battles where code = :'pcode'));
+select answer_battle((select id from battles where code = :'pcode'), 0);
+reset role;
+do $$ declare s numeric; begin
+  select extract(epoch from (phase_ends_at - phase_started_at)) into s from battles where style = 'pressure' and status = 'live' limit 1;
+  if s is null or s > 11 then raise exception 'pressure did not cut the clock (% s)', s; end if;
+  raise notice 'ok: pressure cut the round to % s', round(s, 1);
+end $$;

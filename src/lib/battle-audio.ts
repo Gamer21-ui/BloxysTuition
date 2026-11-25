@@ -127,12 +127,13 @@ export function stopMusic(keepTrack = false) {
 }
 
 // ---------------------------------------------------------------- sound effects
-export type Sfx = "tick" | "lock" | "correct" | "wrong" | "round" | "final" | "victory" | "defeat" | "draw" | "emote" | "join";
+export type Sfx = "cut" | "tick" | "lock" | "correct" | "wrong" | "round" | "final" | "victory" | "defeat" | "draw" | "emote" | "join";
 export function sfx(name: Sfx) {
   const c = audio(); if (!c || !soundOn()) return;
   const t = c.currentTime + 0.01; const out = master!;
   switch (name) {
     case "tick": tone(t, 84, 0.05, "square", 0.08, out); break;
+    case "cut": tone(t, 96, 0.18, "sawtooth", 0.1, out, 72); noise(t, 0.12, 0.12, out, 3000); break;
     case "lock": tone(t, 72, 0.06, "square", 0.1, out); tone(t + 0.06, 79, 0.08, "square", 0.1, out); break;
     case "correct": [72, 76, 79, 84].forEach((n, i) => tone(t + i * 0.07, n, 0.16, "square", 0.12, out)); break;
     case "wrong": tone(t, 52, 0.35, "sawtooth", 0.14, out, 40); break;

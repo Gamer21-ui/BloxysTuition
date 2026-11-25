@@ -12,6 +12,9 @@ export interface Profile {
   tier: Tier;
   subjects: string[] | null;
   tutorial_version?: number;
+  rating?: number;
+  ranked_played?: number;
+  ranked_wins?: number;
   contact: string | null;
   parent_name: string | null;
   parent_contact: string | null;
@@ -58,4 +61,6 @@ export interface Card {
   level: number;
   name_style?: string | null;
   frame?: string | null;
+  rating?: number;
+  ranked_played?: number;
 }

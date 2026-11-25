@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/avatar";
 import { NameTag } from "@/components/name-tag";
 import { rankName } from "@/lib/xp";
+import { rankOf } from "@/lib/ranks";
 
 export const metadata: Metadata = { title: "Leaderboard" };
 
@@ -13,6 +14,7 @@ const KINDS = [
   { k: "xp", label: "All-time XP", unit: "XP" },
   { k: "monthly", label: "This month", unit: "XP" },
   { k: "speedrun", label: "Speedrun", unit: "pts" },
+  { k: "ranked", label: "🏆 Ranked", unit: "RR" },
   { k: "battles", label: "Battle wins", unit: "wins" },
   { k: "attendance", label: "Attendance", unit: "classes" },
 ];
@@ -39,7 +41,7 @@ export default async function Leaderboard({ searchParams }: { searchParams: Prom
             <Avatar name={r.display_name} mode={r.avatar_mode} discordUrl={r.discord_avatar_url} robloxUrl={r.roblox_headshot_url} blocky={r.blocky} size={44} frame={r.frame} />
             <div className="min-w-0 flex-1">
               <div className="truncate font-display"><NameTag name={r.display_name} style={r.name_style} /></div>
-              <div className="text-xs text-muted">Lv {r.level} · {r.title || rankName(r.level)}</div>
+              <div className="text-xs text-muted">{k.k === "ranked" ? <span className="font-bold" style={{ color: rankOf(Number(r.value)).color }}>{rankOf(Number(r.value)).emoji} {rankOf(Number(r.value)).name}</span> : <>Lv {r.level} · {r.title || rankName(r.level)}</>}</div>
             </div>
             <div className="text-right font-display text-lg">{Number(r.value).toLocaleString()} <span className="text-xs text-muted">{k.unit}</span></div>
           </div>

@@ -12,6 +12,7 @@ import type { Card as PCard } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { announceBattle } from "../actions";
 import { playMusic, sfx, setSoundOn, soundOn, stopMusic, unlock } from "@/lib/battle-audio";
+import { rankOf, STYLES } from "@/lib/ranks";
 
 // Emotes are sent as an index into this list, so nobody can broadcast their own text.
 const EMOTES = ["👍", "😂", "😭", "🔥", "💀", "😎", "🤯", "👑", "GG", "Nice one!", "So close!", "Let's go!", "Good luck!", "Wow!"];
@@ -20,8 +21,9 @@ type Floater = { key: number; uid: string; idx: number };
 type Battle = {
   status: "lobby" | "live" | "finished" | "cancelled"; phase: "question" | "reveal"; current_round: number; round_count: number;
   round_seconds: number; phase_started_at: string | null; winner_team: number | null; host_id: string;
+  style?: "classic" | "ranked" | "pressure"; phase_ends_at?: string | null;
 };
-type Player = { user_id: string; team: number; score: number };
+type Player = { user_id: string; team: number; score: number; rating_delta?: number | null };
 type Answer = { round_no: number; user_id: string; choice: number | null; correct: boolean | null; points: number };
 type Q = { round: number; id: string; prompt: string; options: string[]; correct: number | null };
 
@@ -81,8 +83,8 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
 
   const refresh = useCallback(async () => {
     const [{ data: bb }, { data: pp }, { data: aa }] = await Promise.all([
-      sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id").eq("id", battleId).single(),
-      sb.from("battle_players").select("user_id, team, score").eq("battle_id", battleId).order("joined_at"),
+      sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id, style, phase_ends_at").eq("id", battleId).single(),
+      sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at"),
       sb.from("battle_answers").select("round_no, user_id, choice, correct, points").eq("battle_id", battleId),
     ]);
     if (bb) {
@@ -162,6 +164,15 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
     }
   }, [b]);
 
+  // pressure: someone answered, the clock just got cut
+  const cutSeen = useRef<string | null>(null);
+  const [cut, setCut] = useState(0);
+  useEffect(() => {
+    const e = b?.phase === "question" ? b?.phase_ends_at ?? null : null;
+    if (e && cutSeen.current !== e && b?.style === "pressure") { setCut((n) => n + 1); sfx("cut"); }
+    cutSeen.current = e;
+  }, [b?.phase_ends_at, b?.phase, b?.style]);
+
   // my result each reveal: green flash or red shake
   const revealKey = b && b.status === "live" && b.phase === "reveal" ? `${b.current_round}` : "";
   const myRound = answers.find((a) => b && a.round_no === b.current_round && a.user_id === meId);
@@ -187,11 +198,12 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   }
   async function rematch() {
     // same settings as this battle
-    const { data: cur } = await sb.from("battles").select("course_id, chapter_id, tier, subject, both_levels, round_count").eq("id", battleId).single();
+    const { data: cur } = await sb.from("battles").select("course_id, chapter_id, tier, subject, both_levels, round_count, style").eq("id", battleId).single();
     const { data, error } = await sb.rpc("create_battle", {
       p_mode: mode, p_course: cur?.course_id ?? null, p_rounds: cur?.round_count || b?.round_count || 5,
       p_tier: cur?.course_id ? null : cur?.tier ?? null, p_subject: cur?.subject ?? null, p_both: !!cur?.both_levels,
       ...(cur?.chapter_id ? { p_chapter: cur.chapter_id } : {}),
+      ...(cur?.style && cur.style !== "classic" ? { p_style: cur.style } : {}),
     });
     if (error) return setErr(error.message);
     router.push(`/battles/${data}`);
@@ -204,7 +216,12 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   const curAnswers = answers.filter((a) => a.round_no === b.current_round);
   const mine = curAnswers.find((a) => a.user_id === meId);
   const reveal = b.phase === "reveal";
-  const left = Math.max(0, b.round_seconds - (now - phaseSeen.current.at) / 1000);
+  // pressure mode shortens the round: use the server's deadline relative to the round start (no clock-skew issues)
+  const duration = b.phase === "question" && b.phase_ends_at && b.phase_started_at
+    ? Math.max(0, (+new Date(b.phase_ends_at) - +new Date(b.phase_started_at)) / 1000) : b.round_seconds;
+  const left = Math.max(0, duration - (now - phaseSeen.current.at) / 1000);
+  const style = b.style || "classic";
+  const myDelta = players.find((p) => p.user_id === meId)?.rating_delta;
   const name = (id: string) => cards[id]?.display_name || "Player";
   const secs = Math.ceil(left);
   if (b.status === "live" && !reveal && amPlayer && !mine && secs <= 5 && secs > 0 && tickSeen.current !== secs) { tickSeen.current = secs; sfx("tick"); }
@@ -242,7 +259,13 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
             </div>
             <div className={cn("min-w-0 sm:flex-1", side === 2 && "text-right")}>
               <div className="truncate text-sm font-bold sm:text-base"><NameTag name={c?.display_name || "…"} style={c?.name_style} /></div>
-              <div className="truncate text-[11px] text-muted sm:text-xs">Lv {c?.level ?? "?"}{p.user_id === b.host_id && " · host"}{mvp === p.user_id && " · ⭐ MVP"}</div>
+              <div className="truncate text-[11px] text-muted sm:text-xs">
+                {style === "ranked" && c?.rating !== undefined ? <span className="font-bold" style={{ color: rankOf(c.rating).color }}>{rankOf(c.rating).emoji} {c.rating}</span> : <>Lv {c?.level ?? "?"}</>}
+                {p.user_id === b.host_id && " · host"}{mvp === p.user_id && " · ⭐ MVP"}
+              </div>
+              {b.status === "finished" && typeof p.rating_delta === "number" && (
+                <span className={cn("text-xs font-bold", p.rating_delta > 0 ? "text-good" : p.rating_delta < 0 ? "text-bad" : "text-muted")}>{p.rating_delta > 0 ? "+" : ""}{p.rating_delta} RR</span>
+              )}
               <AnimatePresence mode="wait">
                 {status && (
                   <motion.span key={status.text} initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }}
@@ -302,6 +325,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
         <div className="min-w-0">
           <Link href="/battles" className="text-sm text-muted hover:underline">← Battles</Link>
           <h1 className="flex items-center gap-2 font-display text-xl leading-tight sm:text-3xl"><Swords className="shrink-0" size={22} /> <span className="min-w-0">{mode} · {courseTitle}</span></h1>
+          {style !== "classic" && <span className={cn("chip mt-1 text-xs font-bold", style === "ranked" ? "text-xp" : "text-warn")}>{STYLES[style].emoji} {STYLES[style].label}</span>}
         </div>
         <div className="flex items-center gap-2">
           <button className="chip" aria-label={sound ? "Mute music and sounds" : "Turn on music and sounds"} onClick={() => { unlock(); setSoundOn(!sound); setSound(!sound); }}>
@@ -384,9 +408,14 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
           <div className="card">
             <div className="mb-2 flex items-center justify-between text-sm text-muted">
               <span>Round {q.round} / {b.round_count}</span>
-              <span className={cn("font-display text-lg tabular-nums", !reveal && left < 6 && "text-bad")}>{reveal ? "Reveal" : `${Math.ceil(left)}s`}</span>
+              <span className="flex items-center gap-2">
+                <AnimatePresence>{style === "pressure" && cut > 0 && !reveal && (
+                  <motion.span key={cut} initial={{ scale: 2, opacity: 1 }} animate={{ scale: 1, opacity: 0 }} transition={{ duration: 1.2 }} className="font-display text-sm text-warn">⚡ TIME CUT!</motion.span>
+                )}</AnimatePresence>
+                <span className={cn("font-display text-lg tabular-nums", !reveal && left < 6 && "text-bad")}>{reveal ? "Reveal" : `${Math.ceil(left)}s`}</span>
+              </span>
             </div>
-            <div className="bar mb-4"><i style={{ width: `${reveal ? 100 : (left / b.round_seconds) * 100}%`, background: reveal ? "rgb(var(--muted))" : "rgb(var(--xp))", transition: "width 1s linear" }} /></div>
+            <div className="bar mb-4"><i style={{ width: `${reveal ? 100 : (left / b.round_seconds) * 100}%`, background: reveal ? "rgb(var(--muted))" : style === "pressure" && duration < b.round_seconds ? "rgb(var(--warn))" : "rgb(var(--xp))", transition: "width 0.4s linear" }} /></div>
             <AnimatePresence mode="wait">
               <motion.div key={q.round} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
                 <h2 className="mb-4 text-xl">{q.prompt}</h2>
@@ -423,6 +452,17 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
               {b.winner_team === 0 ? "🤝 Draw!" : myTeam ? (b.winner_team === myTeam ? "🏆 Victory!" : "💀 Defeat") : `Team ${b.winner_team === 1 ? "Blue" : "Red"} wins!`}
             </motion.div>
             {mvp && <p className="mt-2 font-bold">⭐ MVP: {name(mvp)}</p>}
+            {style === "ranked" && typeof myDelta === "number" && (() => {
+              const r = cards[meId]?.rating;
+              const after = r !== undefined ? r + myDelta : undefined;
+              return (
+                <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.6 }} className="mt-3">
+                  <div className={cn("font-display text-3xl", myDelta > 0 ? "text-good" : myDelta < 0 ? "text-bad" : "text-muted")}>{myDelta > 0 ? "+" : ""}{myDelta} RR</div>
+                  {after !== undefined && <div className="text-sm font-bold" style={{ color: rankOf(after).color }}>{rankOf(after).emoji} {rankOf(after).name} · {after}</div>}
+                  {myDelta === 0 && <div className="text-xs text-muted">No rating change: you&apos;ve played this opponent 3 times in ranked today.</div>}
+                </motion.div>
+              );
+            })()}
             <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · XP added to your profile (5 rewarded battles a day)</p>
             <div className="mt-4 flex justify-center gap-3">
               <button className="btn btn-primary" onClick={rematch}>New lobby</button>
