@@ -11,15 +11,17 @@ export default async function Shop() {
   const me = await requireApproved();
   const sb = await createClient();
   const [{ data: items }, { data: mine }] = await Promise.all([
-    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only").eq("active", true).order("sort"),
+    // season rewards are hidden until you own them (the database only returns owned ones)
+    sb.from("shop_items").select("id, code, kind, name, description, price, rarity, min_level, data, sort, tutor_only, active, reward_only").order("sort"),
     sb.from("user_items").select("item_id").eq("user_id", me.id),
   ]);
+  const ownedIds = new Set((mine || []).map((m) => m.item_id));
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="page-title">Shop</h1>
       <p className="text-muted">Spend coins on cosmetics. Nothing here gives XP or an advantage, it just looks cool. Earn coins from quizzes, battles, homework, classes and quests.</p>
       <ShopGrid
-        items={(items as Item[]) || []}
+        items={((items as Item[]) || []).filter((i) => (i.reward_only ? ownedIds.has(i.id) : i.active || (i.tutor_only && me.role === "tutor")))}
         owned={(mine || []).map((m) => m.item_id)}
         me={{
           id: me.id, name: me.display_name, coins: me.coins, level: levelFromXp(me.xp), title: me.title, nameStyle: me.name_style,

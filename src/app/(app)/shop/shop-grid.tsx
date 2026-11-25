@@ -9,7 +9,7 @@ import { NameTag } from "@/components/name-tag";
 import type { BlockyConfig, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export type Item = { id: string; code: string; kind: string; name: string; description: string | null; price: number; rarity: string; min_level: number; data: { text?: string }; sort: number; tutor_only?: boolean };
+export type Item = { id: string; code: string; kind: string; name: string; description: string | null; price: number; rarity: string; min_level: number; data: { text?: string }; sort: number; tutor_only?: boolean; active?: boolean; reward_only?: boolean };
 type Me = {
   id: string; name: string; coins: number; level: number; title: string | null; nameStyle: string | null; frame: string | null;
   blocky: BlockyConfig; avatarMode: Profile["avatar_mode"]; discordUrl: string | null; robloxUrl: string | null; freezes: number; streak: number;
@@ -55,8 +55,8 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
     }
   };
 
-  // owner exclusives first, so the tutor finds them without scrolling
-  const list = items.filter((i) => i.kind === tab).sort((a, b) => Number(!!b.tutor_only) - Number(!!a.tutor_only));
+  // owner exclusives and season rewards first
+  const list = items.filter((i) => i.kind === tab).sort((a, b) => Number(!!b.tutor_only || !!b.reward_only) - Number(!!a.tutor_only || !!a.reward_only));
   return (
     <div className="mt-5">
       <div className="sticky top-0 z-10 -mx-2 flex flex-wrap items-center gap-2 bg-bg/90 px-2 py-2 backdrop-blur">
@@ -77,7 +77,7 @@ export function ShopGrid({ items, owned, me }: { items: Item[]; owned: string[];
             <div key={it.id} className={cn("card flex flex-col items-center gap-2 text-center", on && "ring-2 ring-good", it.tutor_only && !on && "ring-2 ring-xp")}>
               <div className="relative">{preview(it)}{locked && <span className="absolute inset-0 grid place-items-center rounded bg-black/55 text-xs font-bold text-white"><span className="flex items-center gap-1"><Lock size={14} aria-hidden="true" /> Lv {it.min_level}</span></span>}</div>
               <div className="font-bold leading-tight">{it.name}</div>
-              <div className={cn("text-xs font-bold uppercase", it.tutor_only ? "fb-owner-name" : RARITY[it.rarity])}>{it.tutor_only ? "👑 Owner exclusive" : it.rarity}</div>
+              <div className={cn("text-xs font-bold uppercase", it.tutor_only ? "fb-owner-name" : RARITY[it.rarity])}>{it.tutor_only ? "👑 Owner exclusive" : it.reward_only ? "🏆 Season reward" : it.rarity}</div>
               {it.description && <div className="text-xs text-muted">{it.description}</div>}
               <div className="mt-auto w-full pt-1">
                 {freeze || !own ? (

@@ -18,6 +18,7 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
   const sp = (await searchParams).level;
   const level = sp === "O" || sp === "A" ? pickLevel(sp) : null;
   const sb = await createClient();
+  await sb.rpc("season_tick"); // a new season resets ranked ratings
   const since = new Date(Date.now() - 3 * 3600_000).toISOString();
   const [{ data: courses }, { data: open }, { data: mine }] = await Promise.all([
     sb.from("courses").select("id, slug, title, code, tier, chapters(id, number, title, sort, status)").eq("active", true).order("sort"),
@@ -46,6 +47,7 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
               <div className="text-sm text-muted">
                 {me.ranked_played ? `${me.ranked_wins ?? 0} wins from ${me.ranked_played} ranked battles` : "Play a 🏆 Ranked battle to get placed"}
                 {nx && ` · ${nx.need} to ${nx.emoji} ${nx.name}`}
+                <span className="block text-xs">Ratings reset at the start of each season. <Link href="/leaderboard" className="underline">See the season</Link></span>
               </div>
             </div>
             <Link href="/leaderboard?kind=ranked" className="btn btn-ghost btn-sm">Ranked leaderboard</Link>

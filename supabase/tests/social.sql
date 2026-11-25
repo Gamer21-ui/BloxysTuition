@@ -174,3 +174,36 @@ do $$ declare s numeric; begin
   if s is null or s > 11 then raise exception 'pressure did not cut the clock (% s)', s; end if;
   raise notice 'ok: pressure cut the round to % s', round(s, 1);
 end $$;
+-- seasons: start resets ranked, end rewards top players and creates the next season
+reset role;
+update seasons set starts_at = now() - interval '2 days', ends_at = now() + interval '1 day' where number = 1;
+select season_tick();
+do $$ begin
+  if (select status from seasons where number = 1) <> 'active' then raise exception 'season 1 not active'; end if;
+  if exists (select 1 from profiles where rating <> 1000 or ranked_played <> 0) then raise exception 'ranked not reset'; end if;
+  raise notice 'ok: season 1 started, ranked reset';
+end $$;
+insert into xp_events(user_id, amount, reason, created_at) values (:'ava', 300, 'quiz', now() - interval '1 hour'), (:'ben', 120, 'quiz', now() - interval '1 hour');
+update profiles set rating = 1080, ranked_played = 4 where id = :'ava';
+set role authenticated; select pg_temp.as_user(:'ava');
+select display_name, value from get_leaderboard('season', 5);
+reset role;
+update seasons set ends_at = now() - interval '1 minute' where number = 1;
+select season_tick();
+select season_tick();
+do $$ declare n int; begin
+  if (select status from seasons where number = 1) <> 'ended' then raise exception 'season 1 not ended'; end if;
+  if not exists (select 1 from seasons where number = 2) then raise exception 'no season 2'; end if;
+  select count(*) into n from season_results r join seasons s on s.id = r.season_id where s.number = 1;
+  if n < 3 then raise exception 'expected results, got %', n; end if;
+  if not exists (select 1 from user_items ui join shop_items si on si.id = ui.item_id join profiles p on p.id = ui.user_id
+                 where p.id = (select user_id from season_results where board = 'xp' and place = 1) and si.code = 's1-xp-champ') then
+    raise exception 'champion title missing'; end if;
+  raise notice 'ok: season 1 ended with % results; season 2 = % to %', n,
+    (select starts_at from seasons where number = 2), (select ends_at from seasons where number = 2);
+end $$;
+-- reward items can't be bought
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform buy_item((select id from shop_items where code = 's1-xp-champ')); raise exception 'bought a reward item';
+exception when others then if sqlerrm not like '%not available%' then raise; end if; end $$;
+reset role;

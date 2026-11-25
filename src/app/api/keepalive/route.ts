@@ -11,7 +11,9 @@ export async function GET(req: Request) {
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Not allowed" }, { status: 401 });
   }
-  const { count, error } = await createAdminClient().from("courses").select("id", { count: "exact", head: true });
+  const admin = createAdminClient();
+  await admin.rpc("season_tick"); // start/end leaderboard seasons on time, even if nobody opens the leaderboard
+  const { count, error } = await admin.from("courses").select("id", { count: "exact", head: true });
   if (error) return NextResponse.json({ ok: false }, { status: 500 });
   return NextResponse.json({ ok: true, courses: count, at: new Date().toISOString() });
 }
