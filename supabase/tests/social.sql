@@ -118,3 +118,21 @@ do $$ begin
   if exists (select 1 from profiles p, site_settings s where p.role = 'student' and p.status = 'approved' and p.tutorial_version >= s.tutorial_version) then raise exception 'students should see it again'; end if;
   raise notice 'ok: tour relaunched';
 end $$;
+-- live polls: tutor launches, students vote (and can change), tally stays right, closed polls reject votes
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ begin perform create_poll('hack?', array['a','b']); raise exception 'student created a poll';
+exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
+reset role; set role authenticated; select pg_temp.as_user(:'tutor_id');
+select create_poll('Confident with depreciation?', array['Yes', 'Kind of', '', 'No'], 0) as poll \gset
+set role authenticated; select pg_temp.as_user(:'ava'); select vote_poll(:'poll', 2); select vote_poll(:'poll', 1);
+select pg_temp.as_user(:'ben'); select vote_poll(:'poll', 1);
+reset role;
+do $$ begin
+  if (select counts from polls order by created_at desc limit 1) <> array[0, 2, 0] then raise exception 'bad tally: %', (select counts from polls order by created_at desc limit 1); end if;
+  raise notice 'ok: poll tally %', (select counts from polls order by created_at desc limit 1);
+end $$;
+set role authenticated; select pg_temp.as_user(:'tutor_id'); select close_poll(:'poll');
+select pg_temp.as_user(:'ava');
+do $$ begin perform vote_poll((select id from polls order by created_at desc limit 1), 0); raise exception 'voted on a closed poll';
+exception when others then if sqlerrm not like '%closed%' then raise; end if; end $$;
+reset role;

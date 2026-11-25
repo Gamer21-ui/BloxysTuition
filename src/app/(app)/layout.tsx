@@ -14,6 +14,7 @@ import { levelProgress, rankName } from "@/lib/xp";
 import { redirect } from "next/navigation";
 import { takes } from "@/lib/subjects";
 import { Tutorial } from "@/components/tutorial";
+import { LivePoll } from "@/components/live-poll";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -82,6 +83,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <MobileNav isTutor={tutor} me={avatar(28)} />
       <PartyBanner meId={me.id} />
+      {!tutor && <LivePoll meId={me.id} />}
       {/* site tour: new students, or everyone after the tutor relaunches it (skipped until the database update is in) */}
       {site && me.tutorial_version !== undefined && (
         <Tutorial show={!tutor && me.tutorial_version < site.tutorial_version} isStudent={!tutor} seen={me.tutorial_version} />
