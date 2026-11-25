@@ -11,3 +11,10 @@ export const SUBJECT_NAMES: Record<string, string> = {
   accounting: "Accounting", business: "Business", economics: "Economics", "computer-science": "Computer Science",
 };
 export const subjectName = (key: string) => SUBJECT_NAMES[key] || key.replace(/-/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
+
+/** Short label for a battle: "AS Level Economics", "AS + A Level · Mixed", "O Level · Mixed". */
+export function battleLabel(b: { tier?: string | null; subject?: string | null; both_levels?: boolean | null; courseTitle?: string | null }) {
+  if (b.courseTitle) return b.courseTitle;
+  const lvl = b.both_levels ? "AS + A Level" : b.tier === "O" ? "O Level" : b.tier === "AS" ? "AS Level" : b.tier === "A" ? "A Level" : "Any level";
+  return b.subject ? `${lvl} ${subjectName(b.subject)}` : `${lvl} · Mixed`;
+}

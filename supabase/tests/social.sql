@@ -85,3 +85,21 @@ do $$ declare r text[]; begin
   raise notice 'ok: subjects saved as %', r;
 end $$;
 reset role;
+-- AS + A Level battles: one subject across both levels
+set role authenticated; select pg_temp.as_user(:'ava');
+select create_battle('1v1', null, 6, 'A', 'economics', true) as asacode \gset
+reset role; insert into battle_players(battle_id, user_id, team) select id, '00000000-0000-0000-0000-000000000004', 2 from battles where code = :'asacode';
+set role authenticated; select pg_temp.as_user(:'ava');
+select start_battle((select id from battles where code = :'asacode'));
+reset role;
+do $$ declare bad int; lv int; begin
+  select count(*) filter (where c.slug not in ('as-economics', 'a-economics')), count(distinct c.tier) into bad, lv
+  from battle_rounds r join battles b on b.id = r.battle_id join questions q on q.id = r.question_id join courses c on c.id = q.course_id
+  where b.subject = 'economics' and b.both_levels;
+  if bad > 0 then raise exception 'AS+A economics battle used other questions'; end if;
+  raise notice 'ok: AS + A Level economics battle (levels used: %)', lv;
+end $$;
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ begin perform create_battle('1v1', null, 5, 'O', 'computer-sciencez', false); raise exception 'accepted a fake subject';
+exception when others then if sqlerrm not like '%no such subject%' then raise; end if; end $$;
+reset role;

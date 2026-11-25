@@ -4,21 +4,33 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Card } from "@/components/ui";
 import { cn } from "@/lib/utils";
-import { groupByLevel } from "@/lib/levels";
+import { subjectName, subjectOf } from "@/lib/subjects";
 
-export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: string; title: string; code: string; tier: string }[]; myTier?: string }) {
+type Lvl = "O" | "AS" | "A" | "ASA";
+const LVL_LABEL: Record<Lvl, string> = { O: "O Level", AS: "AS Level", A: "A Level", ASA: "AS + A Level (both)" };
+
+export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: string; slug: string; title: string; code: string; tier: string }[]; myTier?: string }) {
   const router = useRouter();
   const [mode, setMode] = useState<"1v1" | "2v2">("1v1");
-  const [course, setCourse] = useState("");
+  const [lvl, setLvl] = useState<Lvl>((myTier === "AS" || myTier === "A" ? myTier : "O") as Lvl);
+  const [subject, setSubject] = useState("");
   const [rounds, setRounds] = useState(5);
-  const [tier, setTier] = useState(myTier);
+  // subjects that exist at the chosen level (AS + A shows anything at either)
+  const atLevel = courses.filter((c) => (lvl === "ASA" ? c.tier === "AS" || c.tier === "A" : c.tier === lvl));
+  const subjects = [...new Set(atLevel.map((c) => subjectOf(c.slug)))];
+  const levels = (["O", "AS", "A", "ASA"] as Lvl[]).filter((l) => courses.some((c) => (l === "ASA" ? c.tier === "AS" || c.tier === "A" : c.tier === l)));
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function create() {
     setBusy(true); setErr(null);
-    const { data, error } = await createClient().rpc("create_battle", { p_mode: mode, p_course: course || null, p_rounds: rounds, p_tier: course ? null : tier });
+    // one level + one subject = that course; AS + A or "all subjects" = a mixed battle
+    const course = lvl !== "ASA" && subject ? atLevel.find((c) => subjectOf(c.slug) === subject)?.id || null : null;
+    const { data, error } = await createClient().rpc("create_battle", {
+      p_mode: mode, p_course: course, p_rounds: rounds, p_tier: course ? null : lvl === "ASA" ? "A" : lvl,
+      p_subject: course ? null : subject || null, p_both: lvl === "ASA",
+    });
     setBusy(false);
     if (error) return setErr(error.message);
     router.push(`/battles/${data}`);
@@ -45,22 +57,18 @@ export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: str
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div>
-            <label className="label" htmlFor="bc">Subject</label>
-            <select id="bc" className="input" value={course} onChange={(e) => setCourse(e.target.value)}>
-              <option value="">Mixed (all subjects at one level)</option>
-              {groupByLevel(courses).map((g) => (
-                <optgroup key={g.level.id} label={g.level.label}>{g.items.map((c) => <option key={c.id} value={c.id}>{c.title.replace(/^(O|AS|A) Level /, "")}</option>)}</optgroup>
-              ))}
+            <label className="label" htmlFor="bt">Level</label>
+            <select id="bt" className="input" value={lvl} onChange={(e) => { setLvl(e.target.value as Lvl); setSubject(""); }}>
+              {levels.map((l) => <option key={l} value={l}>{LVL_LABEL[l]}</option>)}
             </select>
           </div>
-          {!course && (
-            <div>
-              <label className="label" htmlFor="bt">Level (for mixed)</label>
-              <select id="bt" className="input" value={tier} onChange={(e) => setTier(e.target.value)}>
-                <option value="O">O Level</option><option value="AS">AS Level</option><option value="A">A Level</option>
-              </select>
-            </div>
-          )}
+          <div>
+            <label className="label" htmlFor="bc">Subject</label>
+            <select id="bc" className="input" value={subject} onChange={(e) => setSubject(e.target.value)}>
+              <option value="">Mixed (all subjects)</option>
+              {subjects.map((k) => <option key={k} value={k}>{subjectName(k)}</option>)}
+            </select>
+          </div>
           <div>
             <label className="label" htmlFor="br">Rounds</label>
             <select id="br" className="input" value={rounds} onChange={(e) => setRounds(+e.target.value)}>

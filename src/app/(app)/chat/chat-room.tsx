@@ -82,7 +82,7 @@ export function ChatRoom({ meId, isTutor, myTier }: { meId: string; isTutor: boo
     router.push(`/battles/${code}`);
   }
 
-  const shown = msgs.filter((m) => (m.kind === "battle" ? !m.tier || levels.includes(m.tier) : !onlyBattles) && (!m.deleted || isTutor));
+  const shown = msgs.filter((m) => (m.kind === "battle" ? !m.tier || levels.includes(m.tier) || (!!m.course_title?.startsWith("AS + A") && levels.includes("AS")) : !onlyBattles) && (!m.deleted || isTutor));
   const fresh = (m: Msg) => Date.now() - +new Date(m.created_at) < 30 * 60_000;
 
   return (
@@ -117,7 +117,7 @@ export function ChatRoom({ meId, isTutor, myTier }: { meId: string; isTutor: boo
                   <div className="mt-1 flex flex-wrap items-center gap-3 rounded-xl border-2 border-accent bg-accent/10 p-2.5">
                     <Swords className="text-accent" aria-hidden="true" />
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold">{m.mode} battle · {m.tier === "O" ? "O Level" : m.tier === "AS" ? "AS Level" : m.tier === "A" ? "A Level" : "any level"}{m.course_title ? ` · ${m.course_title.replace(/^(O|AS|A) Level /, "")}` : ""}</div>
+                      <div className="font-bold">{m.mode} battle · {m.course_title?.startsWith("AS + A") ? m.course_title.replace(/^AS \+ A Level ?/, "AS + A Level · ") : <>{m.tier === "O" ? "O Level" : m.tier === "AS" ? "AS Level" : m.tier === "A" ? "A Level" : "any level"}{m.course_title ? ` · ${m.course_title.replace(/^(O|AS|A) Level /, "")}` : ""}</>}</div>
                       <div className="text-sm">{m.body} <span className="font-mono text-xs text-muted">{m.battle_code}</span></div>
                     </div>
                     {m.user_id !== meId && fresh(m) && <button className="btn btn-primary btn-sm" onClick={() => join(m.battle_code!)}>Join</button>}
