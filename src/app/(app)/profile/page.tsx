@@ -7,6 +7,7 @@ import { AvatarEditor } from "./avatar-editor";
 import { ownedCodes } from "@/lib/shop";
 import Link from "next/link";
 import { subjectName } from "@/lib/subjects";
+import { ReplayTutorialButton } from "@/components/tutorial";
 
 export const metadata: Metadata = { title: "Profile" };
 
@@ -35,6 +36,11 @@ export default async function Profile() {
           <Link href="/subjects" className="btn btn-ghost ml-auto">Change</Link>
         </Card>
       </>)}
+      <SectionTitle>Site tour</SectionTitle>
+      <Card className="flex flex-wrap items-center justify-between gap-3 text-sm">
+        <span className="text-muted">Forgot where something is? Take the quick tour again.</span>
+        <ReplayTutorialButton />
+      </Card>
       <SectionTitle>Account</SectionTitle>
       <Card className="space-y-1 text-sm">
         <div><span className="text-muted">Discord:</span> {me.discord_username || "–"}</div>

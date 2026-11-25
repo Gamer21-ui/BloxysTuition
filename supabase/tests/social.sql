@@ -103,3 +103,18 @@ set role authenticated; select pg_temp.as_user(:'ava');
 do $$ begin perform create_battle('1v1', null, 5, 'O', 'computer-sciencez', false); raise exception 'accepted a fake subject';
 exception when others then if sqlerrm not like '%no such subject%' then raise; end if; end $$;
 reset role;
+-- site tour: students finish it, only the tutor can relaunch it
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ begin perform relaunch_tutorial(); raise exception 'student relaunched the tour';
+exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
+select finish_tutorial();
+reset role;
+select id as tutor_id from profiles where role = 'tutor' limit 1 \gset
+set role authenticated; select pg_temp.as_user(:'tutor_id');
+select relaunch_tutorial() as tv \gset
+reset role;
+do $$ begin
+  if (select tutorial_version from site_settings) < 2 then raise exception 'version not bumped'; end if;
+  if exists (select 1 from profiles p, site_settings s where p.role = 'student' and p.status = 'approved' and p.tutorial_version >= s.tutorial_version) then raise exception 'students should see it again'; end if;
+  raise notice 'ok: tour relaunched';
+end $$;

@@ -13,6 +13,7 @@ import { BRAND } from "@/lib/brand";
 import { levelProgress, rankName } from "@/lib/xp";
 import { redirect } from "next/navigation";
 import { takes } from "@/lib/subjects";
+import { Tutorial } from "@/components/tutorial";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -24,7 +25,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const sb = await createClient();
   const tutor = me.role === "tutor";
   const now = new Date().toISOString();
-  const [{ count }, { data: asg }, { data: subs }, { count: due }, pending, toMark, { count: frReq }, { count: partyInv }] = await Promise.all([
+  const [{ data: site }, { count }, { data: asg }, { data: subs }, { count: due }, pending, toMark, { count: frReq }, { count: partyInv }] = await Promise.all([
+    sb.from("site_settings").select("tutorial_version").maybeSingle(),
     sb.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
     sb.from("assignments").select("id, course:courses(slug)"),
     sb.from("submissions").select("assignment_id").eq("user_id", me.id),
@@ -80,6 +82,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
       <MobileNav isTutor={tutor} me={avatar(28)} />
       <PartyBanner meId={me.id} />
+      {/* site tour: new students, or everyone after the tutor relaunches it (skipped until the database update is in) */}
+      {site && me.tutorial_version !== undefined && (
+        <Tutorial show={!tutor && me.tutorial_version < site.tutorial_version} isStudent={!tutor} seen={me.tutorial_version} />
+      )}
     </div>
   );
 }

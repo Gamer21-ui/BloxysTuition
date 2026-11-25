@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { Card, SectionTitle } from "@/components/ui";
 import { XpLine, ScoreBars } from "./charts";
 import { LEVELS } from "@/lib/levels";
+import { TutorialControl } from "./tutorial-control";
 
 export const metadata: Metadata = { title: "Tutor overview" };
 export const dynamic = "force-dynamic";
@@ -24,6 +25,7 @@ export default async function TutorHome({ searchParams }: { searchParams: Promis
     admin.from("quiz_attempts").select("user_id, score, total, flagged, finished_at, quiz:quizzes(kind, chapter:chapters(id, number, title), course:courses(slug, code, title, tier, sort))").not("finished_at", "is", null).gte("started_at", d30),
     admin.from("submissions").select("id", { count: "exact", head: true }).is("graded_at", null),
   ]);
+  const { data: site } = await admin.from("site_settings").select("tutorial_launched_at").maybeSingle();
 
   const approved = (studs || []).filter((s) => s.status === "approved");
   const pending = (studs || []).filter((s) => s.status === "pending");
@@ -101,6 +103,7 @@ export default async function TutorHome({ searchParams }: { searchParams: Promis
         <Stat label="Quizzes done (30 days)" value={qa.length} />
         <Stat label="Suspiciously fast quizzes" value={flagged} />
       </div>
+      <div className="mt-6"><TutorialControl launchedAt={site?.tutorial_launched_at ?? null} /></div>
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card><h2 className="mb-2 text-lg">Engagement, last 14 days</h2><XpLine data={days} /></Card>
         <Card><h2 className="mb-2 text-lg">Average quiz score by subject (30 days)</h2>{courseBars.length ? <ScoreBars data={courseBars} /> : <p className="text-muted">No quizzes yet.</p>}</Card>

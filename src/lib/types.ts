@@ -11,6 +11,7 @@ export interface Profile {
   status: "pending" | "approved" | "suspended";
   tier: Tier;
   subjects: string[] | null;
+  tutorial_version?: number;
   contact: string | null;
   parent_name: string | null;
   parent_contact: string | null;
