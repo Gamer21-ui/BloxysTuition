@@ -35,7 +35,7 @@ export default async function Shop() {
           freezes: me.streak_freezes, streak: me.streak,
         }}
       />
-      {me.role === "student" && <SecretDoor />}
+      <SecretDoor />
     </div>
   );
 }
