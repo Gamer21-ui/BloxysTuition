@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, MessagesSquare, NotebookPen, Settings, ShoppingBag, UserPlus,
-  Joystick, Swords, Target, Trophy, Users, Vote, type LucideIcon,
+  Joystick, Sparkles, Swords, Target, Trophy, Users, Vote, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/brand";
@@ -26,6 +26,10 @@ export const STUDENT: Item[] = [
   { href: "/profile", label: "Profile", icon: Settings },
 ];
 
+/** 🌟 Special Training: only for students the tutor marks as special (and the tutor). */
+export const SPECIAL: Item = { href: "/special", label: "Special Training", icon: Sparkles };
+export const studentItems = (special?: boolean) => (special ? STUDENT.flatMap((i) => (i.href === "/arcade" ? [i, SPECIAL] : [i])) : STUDENT);
+
 export const TUTOR: Item[] = [
   { href: "/tutor", label: "Overview", icon: BarChart3 },
   { href: "/tutor/students", label: "Students", icon: Users },
@@ -43,7 +47,7 @@ const MOBILE = ["/dashboard", "/courses", "/practice", "/battles", "/profile"];
 
 export type Badges = Partial<Record<string, number>>;
 
-export function Sidebar({ isTutor, badges = {} }: { isTutor: boolean; badges?: Badges }) {
+export function Sidebar({ isTutor, badges = {}, special }: { isTutor: boolean; badges?: Badges; special?: boolean }) {
   const path = usePathname();
   const active = (h: string) => path === h || (h !== "/tutor" && path.startsWith(h + "/")) || (h === "/tutor" && path === "/tutor");
   const link = (i: Item) => (
@@ -64,7 +68,7 @@ export function Sidebar({ isTutor, badges = {} }: { isTutor: boolean; badges?: B
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-1 overflow-y-auto overscroll-contain border-r-2 border-line bg-surface p-3 lg:flex [&>*]:shrink-0">
       <Link href="/dashboard" className="mb-4 px-2 pt-2 font-display text-xl leading-tight text-primary">{BRAND.short}<span className="block text-xs text-muted font-body">Academic Comeback</span></Link>
-      <nav aria-label="Main" className="flex flex-col gap-1">{STUDENT.map(link)}</nav>
+      <nav aria-label="Main" className="flex flex-col gap-1">{studentItems(special).map(link)}</nav>
       {isTutor && (
         <>
           <div className="mt-5 px-3 text-xs font-bold uppercase tracking-wider text-muted">Tutor</div>

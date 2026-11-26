@@ -58,12 +58,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-dvh">
-      <Sidebar isTutor={tutor} badges={badges} />
+      <Sidebar isTutor={tutor} badges={badges} special={tutor || !!me.special} />
       <div className="min-w-0 flex-1 pb-24 lg:pb-8">
         <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
             <MobileMenu
-              isTutor={tutor} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
+              isTutor={tutor} special={tutor || !!me.special} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
               handle={me.discord_username} level={lp.level} rank={(me.prestige ? `${emblem(me.prestige).label} · ` : "") + rankName(lp.level)} xpInto={lp.into} xpNeeded={lp.needed} xpPct={lp.pct}
               coins={me.coins} streak={me.streak} freezes={me.streak_freezes ?? 0}
             />

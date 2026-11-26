@@ -280,3 +280,20 @@ do $$ begin
   if (select count(*) from arcade_plays where xp > 0) <> 1 then raise exception 'arcade paid % times', (select count(*) from arcade_plays where xp > 0); end if;
   raise notice 'ok: arcade paid once (%), lose and repeat win paid 0', (select xp from arcade_plays where xp > 0);
 end $$;
+-- Trace Master: normal modes open to all; Pro only for special students; students can't flag themselves
+set role authenticated; select pg_temp.as_user(:'ben');
+select arcade_finish('trace-as', 900, true) ->> 'xp' as trace_as_xp;
+do $$ begin perform arcade_finish('trace-pro', 900, true); raise exception 'non-special got pro';
+exception when others then if sqlerrm not like '%special training only%' then raise; end if; end $$;
+do $$ begin update profiles set special = true where id = auth.uid(); raise exception 'student set own special';
+exception when insufficient_privilege then null; end $$;
+reset role;
+update profiles set special = true where id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+select arcade_finish('trace-pro', 900, true) ->> 'xp' as trace_pro_xp;
+select count(*) as others_visible from profiles where special and id <> auth.uid();
+reset role;
+do $$ begin
+  if (select count(*) from arcade_plays where game in ('trace-as', 'trace-pro') and xp = 40) <> 2 then raise exception 'trace rewards wrong'; end if;
+  raise notice 'ok: trace-as pays everyone, trace-pro only after the tutor marks the student special';
+end $$;

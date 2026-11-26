@@ -17,6 +17,7 @@ export interface Profile {
   ranked_wins?: number;
   prestige?: number;
   lifetime_xp?: number;
+  special?: boolean;
   contact: string | null;
   parent_name: string | null;
   parent_contact: string | null;

@@ -5,11 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, Coins, Flame, LogOut, Menu, ShoppingBag, Snowflake, X } from "lucide-react";
-import { STUDENT, TUTOR, type Badges } from "@/components/nav";
+import { STUDENT, TUTOR, studentItems, type Badges } from "@/components/nav";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  isTutor: boolean; badges: Badges; avatar: React.ReactNode; name: React.ReactNode; handle: string | null;
+  isTutor: boolean; special?: boolean; badges: Badges; avatar: React.ReactNode; name: React.ReactNode; handle: string | null;
   level: number; rank: string; xpInto: number; xpNeeded: number; xpPct: number; coins: number; streak: number; freezes: number;
 };
 
@@ -86,7 +86,7 @@ export function MobileMenu(p: Props) {
                 </div>
               </div>
 
-              <nav aria-label="All sections" className="mt-3 divide-y-0">{STUDENT.filter((i) => i.href !== "/profile").map(row)}</nav>
+              <nav aria-label="All sections" className="mt-3 divide-y-0">{studentItems(p.special).filter((i) => i.href !== "/profile").map(row)}</nav>
               {p.isTutor && (
                 <>
                   <div className="mt-3 border-t-2 border-line px-2 pt-3 text-xs font-bold uppercase tracking-wider text-muted">Tutor</div>

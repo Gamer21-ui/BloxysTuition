@@ -8,7 +8,7 @@ import { Card, SectionTitle, StatusChip } from "@/components/ui";
 import { levelFromXp, rankName } from "@/lib/xp";
 import { fmtDate, timeAgo } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
-import { addNote, awardBonus, createReport, deleteNote, updateStudent } from "../../actions";
+import { addNote, awardBonus, createReport, deleteNote, setSpecial, updateStudent } from "../../actions";
 import { TopicEditor } from "./topic-editor";
 import { StatusButtons } from "../status-buttons";
 
@@ -68,6 +68,18 @@ export default async function Student({ params }: { params: Promise<{ id: string
         <StatusChip status={p.status} />
         <StatusButtons id={p.id} status={p.status} tier={p.tier} />
       </div>
+
+      {p.special !== undefined && (
+        <form action={setSpecial} className={`mt-4 flex flex-wrap items-center gap-3 rounded-lg border-2 p-3 ${p.special ? "border-xp bg-xp/10" : "border-line bg-surface2"}`}>
+          <input type="hidden" name="id" value={p.id} />
+          <input type="hidden" name="on" value={p.special ? "0" : "1"} />
+          <div className="flex-1 text-sm">
+            <b>🌟 Special Training {p.special ? "is ON" : "is off"}</b>
+            <div className="text-muted">Exclusive exam guides, the pseudocode → VB.NET programming ladder and Trace Master Pro. Only this student (and you) can see it.</div>
+          </div>
+          <button className={`btn ${p.special ? "btn-ghost" : "btn-primary"}`}>{p.special ? "Turn off" : "🌟 Turn on"}</button>
+        </form>
+      )}
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card>

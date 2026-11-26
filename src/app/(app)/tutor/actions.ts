@@ -65,6 +65,18 @@ export async function updateStudent(fd: FormData) {
   revalidatePath(`/tutor/students/${id}`);
 }
 
+/** 🌟 Turn Special Training on/off for one student (exclusive pages + Trace Master Pro). */
+export async function setSpecial(fd: FormData) {
+  await requireTutor();
+  const id = uuid.parse(str(fd, "id"));
+  const on = str(fd, "on") === "1";
+  const admin = createAdminClient();
+  const { error } = await admin.from("profiles").update({ special: on }).eq("id", id).neq("role", "tutor");
+  if (error) await fail("Run the Special Training SQL update in Supabase first.");
+  if (on) await admin.from("notifications").insert({ user_id: id, title: "🌟 Special Training unlocked", body: "Your tutor picked you for Special Training: exam guides, a programming ladder and Trace Master Pro.", link: "/special" });
+  revalidatePath(`/tutor/students/${id}`);
+}
+
 export async function addNote(fd: FormData) {
   await requireTutor();
   const id = uuid.parse(str(fd, "id"));
