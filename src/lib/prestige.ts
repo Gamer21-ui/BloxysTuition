@@ -3,7 +3,7 @@ import { levelFromXp } from "@/lib/xp";
 export const PRESTIGE_LEVEL = 20;
 export const MAX_PRESTIGE = 10;
 
-const COLORS = ["", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#d946ef", "#f43f5e", "#f97316", "#eab308", "#e5e7eb", "#facc15"];
+const COLORS = ["", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#d946ef", "#f43f5e", "#f97316", "#eab308", "#64748b", "#facc15"];
 /** The emblem shown next to a student's level. */
 export const emblem = (n: number) => (n >= MAX_PRESTIGE ? { label: "💠 MASTER", color: COLORS[10] } : { label: `⭐ P${n}`, color: COLORS[n] || "#a3a3a3" });
 

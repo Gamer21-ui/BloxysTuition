@@ -90,10 +90,10 @@ export function PollsDesk({ initial, students }: { initial: Poll[]; students: { 
         <input className="input" placeholder="Question, e.g. How confident are you with depreciation?" value={q} maxLength={300} onChange={(e) => setQ(e.target.value)} />
         <div className="flex flex-wrap gap-1.5 text-xs">
           <span className="self-center text-muted">Quick:</span>
-          <button className="chip" onClick={() => quick(["Yes", "No"])}>Yes / No</button>
-          <button className="chip" onClick={() => quick(["😎 Got it", "🤔 Kind of", "😵 Lost"])}>Got it / Kind of / Lost</button>
-          <button className="chip" onClick={() => quick(["A", "B", "C", "D"])}>A B C D</button>
-          <button className="chip" onClick={() => quick(["True", "False"])}>True / False</button>
+          <button className="chip py-2" onClick={() => quick(["Yes", "No"])}>Yes / No</button>
+          <button className="chip py-2" onClick={() => quick(["😎 Got it", "🤔 Kind of", "😵 Lost"])}>Got it / Kind of / Lost</button>
+          <button className="chip py-2" onClick={() => quick(["A", "B", "C", "D"])}>A B C D</button>
+          <button className="chip py-2" onClick={() => quick(["True", "False"])}>True / False</button>
         </div>
         <div className="space-y-2">
           {opts.map((o, i) => (

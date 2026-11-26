@@ -58,7 +58,7 @@ export function ResultScreen({ game, success, score, stats, lessons, winText, lo
 }
 
 /** Title card before a game starts. */
-export function StartScreen({ title, emoji, how, goal, onStart, extra }: { title: string; emoji: string; how: string[]; goal: string; onStart: () => void; extra?: React.ReactNode }) {
+export function StartScreen({ title, emoji, how, goal, onStart, extra, tips = [] }: { title: string; emoji: string; how: string[]; goal: string; onStart: () => void; extra?: React.ReactNode; tips?: string[] }) {
   return (
     <div className="card space-y-4 text-center">
       <div className="text-6xl">{emoji}</div>
@@ -66,8 +66,24 @@ export function StartScreen({ title, emoji, how, goal, onStart, extra }: { title
       <ul className="mx-auto max-w-md space-y-1 text-left text-sm">{how.map((h) => <li key={h}>• {h}</li>)}</ul>
       <div className="rounded border-2 border-xp/60 bg-xp/10 px-3 py-2 text-sm font-bold">🎯 To win: {goal}</div>
       {extra}
+      {tips.length > 0 && (
+        <details className="rounded border-2 border-accent/50 bg-accent/5 p-2 text-left text-sm" open>
+          <summary className="cursor-pointer font-bold">💡 Tips to win</summary>
+          <ul className="mt-1 space-y-1">{tips.map((t) => <li key={t}>✔️ {t}</li>)}</ul>
+        </details>
+      )}
       <button className="btn btn-primary w-full text-lg" onClick={onStart}>▶ START</button>
       <p className="text-xs text-muted">Win = +40 XP and +10 coins (once a day per game). Lose = nothing lost.</p>
+    </div>
+  );
+}
+
+/** Small cheat-sheet shown under a game while playing. */
+export function CheatSheet({ items }: { items: string[] }) {
+  return (
+    <div className="flex flex-wrap gap-1.5 rounded-lg border-2 border-dashed border-line bg-surface2 p-2 text-[11px] sm:text-xs">
+      <span className="font-bold">💡</span>
+      {items.map((t) => <span key={t} className="rounded bg-surface px-1.5 py-0.5">{t}</span>)}
     </div>
   );
 }

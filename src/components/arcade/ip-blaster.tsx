@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { sfx, unlock } from "@/lib/battle-audio";
 import { cn } from "@/lib/utils";
-import { ResultScreen, StartScreen, type Lesson } from "./shared";
+import { CheatSheet, ResultScreen, StartScreen, type Lesson } from "./shared";
 
 type Mode = "v4" | "v6";
 type Target = { id: number; text: string; valid: boolean; why: string; x: number; y: number; born: number; ttl: number; dx: number };
@@ -165,6 +165,19 @@ export function IpBlaster() {
         pace === "training" ? `${GAME_SECONDS} seconds. Targets move slowly, so take your time and READ each one.` : `${GAME_SECONDS} seconds. It speeds up as you go!`,
       ]}
       goal={`hit at least ${WIN_HITS} valid addresses with ${Math.round(WIN_ACC * 100)}%+ accuracy`}
+      tips={mode === "v4" ? [
+        "Count the DOTS first: a valid IPv4 has exactly 3 dots (4 numbers).",
+        "Then check each number: anything 256 or bigger is a fake.",
+        "Any letter = fake. IPv4 is only digits and dots.",
+        "Colons (:) mean it's IPv6 or a MAC address, so don't shoot!",
+        "Accuracy beats speed: letting a target escape costs nothing, shooting a fake costs points.",
+      ] : [
+        "Count the COLONS: a valid IPv6 has 7 colons (8 groups).",
+        "Only 0–9 and a–f are allowed. A g, k, q or z means it's a fake.",
+        "6 pairs of 2 characters (like 3A:7F:12:9C:00:B1) is a MAC address, not IPv6.",
+        "Dots instead of colons = IPv4, so don't shoot.",
+        "Not sure? Let it go. Missing a target is free, shooting a fake isn't.",
+      ]}
       extra={
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
@@ -257,6 +270,7 @@ export function IpBlaster() {
         </AnimatePresence>
         <div className="pointer-events-none absolute left-3 top-2 text-[10px] font-bold uppercase tracking-[0.3em] text-sky-300/60">target: valid {mode === "v4" ? "IPv4" : "IPv6"}</div>
       </motion.div>
+      <CheatSheet items={mode === "v4" ? ["4 numbers", "3 dots", "each 0–255", "no letters", "colons = don't shoot"] : ["8 groups", "7 colons", "0–9 + a–f only", "6 pairs = MAC ✗", "dots = IPv4 ✗"]} />
     </div>
   );
 }

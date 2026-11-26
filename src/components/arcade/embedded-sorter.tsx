@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { sfx, unlock } from "@/lib/battle-audio";
 import { cn } from "@/lib/utils";
-import { ResultScreen, StartScreen, type Lesson } from "./shared";
+import { CheatSheet, ResultScreen, StartScreen, type Lesson } from "./shared";
 
 type Item = { emoji: string; name: string; embedded: boolean; why: string };
 const POOL: Item[] = [
@@ -106,6 +106,13 @@ export function EmbeddedSorter() {
         `The belt speeds up. ${LIVES} lives: a wrong sort or a dropped device costs one. On a keyboard, use ← and →.`,
       ]}
       goal={`sort at least ${WIN_CORRECT} of ${ROUND} devices correctly`}
+      tips={[
+        "Ask: \"Can I install new apps or programs on it?\" Yes = GENERAL-PURPOSE. No = EMBEDDED.",
+        "Is it part of a bigger machine or appliance (car, oven, alarm)? That's EMBEDDED.",
+        "Does it do ONE job (wash, heat, time, route)? That's EMBEDDED.",
+        "Laptops, desktops, tablets and any \"PC\" are general-purpose.",
+        "Most devices are embedded! General-purpose ones are rarer, so look out for them.",
+      ]}
       extra={<div className="rounded bg-surface2 p-2 text-left text-xs"><b>🔌 Embedded systems</b> are small, cheap, low-power and reliable, but they&apos;re hard to upgrade and only do one job.</div>} />
   );
   if (phase === "done") return (
@@ -153,6 +160,7 @@ export function EmbeddedSorter() {
         <button className="btn h-auto flex-col gap-1 border-good bg-good/15 py-4 text-lg" onClick={() => sort(true)}><span className="text-3xl">🔌</span>EMBEDDED<span className="text-xs font-normal opacity-70">one dedicated job · ←</span></button>
         <button className="btn h-auto flex-col gap-1 border-accent bg-accent/15 py-4 text-lg" onClick={() => sort(false)}><span className="text-3xl">💻</span>GENERAL-PURPOSE<span className="text-xs font-normal opacity-70">runs any program · →</span></button>
       </div>
+      <CheatSheet items={["can install apps? → 💻", "one job? → 🔌", "inside a machine? → 🔌", "laptop / PC / tablet → 💻"]} />
       <AnimatePresence mode="wait">
         {toast && <motion.div key={toast.t} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}
           className={cn("rounded-lg border-2 px-3 py-2 text-sm font-bold", toast.good ? "border-good bg-good/10" : "border-bad bg-bad/10")}>{toast.t}</motion.div>}

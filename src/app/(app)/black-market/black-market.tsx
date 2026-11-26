@@ -114,7 +114,7 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
           </div>
         </div>
       )}
-      <div className="mt-8 text-center"><Link href="/shop" className="text-xs text-white/40 hover:text-white/80">← sneak back to the normal shop</Link></div>
+      <div className="mt-8 text-center"><Link href="/shop" className="inline-block px-3 py-2.5 text-xs text-white/40 hover:text-white/80">← sneak back to the normal shop</Link></div>
     </Shell>
   );
 }
@@ -123,7 +123,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="mx-auto max-w-2xl rounded-2xl border border-white/10 p-5 text-center text-white shadow-2xl sm:p-6 sm:text-left"
       style={{ background: "radial-gradient(circle at 30% 0%, #2a1f3d 0%, #0b0b10 55%, #050507 100%)" }}>
-      <div className="mb-4 flex items-center justify-between text-xs uppercase tracking-[0.3em] text-white/40"><span>🕳️ the black market</span><span>no refunds</span></div>
+      <div className="mb-4 flex items-center justify-between gap-2 text-[10px] uppercase tracking-[0.2em] text-white/40 sm:text-xs sm:tracking-[0.3em]"><span className="whitespace-nowrap">🕳️ black market</span><span className="whitespace-nowrap">no refunds</span></div>
       {children}
     </div>
   );

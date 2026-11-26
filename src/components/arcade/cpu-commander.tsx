@@ -3,11 +3,11 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { sfx, unlock } from "@/lib/battle-audio";
 import { cn } from "@/lib/utils";
-import { ResultScreen, StartScreen, type Lesson } from "./shared";
+import { CheatSheet, ResultScreen, StartScreen, type Lesson } from "./shared";
 
 type Op = "LOAD" | "ADD" | "SUB" | "OUT" | "MUL";
 type Card = { id: string; op: Op; n?: number };
-type Level = { title: string; tip: string; target: number[]; palette: Card[] };
+type Level = { title: string; tip: string; target: number[]; palette: Card[]; solution: string[] };
 
 const SET: { op: Op; does: string }[] = [
   { op: "LOAD", does: "put a number into the ACC" },
@@ -17,12 +17,12 @@ const SET: { op: Op; does: string }[] = [
 ];
 const c = (id: string, op: Op, n?: number): Card => ({ id, op, n });
 const LEVELS: Level[] = [
-  { title: "Boot up", tip: "LOAD puts a number in the accumulator (ACC). OUT shows it.", target: [7], palette: [c("a", "LOAD", 3), c("b", "LOAD", 7), c("c", "OUT")] },
-  { title: "First sum", tip: "The CPU runs instructions in order, one per fetch–decode–execute cycle.", target: [12], palette: [c("a", "LOAD", 5), c("b", "ADD", 2), c("c", "ADD", 7), c("d", "OUT")] },
-  { title: "Combo", tip: "You don't have to use every card.", target: [10], palette: [c("a", "LOAD", 3), c("b", "ADD", 4), c("c", "SUB", 1), c("d", "ADD", 3), c("e", "OUT")] },
-  { title: "Back to zero", tip: "SUB takes away from the ACC.", target: [0], palette: [c("a", "LOAD", 9), c("b", "SUB", 4), c("c", "ADD", 2), c("d", "SUB", 5), c("e", "OUT")] },
-  { title: "Times table?", tip: "Hmm… there's a MUL card here. Is MUL in this CPU's instruction set? 🤔", target: [16], palette: [c("a", "LOAD", 4), c("m", "MUL", 4), c("b", "ADD", 4), c("x", "ADD", 4), c("y", "ADD", 4), c("d", "OUT")] },
-  { title: "Double output", tip: "A program can OUT more than once. Output 5, then 8.", target: [5, 8], palette: [c("a", "LOAD", 5), c("b", "OUT"), c("s", "SUB", 3), c("d", "ADD", 3), c("e", "OUT")] },
+  { title: "Boot up", tip: "LOAD puts a number in the accumulator (ACC). OUT shows it.", target: [7], palette: [c("a", "LOAD", 3), c("b", "LOAD", 7), c("c", "OUT")], solution: ["LOAD 7", "OUT"] },
+  { title: "First sum", tip: "The CPU runs instructions in order, one per fetch–decode–execute cycle.", target: [12], palette: [c("a", "LOAD", 5), c("b", "ADD", 2), c("c", "ADD", 7), c("d", "OUT")], solution: ["LOAD 5", "ADD 7", "OUT"] },
+  { title: "Combo", tip: "You don't have to use every card.", target: [10], palette: [c("a", "LOAD", 3), c("b", "ADD", 4), c("c", "SUB", 1), c("d", "ADD", 3), c("e", "OUT")], solution: ["LOAD 3", "ADD 4", "ADD 3", "OUT"] },
+  { title: "Back to zero", tip: "SUB takes away from the ACC.", target: [0], palette: [c("a", "LOAD", 9), c("b", "SUB", 4), c("c", "ADD", 2), c("d", "SUB", 5), c("e", "OUT")], solution: ["LOAD 9", "SUB 4", "SUB 5", "OUT"] },
+  { title: "Times table?", tip: "Hmm… there's a MUL card here. Is MUL in this CPU's instruction set? 🤔", target: [16], palette: [c("a", "LOAD", 4), c("m", "MUL", 4), c("b", "ADD", 4), c("x", "ADD", 4), c("y", "ADD", 4), c("d", "OUT")], solution: ["LOAD 4", "ADD 4", "ADD 4", "ADD 4", "OUT"] },
+  { title: "Double output", tip: "A program can OUT more than once. Output 5, then 8.", target: [5, 8], palette: [c("a", "LOAD", 5), c("b", "OUT"), c("s", "SUB", 3), c("d", "ADD", 3), c("e", "OUT")], solution: ["LOAD 5", "OUT", "ADD 3", "OUT"] },
 ];
 const label = (k: Card) => (k.n === undefined ? k.op : `${k.op} ${k.n}`);
 const MAX_SLOTS = 6;
@@ -43,10 +43,11 @@ export function CpuCommander() {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [runs, setRuns] = useState(0);
   const [won, setWon] = useState(false);
+  const [hint, setHint] = useState(0); // how many steps of the solution are revealed
   const L = LEVELS[lv];
 
   const reset = () => { setPc(0); setCur(-1); setStage(null); setAcc(0); setCir(""); setOut([]); setMsg(null); };
-  const begin = () => { unlock(); setLv(0); setProg([]); reset(); setLessons([]); setRuns(0); setPhase("play"); sfx("round"); };
+  const begin = () => { unlock(); setLv(0); setProg([]); setHint(0); reset(); setLessons([]); setRuns(0); setPhase("play"); sfx("round"); };
   const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   async function run() {
@@ -82,7 +83,7 @@ export function CpuCommander() {
     }
     setRunning(false);
   }
-  const next = () => { setLv((n) => n + 1); setProg([]); reset(); };
+  const next = () => { setLv((n) => n + 1); setProg([]); setHint(0); reset(); };
   const used = new Set(prog.map((p) => p.id));
   const solved = msg?.good && !running;
 
@@ -94,6 +95,13 @@ export function CpuCommander() {
         "Get the OUTPUT to match the target to clear the level. Retries are free!",
       ]}
       goal={`clear all ${LEVELS.length} levels`}
+      tips={[
+        "Almost every program starts with LOAD, to put a starting number in the ACC.",
+        "Always finish with OUT, or nothing gets output!",
+        "Work it out on paper first: start number, then +/− each step, then check it equals the target.",
+        "If a command isn't in the instruction set, the CPU can't run it. Find another way with the commands it DOES know.",
+        "Stuck? Press 💡 Hint to reveal the program one step at a time. No penalty!",
+      ]}
       extra={<div className="rounded bg-surface2 p-2 text-left text-xs"><b>🧠 Key idea:</b> an <b>instruction set</b> is the list of machine-code commands a CPU understands. This CPU only knows <b>LOAD, ADD, SUB and OUT</b>. Anything else, it can&apos;t run.</div>} />
   );
   if (phase === "done") return (
@@ -110,7 +118,40 @@ export function CpuCommander() {
         <div className="rounded-lg border-2 border-xp bg-xp/10 px-3 py-1 font-display text-lg">🎯 Target: {L.target.join(" then ")}</div>
       </div>
       <p className="text-sm text-muted">💡 {L.tip}</p>
+      <CheatSheet items={["start with LOAD", "end with OUT", "ACC = running total", "PC = next address", "only LOAD · ADD · SUB · OUT"]} />
+      {hint > 0 && (
+        <div className="rounded-lg border-2 border-accent/50 bg-accent/5 p-2 text-sm">
+          <b>💡 Hint:</b> {L.solution.slice(0, hint).map((x, i) => <code key={i} className="mx-0.5 rounded bg-surface px-1.5 py-0.5 font-bold">{i}: {x}</code>)}
+          {hint < L.solution.length && <span className="text-muted"> …</span>}
+        </div>
+      )}
 
+      {/* cards + controls first, so phones don't have to scroll to play */}
+      <div className="card p-3">
+        <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">Your cards (tap to add to the program)</div>
+        <div className="flex flex-wrap gap-2">
+          {L.palette.map((k) => (
+            <button key={k.id} type="button" disabled={running || used.has(k.id) || prog.length >= MAX_SLOTS}
+              onClick={() => { setProg([...prog, k]); setMsg(null); sfx("emote"); }}
+              className={cn("rounded-lg border-2 px-3 py-2 font-mono font-bold shadow-chunky transition disabled:opacity-30",
+                k.op === "MUL" ? "border-warn bg-warn/15" : "border-accent bg-accent/10")}>{label(k)}</button>
+          ))}
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {msg && <motion.div initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}
+          className={cn("rounded-lg border-2 p-3 text-sm font-bold", msg.good ? "border-good bg-good/10" : "border-bad bg-bad/10")}>{msg.t}</motion.div>}
+      </AnimatePresence>
+
+      <div className="flex flex-wrap gap-2">
+        {solved && lv < LEVELS.length - 1
+          ? <button className="btn btn-primary flex-1" onClick={next}>Next level ➜</button>
+          : <button className="btn btn-primary flex-1" disabled={running || !prog.length} onClick={run}>{running ? "Running…" : "▶ RUN"}</button>}
+        <button className="btn btn-ghost" disabled={running || hint >= L.solution.length} onClick={() => setHint((h) => h + 1)}>💡 Hint</button>
+        <button className="btn btn-ghost" disabled={running} onClick={() => { setProg([]); reset(); }}>Clear</button>
+        <button className="btn btn-ghost" disabled={running} onClick={() => { setWon(false); setPhase("done"); }}>Give up</button>
+      </div>
       <div className="grid gap-3 md:grid-cols-[1fr_1.2fr_0.8fr]">
         {/* RAM: the program */}
         <div className="card p-3">
@@ -166,31 +207,6 @@ export function CpuCommander() {
         </div>
       </div>
 
-      {/* cards */}
-      <div className="card p-3">
-        <div className="mb-2 text-xs font-bold uppercase tracking-wider text-muted">Your cards (tap to add to the program)</div>
-        <div className="flex flex-wrap gap-2">
-          {L.palette.map((k) => (
-            <button key={k.id} type="button" disabled={running || used.has(k.id) || prog.length >= MAX_SLOTS}
-              onClick={() => { setProg([...prog, k]); setMsg(null); sfx("emote"); }}
-              className={cn("rounded-lg border-2 px-3 py-2 font-mono font-bold shadow-chunky transition disabled:opacity-30",
-                k.op === "MUL" ? "border-warn bg-warn/15" : "border-accent bg-accent/10")}>{label(k)}</button>
-          ))}
-        </div>
-      </div>
-
-      <AnimatePresence>
-        {msg && <motion.div initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }}
-          className={cn("rounded-lg border-2 p-3 text-sm font-bold", msg.good ? "border-good bg-good/10" : "border-bad bg-bad/10")}>{msg.t}</motion.div>}
-      </AnimatePresence>
-
-      <div className="flex flex-wrap gap-2">
-        {solved && lv < LEVELS.length - 1
-          ? <button className="btn btn-primary flex-1" onClick={next}>Next level ➜</button>
-          : <button className="btn btn-primary flex-1" disabled={running || !prog.length} onClick={run}>{running ? "Running…" : "▶ RUN"}</button>}
-        <button className="btn btn-ghost" disabled={running} onClick={() => { setProg([]); reset(); }}>Clear</button>
-        <button className="btn btn-ghost" disabled={running} onClick={() => { setWon(false); setPhase("done"); }}>Give up</button>
-      </div>
     </div>
   );
 }
