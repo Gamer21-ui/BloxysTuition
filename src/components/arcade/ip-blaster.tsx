@@ -9,8 +9,12 @@ type Mode = "v4" | "v6";
 type Target = { id: number; text: string; valid: boolean; why: string; x: number; y: number; born: number; ttl: number; dx: number };
 type Fx = { id: number; x: number; y: number; text: string; good: boolean };
 
-const GAME_SECONDS = 45;
-const WIN_HITS = 12;
+type Pace = "training" | "normal";
+// Training: slow, few targets, big text, time to actually read. Normal: faster, still readable.
+const PACE = {
+  training: { seconds: 60, winHits: 10, ttl: (e: number) => Math.max(5200, 7000 - e * 20), maxOn: (e: number) => (e < 25 ? 2 : 3), spawn: 0.35, label: "🎓 Training", sub: "slow, time to read" },
+  normal: { seconds: 45, winHits: 12, ttl: (e: number) => Math.max(2600, 4000 - e * 30), maxOn: (e: number) => (e < 15 ? 3 : e < 30 ? 4 : 5), spawn: 0.5, label: "⚡ Normal", sub: "faster, more targets" },
+} as const;
 const WIN_ACC = 0.75;
 
 const r = (n: number) => Math.floor(Math.random() * n);
@@ -49,10 +53,10 @@ function badV6(): { text: string; why: string } {
     default: return { text: validV6().split(":").slice(0, 6).join(":"), why: "only 6 groups: IPv6 has exactly 8 groups (8 × 16 bits = 128)" };
   }
 }
-function makeTarget(mode: Mode, id: number, elapsed: number, others: Target[] = []): Target {
+function makeTarget(mode: Mode, pace: Pace, id: number, elapsed: number, others: Target[] = []): Target {
   const valid = Math.random() < 0.55;
   const bad = mode === "v4" ? badV4() : badV6();
-  const ttl = Math.max(1700, 2900 - elapsed * 25); // speeds up over time
+  const ttl = PACE[pace].ttl(elapsed); // speeds up over time
   return {
     id, valid, ttl, born: Date.now(),
     text: valid ? (mode === "v4" ? validV4() : validV6()) : bad.text,
@@ -77,6 +81,9 @@ function spot(mode: Mode, others: Target[]) {
 // ---------------------------------------------------------------- the game
 export function IpBlaster() {
   const [mode, setMode] = useState<Mode>("v4");
+  const [pace, setPace] = useState<Pace>("training");
+  const P = PACE[pace];
+  const GAME_SECONDS = P.seconds, WIN_HITS = P.winHits;
   const [phase, setPhase] = useState<"start" | "play" | "done">("start");
   const [targets, setTargets] = useState<Target[]>([]);
   const [fx, setFx] = useState<Fx[]>([]);
@@ -85,7 +92,7 @@ export function IpBlaster() {
   const [hits, setHits] = useState(0);
   const [wrong, setWrong] = useState(0);
   const [escaped, setEscaped] = useState(0);
-  const [left, setLeft] = useState(GAME_SECONDS);
+  const [left, setLeft] = useState<number>(GAME_SECONDS);
   const [toast, setToast] = useState<string | null>(null);
   const [cross, setCross] = useState<{ x: number; y: number } | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
@@ -113,13 +120,12 @@ export function IpBlaster() {
         const alive = ts.filter((t) => now - t.born < t.ttl);
         const gone = ts.filter((t) => now - t.born >= t.ttl && t.valid).length;
         if (gone) { setEscaped((e) => e + gone); setCombo(0); }
-        const maxOn = elapsed < 15 ? 4 : elapsed < 30 ? 5 : 6;
-        if (alive.length < maxOn && Math.random() < 0.55) alive.push(makeTarget(mode, nextId.current++, elapsed, alive));
+        if (alive.length < P.maxOn(elapsed) && Math.random() < P.spawn) alive.push(makeTarget(mode, pace, nextId.current++, elapsed, alive));
         return alive;
       });
     }, 260);
     return () => clearInterval(tick);
-  }, [phase, mode]);
+  }, [phase, mode, pace, P, GAME_SECONDS]);
 
   const boom = (x: number, y: number, text: string, good: boolean) => {
     const id = nextId.current++;
@@ -156,16 +162,24 @@ export function IpBlaster() {
         mode === "v4" ? "Shoot every VALID IPv4 address: 4 numbers from 0 to 255, separated by dots." : "Shoot every VALID IPv6 address: 8 groups of hex (0–9, a–f) separated by colons.",
         "DON'T shoot fakes: numbers over 255, the wrong number of parts, MAC addresses, the other IP version…",
         "Hit valid targets in a row for a combo multiplier. Shooting a fake costs 50 points and your combo.",
-        `${GAME_SECONDS} seconds. It speeds up as you go!`,
+        pace === "training" ? `${GAME_SECONDS} seconds. Targets move slowly, so take your time and READ each one.` : `${GAME_SECONDS} seconds. It speeds up as you go!`,
       ]}
       goal={`hit at least ${WIN_HITS} valid addresses with ${Math.round(WIN_ACC * 100)}%+ accuracy`}
       extra={
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
+            {(["training", "normal"] as Pace[]).map((k) => (
+              <button key={k} className={cn("btn h-auto flex-col py-2", pace === k ? "btn-accent" : "btn-ghost")} onClick={() => setPace(k)}>
+                <span className="font-display text-base">{PACE[k].label}</span>
+                <span className="text-xs opacity-80">{PACE[k].sub}</span>
+              </button>
+            ))}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
             {(["v4", "v6"] as Mode[]).map((m) => (
               <button key={m} className={cn("btn h-auto flex-col py-2", mode === m ? "btn-primary" : "btn-ghost")} onClick={() => setMode(m)}>
                 <span className="font-display text-lg">{m === "v4" ? "IPv4" : "IPv6"}</span>
-                <span className="text-xs opacity-80">{m === "v4" ? "Rookie" : "Elite"}</span>
+                <span className="text-xs opacity-80">{m === "v4" ? "4 numbers, dots" : "8 hex groups, colons"}</span>
               </button>
             ))}
           </div>
@@ -207,7 +221,7 @@ export function IpBlaster() {
             <motion.button key={t.id} type="button" onPointerDown={(e) => shoot(t, e)}
               initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1, x: t.dx * 6 }} exit={{ scale: 0.3, opacity: 0 }}
               transition={{ x: { duration: t.ttl / 1000, ease: "linear" }, default: { type: "spring", stiffness: 300, damping: 18 } }}
-              className="absolute whitespace-nowrap rounded-lg border-2 border-sky-400/70 bg-slate-900/90 px-2 py-1.5 font-mono text-[10px] font-bold text-sky-100 shadow-[0_0_18px_rgba(56,189,248,.45)] sm:text-sm"
+              className={cn("absolute whitespace-nowrap rounded-lg border-2 border-sky-400/70 bg-slate-900/90 px-2 py-1.5 font-mono font-bold text-sky-100 shadow-[0_0_18px_rgba(56,189,248,.45)]", pace === "training" ? (mode === "v6" ? "text-[11px] sm:text-base" : "text-sm sm:text-lg") : "text-[10px] sm:text-sm")}
               style={{ left: `${t.x}%`, top: `${t.y}%`, cursor: "none" }}>
               <span className="pointer-events-none absolute -left-1 -top-1 h-2 w-2 border-l-2 border-t-2 border-red-400" />
               <span className="pointer-events-none absolute -right-1 -top-1 h-2 w-2 border-r-2 border-t-2 border-red-400" />
