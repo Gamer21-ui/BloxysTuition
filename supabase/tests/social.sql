@@ -268,3 +268,15 @@ set role authenticated; select pg_temp.as_user(:'tutor_id');
 do $$ begin perform black_market_buy('bunk', gen_random_uuid()); raise exception 'tutor bought';
 exception when others then if sqlerrm not like '%owner%' then raise; end if; end $$;
 reset role;
+-- arcade: a win pays once a day per game; losing pays nothing; unknown games rejected
+set role authenticated; select pg_temp.as_user(:'ben');
+select arcade_finish('ip-blaster-v4', 1500, false) ->> 'xp' as lose_xp;
+select arcade_finish('ip-blaster-v4', 1500, true) ->> 'xp' as first_win_xp;
+select arcade_finish('ip-blaster-v4', 1800, true) ->> 'xp' as second_win_xp;
+do $$ begin perform arcade_finish('free-xp', 1, true); raise exception 'unknown game accepted';
+exception when others then if sqlerrm not like '%unknown game%' then raise; end if; end $$;
+reset role;
+do $$ begin
+  if (select count(*) from arcade_plays where xp > 0) <> 1 then raise exception 'arcade paid % times', (select count(*) from arcade_plays where xp > 0); end if;
+  raise notice 'ok: arcade paid once (%), lose and repeat win paid 0', (select xp from arcade_plays where xp > 0);
+end $$;

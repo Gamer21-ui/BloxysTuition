@@ -3,7 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3, BookOpen, CalendarDays, ClipboardList, Gamepad2, GraduationCap, House, Medal, Megaphone, MessagesSquare, NotebookPen, Settings, ShoppingBag, UserPlus,
-  Swords, Target, Trophy, Users, Vote, type LucideIcon,
+  Joystick, Swords, Target, Trophy, Users, Vote, type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BRAND } from "@/lib/brand";
@@ -16,6 +16,7 @@ export const STUDENT: Item[] = [
   { href: "/practice", label: "Exam prep", icon: GraduationCap },
   { href: "/challenges", label: "Quests", icon: Target },
   { href: "/battles", label: "Battles", icon: Swords },
+  { href: "/arcade", label: "Arcade", icon: Joystick },
   { href: "/friends", label: "Friends", icon: UserPlus },
   { href: "/chat", label: "Chat", icon: MessagesSquare },
   { href: "/homework", label: "Homework", icon: NotebookPen },
