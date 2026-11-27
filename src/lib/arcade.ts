@@ -2,6 +2,9 @@
 export type Game = { slug: string; ids: string[]; emoji: string; name: string; genre: string; topic: string; blurb: string; where: { course: string; chapters: string[] }[] };
 
 export const ARCADE: Game[] = [
+  { slug: "order-race", ids: ["order-race"], emoji: "🏁", name: "Order Race 1v1", genre: "Versus", topic: "Processes in the right order",
+    blurb: "Challenge a friend: PC → MAR → MDR → CIR, packet switching, DNS lookups… Fastest correct order wins.",
+    where: [{ course: "o-computer-science", chapters: ["1", "2", "3", "4", "5", "6", "7"] }] },
   { slug: "trace-master", ids: ["trace-o", "trace-as", "trace-a", "trace-pro"], emoji: "🧮", name: "Trace Master", genre: "Brain", topic: "Pseudocode · trace tables",
     blurb: "Be the computer: run pseudocode line by line and fill in the trace table. O Level, AS and A Level modes.",
     where: [{ course: "o-computer-science", chapters: ["7", "8"] }, { course: "as-computer-science", chapters: ["9", "10", "11"] }, { course: "a-computer-science", chapters: ["19", "20"] }] },

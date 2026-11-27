@@ -1,0 +1,68 @@
+// Order Race puzzles for O Level CS 2210: put the items in the right order, fastest wins.
+// items are written in the CORRECT order (the builder shuffles them). e = why, shown after the reveal.
+export default {
+  "o-computer-science": {
+    "1": [
+      { p: "Order these units from smallest to largest.", items: ["Bit", "Nibble", "Byte", "Kibibyte (KiB)", "Mebibyte (MiB)", "Gibibyte (GiB)"],
+        e: "1 nibble = 4 bits, 1 byte = 8 bits, then each binary prefix is 1024 times bigger than the one before." },
+      { p: "Order the steps to convert denary 13 to binary.", items: ["Write the column values 8, 4, 2, 1", "Take the largest that fits: 8 (5 left)", "Next: 4 fits (1 left)", "2 does not fit: write 0", "1 fits: write 1, giving 1101"],
+        e: "Work from the biggest column down, subtracting each value that fits: 13 = 8 + 4 + 1 = 1101." },
+    ],
+    "2": [
+      { p: "Order the steps of packet switching.", items: ["Data is split into packets", "Each packet gets a header", "Packets take different routes", "Packets arrive at the receiver", "Packets are reordered using the header"],
+        e: "The header holds the destination address and packet number, so packets can be sent separately and put back in order." },
+      { p: "Order the steps of an even parity check.", items: ["Sender counts the 1s in the byte", "Sender sets the parity bit", "Data is transmitted", "Receiver counts the 1s", "Odd count found, so an error is flagged"],
+        e: "With even parity the total number of 1s must be even. An odd count at the receiver means a bit changed." },
+      { p: "Order the steps of an automatic repeat request (ARQ).", items: ["Sender transmits data and starts a timer", "Receiver checks the data for errors", "Receiver sends an acknowledgement", "If no acknowledgement in time, data is resent"],
+        e: "ARQ uses acknowledgements and a timeout. No acknowledgement before the timeout means the data is sent again." },
+    ],
+    "3": [
+      { p: "Order the registers an instruction passes through during the fetch stage.", items: ["PC", "MAR", "MDR", "CIR"],
+        e: "The PC's address is copied to the MAR, the instruction arrives in the MDR, then it is copied to the CIR." },
+      { p: "Order the full fetch stage.", items: ["Address in PC copied to MAR", "Address sent on the address bus", "Instruction sent back on the data bus", "Instruction stored in the MDR", "Instruction copied to the CIR", "PC incremented by 1"],
+        e: "Fetch: PC → MAR → address bus → memory → data bus → MDR → CIR, and the PC moves on to the next instruction." },
+      { p: "Order the stages of the processor cycle.", items: ["Fetch", "Decode", "Execute", "Check for interrupts"],
+        e: "The CPU fetches, decodes and executes an instruction, then checks for interrupts before the next cycle." },
+      { p: "Order these from fastest to slowest to access.", items: ["Registers", "Cache", "RAM", "Solid-state drive", "Magnetic hard disk"],
+        e: "The closer to the CPU, the faster. Registers are inside the CPU; magnetic disks have moving parts." },
+      { p: "Order how a sensor and microprocessor control a greenhouse heater.", items: ["Temperature sensor takes a reading", "Reading converted to digital (ADC)", "Microprocessor compares it with stored value", "Too cold, so a signal goes to the actuator", "Heater switches on"],
+        e: "Sensor → ADC → microprocessor compares → actuator. The loop repeats continuously." },
+      { p: "Order how a capacitive touch screen detects a touch.", items: ["Finger touches the screen", "Electrostatic field changes at that point", "Change in charge is measured", "Processor calculates the coordinates"],
+        e: "The finger is conductive, so it disturbs the field; the processor works out where from the change." },
+      { p: "Order how data is read from an optical disc.", items: ["Disc spins", "Laser is shone onto the disc", "Light reflects off pits and lands", "Sensor detects the reflected light", "Pattern converted to binary"],
+        e: "Pits and lands reflect light differently, and the sensor turns that pattern into 1s and 0s." },
+      { p: "Order how a router forwards a data packet.", items: ["Packet arrives at the router", "Router reads the destination IP", "Router checks its routing table", "Packet is sent to the next hop"],
+        e: "Routers use the destination IP address and their routing table to choose where each packet goes next." },
+    ],
+    "4": [
+      { p: "Order what happens when a computer is switched on and an app is opened.", items: ["Power on", "Firmware (bootloader) runs from ROM", "Operating system loaded into RAM", "User opens an application"],
+        e: "Firmware loads the OS, and the OS provides the environment that applications run in." },
+      { p: "Order how the CPU handles an interrupt.", items: ["Interrupt signal is received", "Current FDE cycle finishes", "Current task's state is saved", "Interrupt service routine runs", "State restored and task resumes"],
+        e: "The CPU saves where it was, runs the ISR, then restores everything and carries on." },
+      { p: "Order these from lowest level to highest level.", items: ["Machine code", "Assembly language", "High-level language"],
+        e: "Machine code is binary the CPU runs; assembly uses mnemonics; high-level languages are English-like." },
+      { p: "Order the steps to release a compiled game.", items: ["Write the source code", "Test with an interpreter", "Compile the whole program", "Executable file is produced", "Share the executable"],
+        e: "Interpreters help while developing; the compiler makes the executable that customers run." },
+    ],
+    "5": [
+      { p: "Order how a web page is found and loaded.", items: ["User types a URL", "Browser asks a DNS server", "DNS returns the IP address", "Browser requests the page", "Web server sends back HTML", "Browser renders the page"],
+        e: "DNS turns the domain name into an IP address so the browser can contact the right web server." },
+      { p: "Order how a phishing attack works.", items: ["Fake email is sent", "User clicks the link", "Fake website opens", "User enters their details", "Criminal steals the data"],
+        e: "Phishing tricks the user with a legitimate-looking email and website. Prevention: check links and senders." },
+      { p: "Order how a blockchain transaction is recorded.", items: ["Transaction requested", "Sent to the network of computers", "Transaction verified", "Added to a new block", "Block linked to the chain"],
+        e: "Each block holds a hash of the previous one, so changing old records breaks the chain." },
+    ],
+    "6": [
+      { p: "Order the stages of an automated system.", items: ["Sensor detects a change", "Data sent to the microprocessor", "Microprocessor makes a decision", "Actuator carries out the action"],
+        e: "Input (sensor) → process (microprocessor) → output (actuator)." },
+      { p: "Order how a machine-learning system improves.", items: ["Collect training data", "Train the model on the data", "Model makes predictions", "Check the results", "Adjust and retrain"],
+        e: "Machine learning improves by learning from data and feedback without being reprogrammed." },
+    ],
+    "7": [
+      { p: "Order the stages of the program development life cycle.", items: ["Analysis", "Design", "Coding", "Testing"],
+        e: "Understand the problem, plan the solution, write the code, then test it." },
+      { p: "Order the steps of a linear search for a value.", items: ["Start at the first item", "Compare the item with the value", "If it matches, stop", "Otherwise move to the next item", "If the end is reached, it is not found"],
+        e: "A linear search checks each item in turn until it finds the value or reaches the end." },
+    ],
+  },
+};

@@ -17,6 +17,7 @@ export const STYLES = {
   classic: { label: "Classic", emoji: "⚔️", blurb: "Normal battle. 20 seconds a round." },
   ranked: { label: "Ranked", emoji: "🏆", blurb: "Win to gain rating and climb from Bronze to Champion. Lose and you drop. At least 5 rounds, no single chapters." },
   pressure: { label: "Pressure", emoji: "⚡", blurb: "Every time someone answers, everyone else's time is cut in half. Think fast!" },
+  race: { label: "Order Race", emoji: "🏁", blurb: "Put the steps in the right order (like PC → MAR → MDR → CIR). Fastest correct order wins the round." },
   duel: { label: "Past-paper Duel", emoji: "📜", blurb: "1v1 on one chapter with exam-style questions. The winner gets double XP plus a bonus; the loser still earns XP for every correct answer." },
 } as const;
 export type Style = keyof typeof STYLES;

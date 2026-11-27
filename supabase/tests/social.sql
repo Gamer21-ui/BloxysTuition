@@ -453,3 +453,51 @@ do $$ begin
   perform set_duel_open((select id from chapters limit 1), true); raise exception 'student opened duels';
 exception when others then if sqlerrm not like '%tutors only%' then raise; end if; end $$;
 reset role;
+-- Order Race: order puzzles only, order checked on the server, normal answers rejected, chat card labelled
+reset role;
+delete from xp_events where reason = 'race';
+select id as race_ch from chapters where course_id = (select id from courses where slug = 'o-computer-science') and number = '3' \gset
+set role authenticated; select pg_temp.as_user(:'ava');
+select create_battle('1v1', null, 5, null, null, false, :'race_ch', 'race') as rcode \gset
+select post_chat('', :'rcode') > 0 as race_posted;
+select style, body, course_title from chat_messages where battle_code = :'rcode';
+select pg_temp.as_user(:'ben'); select join_battle(:'rcode') is not null as ben_joined_race;
+select pg_temp.as_user(:'ava'); select start_battle((select id from battles where code = :'rcode'));
+select (battle_question((select id from battles where code = :'rcode')) ->> 'order') is null as order_hidden_before_reveal;
+reset role;
+do $$ declare b uuid := (select id from battles where style = 'race' order by created_at desc limit 1); rnd int; key int[]; n int; o jsonb;
+begin
+  if exists (select 1 from battle_rounds r join questions q on q.id = r.question_id where r.battle_id = b and q.source <> 'order') then
+    raise exception 'race used non-order questions'; end if;
+  n := (select round_count from battles where id = b);
+  for rnd in 1..n loop
+    select qk.order_key into key from battle_rounds r join question_keys qk on qk.question_id = r.question_id where r.battle_id = b and r.round_no = rnd;
+    perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
+    if rnd = 1 then
+      begin perform answer_battle(b, -1); raise exception 'answer_battle accepted on a race';
+      exception when others then if sqlerrm not like '%send an order%' then raise; end if; end;
+      begin perform answer_race(b, key[1:1]); raise exception 'partial order accepted';
+      exception when others then if sqlerrm not like '%place every item%' then raise; end if; end;
+    end if;
+    perform answer_race(b, key);                                    -- Ava: always right
+    perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000003', true);
+    perform answer_race(b, key[2:] || key[1:1]);                    -- Ben: rotated, wrong
+    if rnd = 1 then
+      o := battle_question(b) -> 'order';
+      if o is null or jsonb_array_length(o) <> cardinality(key) then raise exception 'order not revealed'; end if;
+      if (select correct from battle_answers where battle_id = b and round_no = 1 and user_id = '00000000-0000-0000-0000-000000000003') then raise exception 'wrong order marked correct'; end if;
+    end if;
+    update battles set phase_started_at = now() - interval '6 seconds' where id = b;
+    if tick_battle(b) <> 'live' then raise exception 'race reveal should last 7s'; end if;
+    update battles set phase_started_at = now() - interval '8 seconds' where id = b;
+    perform tick_battle(b);
+  end loop;
+  if (select status from battles where id = b) <> 'finished' or (select winner_team from battles where id = b) <> 1 then raise exception 'race result wrong'; end if;
+  if (select count(*) from xp_events where reason = 'race') <> 2 then raise exception 'race rewards missing'; end if;
+  raise notice 'ok: order race % rounds, Ava won, rewards % / % XP', n,
+    (select reward_xp from battle_players where battle_id = b and team = 1), (select reward_xp from battle_players where battle_id = b and team = 2);
+end $$;
+-- the O Level CS exam never includes race puzzles
+do $$ begin
+  if exists (select 1 from questions where source = 'order' and battle_ok) then raise exception 'race puzzle leaks into battles'; end if;
+end $$;

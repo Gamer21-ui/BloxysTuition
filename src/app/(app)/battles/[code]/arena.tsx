@@ -22,11 +22,11 @@ type Floater = { key: number; uid: string; idx: number };
 type Battle = {
   status: "lobby" | "live" | "finished" | "cancelled"; phase: "question" | "reveal"; current_round: number; round_count: number;
   round_seconds: number; phase_started_at: string | null; winner_team: number | null; host_id: string;
-  style?: "classic" | "ranked" | "pressure" | "duel"; phase_ends_at?: string | null;
+  style?: "classic" | "ranked" | "pressure" | "duel" | "race"; phase_ends_at?: string | null;
 };
 type Player = { user_id: string; team: number; score: number; rating_delta?: number | null; reward_xp?: number | null };
-type Answer = { round_no: number; user_id: string; choice: number | null; correct: boolean | null; points: number };
-type Q = { round: number; id: string; prompt: string; options: string[]; correct: number | null; ref?: string | null; guide?: string | null; explanation?: string | null };
+type Answer = { round_no: number; user_id: string; choice: number | null; correct: boolean | null; points: number; order_given?: number[] | null };
+type Q = { round: number; id: string; prompt: string; options: string[]; correct: number | null; ref?: string | null; guide?: string | null; explanation?: string | null; order?: number[] | null };
 
 const LETTERS = ["A", "B", "C", "D", "E"];
 
@@ -38,6 +38,8 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   const [cards, setCards] = useState<Record<string, PCard>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [q, setQ] = useState<Q | null>(null);
+  const [picked, setPicked] = useState<number[]>([]);   // Order Race: the order tapped so far
+  useEffect(() => { setPicked([]); }, [q?.round, q?.id]);
   const [err, setErr] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
   const [copied, setCopied] = useState(false);
@@ -90,7 +92,8 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
       sb.from("battle_players").select("user_id, team, score, rating_delta, reward_xp").eq("battle_id", battleId).order("joined_at")
         .then(async (r) => (r.error ? await sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at") as unknown as typeof r : r))
         .then(async (r) => (r.error ? await sb.from("battle_players").select("user_id, team, score").eq("battle_id", battleId).order("joined_at") as unknown as typeof r : r)),
-      sb.from("battle_answers").select("round_no, user_id, choice, correct, points").eq("battle_id", battleId),
+      sb.from("battle_answers").select("round_no, user_id, choice, correct, points, order_given").eq("battle_id", battleId)
+        .then(async (r) => (r.error ? await sb.from("battle_answers").select("round_no, user_id, choice, correct, points").eq("battle_id", battleId) as unknown as typeof r : r)),
     ]);
     if (bb) {
       setB(bb as Battle);
@@ -245,7 +248,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
     const won = b.status === "finished" && b.winner_team === p.team;
     const hot = streak(p.user_id) >= 3;
     const status = b.status === "live" && !reveal && a ? { text: "locked in", cls: "bg-surface2 text-ink" }
-      : b.status === "live" && reveal ? { text: a?.correct ? `+${a.points}` : a ? "wrong" : "no answer", cls: a?.correct ? "bg-good text-white" : "bg-bad text-white" }
+      : b.status === "live" && reveal ? { text: a?.correct ? `+${a.points}` : a ? (b.style === "race" && q ? `${a.choice ?? 0}/${q.options.length} in place` : "wrong") : "no answer", cls: a?.correct ? "bg-good text-white" : "bg-bad text-white" }
       : null;
     const floats = floaters.filter((f) => f.uid === p.user_id);
     return (
@@ -330,7 +333,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
         <div className="min-w-0">
           <Link href="/battles" className="text-sm text-muted hover:underline">← Battles</Link>
           <h1 className="flex items-center gap-2 font-display text-xl leading-tight sm:text-3xl"><Swords className="shrink-0" size={22} /> <span className="min-w-0">{mode} · {courseTitle}</span></h1>
-          {style !== "classic" && <span className={cn("chip mt-1 text-xs font-bold", style === "ranked" ? "text-xp" : style === "duel" ? "text-accent" : "text-warn")}>{STYLES[style].emoji} {STYLES[style].label}</span>}
+          {style !== "classic" && <span className={cn("chip mt-1 text-xs font-bold", style === "ranked" ? "text-xp" : style === "duel" || style === "race" ? "text-accent" : "text-warn")}>{STYLES[style].emoji} {STYLES[style].label}</span>}
         </div>
         <div className="flex items-center gap-2">
           <button className="chip" aria-label={sound ? "Mute music and sounds" : "Turn on music and sounds"} onClick={() => { unlock(); setSoundOn(!sound); setSound(!sound); }}>
@@ -425,6 +428,62 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
               <motion.div key={q.round} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
                 {style === "duel" && q.ref && <div className="mb-1 text-xs font-bold uppercase tracking-wide text-accent">📜 Past-paper style · {q.ref}</div>}
                 <h2 className="mb-4 text-xl">{q.prompt}</h2>
+                {style === "race" ? (() => {
+                  const n = q.options.length;
+                  const myOrder = mine?.order_given || picked;
+                  if (reveal && q.order) {
+                    return (
+                      <ol className="space-y-1.5">
+                        {q.order.map((oi, pos) => {
+                          const ok = myOrder[pos] === oi;
+                          return (
+                            <motion.li key={pos} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: pos * 0.12 }}
+                              className={cn("flex items-center gap-3 rounded border-2 p-2.5 font-bold", ok ? "border-good bg-good/15" : "border-bad bg-bad/10")}>
+                              <span className="grid h-7 w-7 shrink-0 place-items-center rounded bg-surface2">{pos + 1}</span>
+                              <span className="flex-1">{q.options[oi]}</span>
+                              {ok ? <Check size={18} className="text-good" /> : <span className="text-xs font-normal text-muted">{myOrder[pos] !== undefined ? `you: ${q.options[myOrder[pos]]}` : "—"}</span>}
+                            </motion.li>
+                          );
+                        })}
+                      </ol>
+                    );
+                  }
+                  const locked = !!mine;
+                  return (
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wide text-muted">Your order</div>
+                      <ol className="mt-1 min-h-[3rem] space-y-1.5">
+                        {myOrder.map((oi, pos) => (
+                          <li key={oi}>
+                            <button disabled={locked} onClick={() => setPicked((p) => p.filter((x) => x !== oi))}
+                              className={cn("flex w-full items-center gap-3 rounded border-2 border-accent bg-accent/10 p-2.5 text-left font-bold", !locked && "hover:bg-accent/20")}>
+                              <span className="grid h-7 w-7 shrink-0 place-items-center rounded bg-accent font-display text-white">{pos + 1}</span>
+                              <span className="flex-1">{q.options[oi]}</span>
+                              {!locked && <X size={14} className="text-muted" aria-label="Remove" />}
+                            </button>
+                          </li>
+                        ))}
+                        {!locked && myOrder.length < n && <li className="rounded border-2 border-dashed border-surface2 p-2.5 text-center text-sm text-muted">Tap a step below to put it {myOrder.length === 0 ? "first" : `at #${myOrder.length + 1}`}</li>}
+                      </ol>
+                      {!locked && (
+                        <>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {q.options.map((o, i) => picked.includes(i) ? null : (
+                              <motion.button layout key={i} onClick={() => { unlock(); sfx("lock"); setPicked((p) => [...p, i]); }}
+                                className="btn btn-ghost h-auto py-2 normal-case">{o}</motion.button>
+                            ))}
+                          </div>
+                          <div className="mt-3 flex gap-2">
+                            <button className="btn btn-ghost" disabled={!picked.length} onClick={() => setPicked([])}>Reset</button>
+                            <button className="btn btn-primary flex-1" disabled={picked.length !== n} onClick={() => rpc("answer_race", { p_battle: battleId, p_order: picked })}>
+                              {picked.length === n ? "Lock in order" : `${n - picked.length} left to place`}
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })() : (
                 <div className="grid gap-2 sm:grid-cols-2">
                   {q.options.map((o, i) => {
                     const picked = mine?.choice === i;
@@ -444,8 +503,9 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
                     );
                   })}
                 </div>
+                )}
                 {!reveal && mine && <p className="mt-3 text-center text-sm text-muted">Locked in. Waiting for the others…</p>}
-                {reveal && style === "duel" && (q.guide || q.explanation) && (
+                {reveal && (style === "duel" || style === "race") && (q.guide || q.explanation) && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-4 rounded border-2 border-accent/40 bg-accent/10 p-3 text-left text-sm">
                     {q.explanation && <p><b>Why:</b> {q.explanation}</p>}
                     {q.guide && <p className="mt-2"><b>📝 How to score it in the exam:</b> {q.guide}</p>}
@@ -477,7 +537,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
             })()}
             {(() => { const rx = players.find((p) => p.user_id === meId)?.reward_xp; return typeof rx === "number" && rx > 0
               ? <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 font-display text-3xl text-xp">+{rx} XP</motion.div> : null; })()}
-            <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · {style === "duel"
+            <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · {style === "race" ? "Race XP: win 60, draw 35, lose 20 (5 rewarded races a day)" : style === "duel"
               ? "Duel XP: 15 per correct answer, winner doubled + 50 bonus (5 rewarded duels a day, 3 per opponent)"
               : "XP added to your profile (5 rewarded battles a day)"}</p>
             <div className="mt-4 flex justify-center gap-3">

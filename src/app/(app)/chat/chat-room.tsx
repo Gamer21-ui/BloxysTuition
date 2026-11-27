@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Filter, Send, Swords, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -8,7 +9,7 @@ import { NameTag } from "@/components/name-tag";
 import type { Card as PCard } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-type Msg = { id: number; user_id: string; body: string; kind: "text" | "battle"; battle_code: string | null; mode: string | null; tier: "O" | "AS" | "A" | null; course_title: string | null; deleted: boolean; created_at: string };
+type Msg = { id: number; user_id: string; body: string; kind: "text" | "battle"; style?: string | null; battle_code: string | null; mode: string | null; tier: "O" | "AS" | "A" | null; course_title: string | null; deleted: boolean; created_at: string };
 const LEVELS = [{ id: "O", label: "O Level" }, { id: "AS", label: "AS Level" }, { id: "A", label: "A Level" }] as const;
 const FILTER_KEY = "fb_chat_levels";
 
@@ -117,7 +118,7 @@ export function ChatRoom({ meId, isTutor, myTier }: { meId: string; isTutor: boo
                   <div className="mt-1 flex flex-wrap items-center gap-3 rounded-xl border-2 border-accent bg-accent/10 p-2.5">
                     <Swords className="text-accent" aria-hidden="true" />
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold">{m.mode} battle · {m.course_title?.startsWith("AS + A") ? m.course_title.replace(/^AS \+ A Level ?/, "AS + A Level · ") : <>{m.tier === "O" ? "O Level" : m.tier === "AS" ? "AS Level" : m.tier === "A" ? "A Level" : "any level"}{m.course_title ? ` · ${m.course_title.replace(/^(O|AS|A) Level /, "")}` : ""}</>}</div>
+                      <div className="font-bold">{m.style === "race" ? "🏁 Order Race" : m.style === "duel" ? "📜 Past-paper Duel" : `${m.mode} battle`} · {m.course_title?.startsWith("AS + A") ? m.course_title.replace(/^AS \+ A Level ?/, "AS + A Level · ") : <>{m.tier === "O" ? "O Level" : m.tier === "AS" ? "AS Level" : m.tier === "A" ? "A Level" : "any level"}{m.course_title ? ` · ${m.course_title.replace(/^(O|AS|A) Level /, "")}` : ""}</>}</div>
                       <div className="text-sm">{m.body} <span className="font-mono text-xs text-muted">{m.battle_code}</span></div>
                     </div>
                     {m.user_id !== meId && fresh(m) && <button className="btn btn-primary btn-sm" onClick={() => join(m.battle_code!)}>Join</button>}
@@ -138,6 +139,7 @@ export function ChatRoom({ meId, isTutor, myTier }: { meId: string; isTutor: boo
           <select className="input h-8 w-auto py-0 text-sm" value={tier} onChange={(e) => setTier(e.target.value as "O" | "AS" | "A")} aria-label="Level">
             {LEVELS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
           </select>
+          <Link href="/arcade/order-race" className="btn btn-ghost btn-sm">🏁 Order Race</Link>
           <button className="btn btn-accent btn-sm ml-auto" disabled={posting} onClick={postBattle}><Swords size={14} aria-hidden="true" /> Create &amp; post</button>
         </div>
       )}
