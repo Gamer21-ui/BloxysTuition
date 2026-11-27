@@ -33,6 +33,8 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [feedback, setFeedback] = useState<null | { good: boolean; text: string; pick: string }>(null);
   const [cleared, setCleared] = useState(false);
+  const [slips, setSlips] = useState(0);            // mistakes in the program being traced right now
+  const [clearedWith, setClearedWith] = useState<{ slips: number; asks: number } | null>(null);
   const [showVb, setShowVb] = useState(false);
   const prog = run[pi];
   const step = prog?.steps[si];
@@ -40,22 +42,23 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
   const begin = () => {
     unlock(); sfx("round");
     setRun(shuffle(set.programs).slice(0, PER_RUN)); setPi(0); setSi(0); setLives(LIVES); setScore(0); setStreak(0);
-    setRight(0); setAsked(0); setLessons([]); setFeedback(null); setCleared(false); setShowVb(false); setSeed(Math.floor(Math.random() * 1000) + 1); setPhase("play");
+    setRight(0); setAsked(0); setLessons([]); setFeedback(null); setCleared(false); setSlips(0); setShowVb(false); setSeed(Math.floor(Math.random() * 1000) + 1); setPhase("play");
   };
 
   // auto-fill steps the player isn't asked about; detect end of each program
   useEffect(() => {
     if (phase !== "play" || !prog || feedback || cleared) return;
     if (si >= prog.steps.length) {
-      setCleared(true); sfx("final");
+      setCleared(true); setClearedWith({ slips, asks: prog.steps.filter((x) => x.ask).length });
+      sfx(slips === 0 ? "final" : "tick");
       const t = setTimeout(() => {
-        setCleared(false); setShowVb(false);
+        setCleared(false); setShowVb(false); setSlips(0);
         if (pi + 1 >= run.length) setPhase("done"); else { setPi(pi + 1); setSi(0); sfx("round"); }
-      }, 1500);
+      }, slips === 0 ? 1500 : 2600);
       return () => clearTimeout(t);
     }
     if (!step.ask) { const t = setTimeout(() => { setSi((n) => n + 1); sfx("tick"); }, 420); return () => clearTimeout(t); }
-  }, [phase, prog, step, si, pi, run.length, feedback, cleared]);
+  }, [phase, prog, step, si, pi, run.length, feedback, cleared, slips]);
 
   const options = useMemo(() => (prog && step?.ask ? optionsFor(prog.steps, si, seed + pi * 31) : []), [prog, step, si, seed, pi]);
 
@@ -71,7 +74,7 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
       setTimeout(() => { setFeedback(null); setSi((n) => n + 1); }, step.note ? 1300 : 750);
     } else {
       const nl = lives - 1;
-      setLives(nl); setStreak(0); sfx("wrong");
+      setLives(nl); setStreak(0); setSlips((n) => n + 1); sfx("wrong");
       setFeedback({ good: false, text: `❌ ${where} is ${step.value}, not ${v}.${step.note ? ` ${step.note}.` : ""}`, pick: v });
       setLessons((l) => [...l, { wrong: `${prog.title}, line ${step.line}`, why: `${where} = ${step.value}${step.note ? ` (${step.note})` : ""}` }]);
       if (nl <= 0) setTimeout(() => setPhase("done"), 1600);
@@ -117,7 +120,8 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
     return (
       <ResultScreen game={set.game} success={success} score={score} onAgain={() => setPhase("start")} lessons={lessons}
         stats={[{ label: "Level", value: set.label }, { label: "Correct", value: `${right}/${asked}` }, { label: "Score", value: String(score) }, { label: "Lives", value: "❤️".repeat(Math.max(0, lives)) || "0" }]}
-        winText="You ran the code in your head like a real CPU. That's exactly the skill Paper 2 tests."
+        winText={asked - right === 0 ? "Perfect: you ran the code in your head like a real CPU. That's exactly the skill Paper 2 tests."
+          : `Finished, but with ${asked - right} mistake${asked - right === 1 ? "" : "s"} (${Math.round((right / Math.max(1, asked)) * 100)}% right first time). Go through the lessons below, then try for a perfect trace.`}
         loseText="Out of lives! Read the lessons below, then trace again. Every attempt makes you faster." />
     );
   }
@@ -155,10 +159,10 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
           {lines.map((l, k) => {
             const hot = !showVb && k + 1 === hiLine;
             return (
-              <div key={k} className={cn("flex whitespace-pre px-2", hot && "bg-amber-400/25", l.trim().startsWith("//") || l.trim().startsWith("'") ? "text-slate-400" : "")}>
+              <div key={k} className={cn("flex px-2", hot && "bg-amber-400/25", l.trim().startsWith("//") || l.trim().startsWith("'") ? "text-slate-400" : "")}>
                 <span className={cn("mr-3 inline-block w-5 shrink-0 select-none text-right", hot ? "font-bold text-amber-300" : "text-slate-500")}>{k + 1}</span>
-                <span>{l || " "}</span>
-                {hot && <span className="ml-2 text-amber-300">◀</span>}
+                {/* wrapped lines keep their indent; long lines no longer run off the screen */}
+                <span className="min-w-0 flex-1 whitespace-pre-wrap break-words" style={{ paddingLeft: `${(l.match(/^ */)?.[0].length || 0) * 0.55}em`, textIndent: 0 }}>{l.trimStart() || " "}{hot && <span className="ml-2 text-amber-300">◀</span>}</span>
               </div>
             );
           })}
@@ -183,12 +187,23 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
 
       <AnimatePresence mode="wait">
         {cleared ? (
-          <motion.div key="clear" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
-            className="rounded-xl border-2 border-good bg-good/15 p-4 text-center font-display text-2xl">🎉 PROGRAM CLEARED!</motion.div>
+          (() => {
+            const m = clearedWith?.slips ?? 0, n = clearedWith?.asks ?? 0;
+            const grade = m === 0 ? { t: "[OK] PERFECT TRACE", sub: `${n}/${n} right first time`, cls: "border-good bg-good/15" }
+              : m <= 2 ? { t: `[~] CLEARED · ${m} MISTAKE${m === 1 ? "" : "S"}`, sub: `${n - m}/${n} right first time. Check the lessons at the end.`, cls: "border-warn bg-warn/15" }
+              : { t: `[!] SCRAPED THROUGH · ${m} MISTAKES`, sub: `Only ${Math.max(0, n - m)}/${n} right first time. Trace this one again on paper.`, cls: "border-bad bg-bad/10" };
+            return (
+              <motion.div key="clear" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
+                className={cn("rounded-xl border-2 p-3 text-center", grade.cls)}>
+                <div className="font-mono text-lg font-bold tracking-wider sm:text-xl">{grade.t}</div>
+                <div className="text-sm text-muted">{grade.sub}</div>
+              </motion.div>
+            );
+          })()
         ) : step?.ask ? (
           <motion.div key={`${pi}-${si}`} initial={{ y: 8, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-2">
             <div className="text-center font-bold">
-              Line {step.line} runs. {step.name === "OUTPUT" ? "What is OUTPUT?" : <>What is <code className="rounded bg-surface2 px-1">{step.name}</code> now?</>}
+              {step.q ? step.q : <>Line {step.line} runs. {step.name === "OUTPUT" ? "What is OUTPUT?" : <>What is <code className="rounded bg-surface2 px-1">{step.name}</code> now?</>}</>}
             </div>
             <div className="grid grid-cols-2 gap-2">
               {options.map((o) => (

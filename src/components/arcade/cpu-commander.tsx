@@ -36,7 +36,7 @@ export function CpuCommander() {
   const [pc, setPc] = useState(0);
   const [cur, setCur] = useState(-1); // RAM address being worked on
   const [stage, setStage] = useState<Stage>(null);
-  const [acc, setAcc] = useState(0);
+  const [acc, setAcc] = useState<number | null>(null);   // empty until something is LOADed
   const [cir, setCir] = useState("");
   const [out, setOut] = useState<number[]>([]);
   const [msg, setMsg] = useState<{ t: string; good?: boolean; boom?: boolean } | null>(null);
@@ -46,14 +46,14 @@ export function CpuCommander() {
   const [hint, setHint] = useState(0); // how many steps of the solution are revealed
   const L = LEVELS[lv];
 
-  const reset = () => { setPc(0); setCur(-1); setStage(null); setAcc(0); setCir(""); setOut([]); setMsg(null); };
+  const reset = () => { setPc(0); setCur(-1); setStage(null); setAcc(null); setCir(""); setOut([]); setMsg(null); };
   const begin = () => { unlock(); setLv(0); setProg([]); setHint(0); reset(); setLessons([]); setRuns(0); setPhase("play"); sfx("round"); };
   const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
   async function run() {
     if (!prog.length || running) return;
     setRunning(true); reset(); setRuns((n) => n + 1);
-    let a = 0; const outs: number[] = [];
+    let a: number | null = null; const outs: number[] = [];
     for (let i = 0; i < prog.length; i++) {
       const k = prog[i];
       setPc(i); setCur(i); setStage("FETCH"); setCir(""); sfx("tick"); await wait(300);
@@ -65,8 +65,16 @@ export function CpuCommander() {
         setLessons((l) => [...l, { wrong: "MUL 4", why: "not in the instruction set: a CPU can only run commands from its own instruction set (4 × 4 = LOAD 4 + ADD 4 + ADD 4 + ADD 4)" }]);
         setRunning(false); return;
       }
+      if (k.op !== "LOAD" && a === null) {
+        // nothing was ever LOADed, so there's no value in the ACC to add to, subtract from or output
+        setStage(null); sfx("wrong");
+        const why = `${label(k)} ran but the ACC was empty: nothing had been LOADed yet. A program has to LOAD a starting value first.`;
+        setMsg({ t: `❌ ${why}`, boom: true });
+        setLessons((l) => [...l, { wrong: prog.map(label).join(" → "), why }]);
+        setRunning(false); return;
+      }
       setStage("EXECUTE");
-      if (k.op === "LOAD") a = k.n!; else if (k.op === "ADD") a += k.n!; else if (k.op === "SUB") a -= k.n!; else { outs.push(a); setOut([...outs]); sfx("lock"); }
+      if (k.op === "LOAD") a = k.n!; else if (k.op === "ADD") a = a! + k.n!; else if (k.op === "SUB") a = a! - k.n!; else { outs.push(a!); setOut([...outs]); sfx("lock"); }
       setAcc(a); await wait(480);
     }
     setStage(null); setCur(-1);
@@ -181,7 +189,7 @@ export function CpuCommander() {
             ))}
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
-            {[{ k: "PC", v: String(pc), hint: "address of NEXT instruction" }, { k: "CIR", v: cir || "—", hint: "current instruction" }, { k: "ACC", v: String(acc), hint: "result" }].map((r) => (
+            {[{ k: "PC", v: String(pc), hint: "address of NEXT instruction" }, { k: "CIR", v: cir || "—", hint: "current instruction" }, { k: "ACC", v: acc === null ? "—" : String(acc), hint: "result" }].map((r) => (
               <div key={r.k} className="rounded-lg border-2 border-line bg-surface2 p-2">
                 <div className="text-xs font-bold text-muted">{r.k}</div>
                 <motion.div key={r.v} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-mono text-lg font-bold">{r.v}</motion.div>

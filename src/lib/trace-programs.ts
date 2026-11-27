@@ -296,7 +296,7 @@ OUTPUT Count`,
 const A = [
   program({
     id: "a-fact", title: "Recursive factorial", topic: "Recursion · base case · unwinding",
-    vars: ["N", "Returns"],
+    vars: ["Call", "N", "Returns"],
     code: `
 FUNCTION Fact(N : INTEGER) RETURNS INTEGER
     IF N = 1 THEN
@@ -308,10 +308,21 @@ ENDFUNCTION
 
 OUTPUT Fact(4)`,
     run: (t) => {
-      for (let n = 4; n >= 1; n--) t.set("N", n, "FUNCTION Fact", n < 4, n === 1 ? "N = 1 is the BASE CASE: no more calls" : "each call passes N - 1");
+      // Call = which copy of Fact is running. Calls go down (N = 4, 3, 2, 1), RETURNs come back up.
+      for (let n = 4; n >= 1; n--) {
+        const call = 5 - n;
+        t.set("Call", call, n === 4 ? "FUNCTION Fact" : "RETURN N * Fact", false);
+        if (n === 4) t.set("N", n, "FUNCTION Fact", false);
+        else t.ask("N", n, "FUNCTION Fact", `Call ${call - 1} has N = ${n + 1}, which isn't 1, so it calls Fact(N - 1). What is N in call ${call}?`,
+          n === 1 ? "N = 1 is the BASE CASE: no more calls" : "each call passes N - 1");
+      }
       let r = 1;
-      t.set("Returns", 1, "RETURN 1", true, "the base case returns 1");
-      for (let n = 2; n <= 4; n++) { r = t.set("Returns", n * r, "RETURN N * Fact", true, `unwinding: ${n} × ${r}`) as number; }
+      t.ask("Returns", 1, "RETURN 1", "Call 4: N = 1, so the IF is TRUE (the base case). What does call 4 return?", "the base case returns 1");
+      for (let n = 2; n <= 4; n++) {
+        const call = 5 - n;
+        t.set("Call", call, "RETURN N * Fact", false);
+        r = t.ask("Returns", n * r, "RETURN N * Fact", `Back in call ${call} (N = ${n}): it gets ${r} from call ${call + 1}, then works out N * that. What does call ${call} return?`, `unwinding: ${n} × ${r}`) as number;
+      }
       t.out(r, "OUTPUT Fact(4)");
     },
   }),

@@ -4,7 +4,7 @@
  * JS `run` that records every assignment/output. The trace is therefore computed, never hand-typed,
  * so the "correct" answers can't drift from the code.
  */
-export type TraceStep = { line: number; name: string; value: string; ask: boolean; note?: string; wrong?: string[] };
+export type TraceStep = { line: number; name: string; value: string; ask: boolean; note?: string; wrong?: string[]; q?: string };
 export type TraceProgram = { id: string; title: string; topic: string; code: string[]; vars: string[]; steps: TraceStep[]; vb?: string[] };
 export type TraceSet = { key: "o" | "as" | "a" | "pro"; game: string; label: string; blurb: string; programs: TraceProgram[] };
 
@@ -26,6 +26,12 @@ export class Tracer {
     return v;
   }
   out(v: Val, marker: string, ask = true) { return this.set("OUTPUT", v, marker, ask); }
+  /** like set(), always asked, with a custom question (used where "Line n runs" would confuse, e.g. recursion) */
+  ask(name: string, v: Val, marker: string, q: string, note?: string, wrong?: Val[]) {
+    this.set(name, v, marker, true, note, wrong);
+    this.steps[this.steps.length - 1].q = q;
+    return v;
+  }
 }
 
 export function program(def: { id: string; title: string; topic: string; code: string; vars: string[]; vb?: string; run: (t: Tracer) => void }): TraceProgram {

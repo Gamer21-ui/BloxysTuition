@@ -125,7 +125,7 @@ Next`,
   }),
   program({
     id: "pro-mystery", title: "Mystery recursive function", topic: "Paper 4 style · recursion with strings",
-    vars: ["S", "Returns"],
+    vars: ["Call", "S", "Returns"],
     code: `
 FUNCTION Mystery(S : STRING) RETURNS STRING
     IF LENGTH(S) <= 1 THEN
@@ -148,12 +148,18 @@ End Function
 
 Console.WriteLine(Mystery("ABC"))`,
     run: (t) => {
+      // Call = which copy of Mystery is running (1 = the first call). Calls go down, RETURNs come back up.
+      t.set("Call", 1, "FUNCTION Mystery", false);
       t.set("S", "ABC", "FUNCTION Mystery", false);
-      t.set("S", "BC", "FUNCTION Mystery", true, 'RIGHT("ABC", 2) = "BC"', ["AB"]);
-      t.set("S", "C", "FUNCTION Mystery", true, 'RIGHT("BC", 1) = "C"', ["B"]);
-      t.set("Returns", "C", "RETURN S", true, "base case: length 1, return it unchanged");
-      t.set("Returns", "CB", "RETURN Mystery(RIGHT", true, '"C" & LEFT("BC", 1)', ["BC"]);
-      t.set("Returns", "CBA", "RETURN Mystery(RIGHT", true, '"CB" & LEFT("ABC", 1)', ["ABC", "CAB"]);
+      t.set("Call", 2, "RETURN Mystery(RIGHT", false);
+      t.ask("S", "BC", "FUNCTION Mystery", 'Call 1 has S = "ABC", which is longer than 1, so it calls Mystery(RIGHT("ABC", 2)). What is S in call 2?', 'RIGHT("ABC", 2) = "BC"', ["AB"]);
+      t.set("Call", 3, "RETURN Mystery(RIGHT", false);
+      t.ask("S", "C", "FUNCTION Mystery", 'Call 2 has S = "BC", still longer than 1, so it calls Mystery(RIGHT("BC", 1)). What is S in call 3?', 'RIGHT("BC", 1) = "C"', ["B"]);
+      t.ask("Returns", "C", "RETURN S", 'Call 3: LENGTH("C") is 1, so the IF is TRUE (the base case). What does call 3 return?', "base case: length 1, return it unchanged");
+      t.set("Call", 2, "RETURN Mystery(RIGHT", false);
+      t.ask("Returns", "CB", "RETURN Mystery(RIGHT", 'Back in call 2 (S = "BC"): it gets "C" from call 3, then adds LEFT(S, 1). What does call 2 return?', '"C" & LEFT("BC", 1) = "C" & "B"', ["BC"]);
+      t.set("Call", 1, "RETURN Mystery(RIGHT", false);
+      t.ask("Returns", "CBA", "RETURN Mystery(RIGHT", 'Back in call 1 (S = "ABC"): it gets "CB" from call 2, then adds LEFT(S, 1). What does call 1 return?', '"CB" & LEFT("ABC", 1) = "CB" & "A". Mystery reverses the string', ["ABC", "CAB"]);
       t.out("CBA", 'OUTPUT Mystery("ABC")', false);
     },
   }),
