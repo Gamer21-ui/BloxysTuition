@@ -14,6 +14,7 @@ import { announceBattle } from "../actions";
 import { playMusic, sfx, setSoundOn, soundOn, stopMusic, unlock } from "@/lib/battle-audio";
 import { rankOf, STYLES } from "@/lib/ranks";
 import { PrestigeBadge } from "@/components/prestige-badge";
+import { bountyOf, WANTED_AT } from "@/lib/bounty";
 
 // Emotes are sent as an index into this list, so nobody can broadcast their own text.
 const EMOTES = ["👍", "😂", "😭", "🔥", "💀", "😎", "🤯", "👑", "GG", "Nice one!", "So close!", "Let's go!", "Good luck!", "Wow!"];
@@ -38,6 +39,8 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
   const [cards, setCards] = useState<Record<string, PCard>>({});
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [q, setQ] = useState<Q | null>(null);
+  const [streaks, setStreaks] = useState<Record<string, number>>({});   // 🎯 win streaks (bounties)
+  const [bounty, setBounty] = useState<{ user_id: string; kind: string; streak: number; xp: number; coins: number; other_id: string | null }[]>([]);
   const [picked, setPicked] = useState<number[]>([]);   // Order Race: the order tapped so far
   useEffect(() => { setPicked([]); }, [q?.round, q?.id]);
   const [err, setErr] = useState<string | null>(null);
@@ -109,6 +112,15 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
     if (aa) setAnswers(aa as Answer[]);
   }, [sb, battleId]);
 
+  // win streaks for wanted badges (silently skipped before the bounty update)
+  const playerKey = players.map((p) => p.user_id).join(",");
+  useEffect(() => {
+    if (!playerKey) return;
+    sb.rpc("battle_streaks", { p_battle: battleId }).then(({ data }) => {
+      if (data) setStreaks(Object.fromEntries((data as { user_id: string; win_streak: number }[]).map((x) => [x.user_id, x.win_streak])));
+    });
+  }, [playerKey, sb, battleId]);
+
   // profile cards for everyone in the battle
   useEffect(() => {
     const missing = players.map((p) => p.user_id).filter((id) => !cards[id]);
@@ -148,6 +160,14 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
       router.refresh();
     }
   }, [b?.status, amPlayer, battleId, router]);
+  // bounty results arrive with the finish (the reward runs on the server first)
+  useEffect(() => {
+    if (b?.status !== "finished") return;
+    const load = () => sb.from("bounty_events").select("user_id, kind, streak, xp, coins, other_id").eq("battle_id", battleId)
+      .then(({ data, error }) => { if (!error && data) setBounty(data); });
+    load(); const t = setTimeout(load, 1500);
+    return () => clearTimeout(t);
+  }, [b?.status, sb, battleId]);
 
   // ---------------------------------------------------------------- music + effects
   useEffect(() => { setSound(soundOn()); return () => stopMusic(); }, []);
@@ -271,7 +291,12 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
                 {style === "ranked" && c?.rating !== undefined ? <span className="font-bold" style={{ color: rankOf(c.rating).color }}>{rankOf(c.rating).emoji} {c.rating}</span> : <><PrestigeBadge n={c?.prestige} /> Lv {c?.level ?? "?"}</>}
                 {p.user_id === b.host_id && " · host"}{mvp === p.user_id && " · ⭐ MVP"}
               </div>
-              {b.status === "finished" && typeof p.rating_delta === "number" && (
+              {(streaks[p.user_id] ?? 0) >= WANTED_AT && b.status !== "finished" && (
+                <span className="mt-0.5 inline-block rounded bg-warn px-1.5 py-0.5 text-[10px] font-bold leading-none text-white" title={`Beat them for +${bountyOf(streaks[p.user_id]).pct}% XP${bountyOf(streaks[p.user_id]).coins ? ` and ${bountyOf(streaks[p.user_id]).coins} coins` : ""}`}>
+                  🎯 WANTED · {streaks[p.user_id]}🔥
+                </span>
+              )}
+                            {b.status === "finished" && typeof p.rating_delta === "number" && (
                 <span className={cn("text-xs font-bold", p.rating_delta > 0 ? "text-good" : p.rating_delta < 0 ? "text-bad" : "text-muted")}>{p.rating_delta > 0 ? "+" : ""}{p.rating_delta} RR</span>
               )}
               <AnimatePresence mode="wait">
@@ -400,6 +425,14 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
       <div className="mt-4">
         {b.status === "lobby" && (
           <div className="card text-center">
+            {players.filter((p) => (streaks[p.user_id] ?? 0) >= WANTED_AT).map((p) => {
+              const bo = bountyOf(streaks[p.user_id]);
+              return (
+                <motion.div key={p.user_id} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mb-3 rounded border-2 border-dashed border-warn bg-warn/10 p-2 text-sm">
+                  🎯 <b>{name(p.user_id)}</b> is on a <b>{streaks[p.user_id]}-win streak</b>. {p.user_id === meId ? "Everyone wants your bounty. Defend it!" : <>Beat them for <b className="text-xp">+{bo.pct}% XP</b>{bo.coins > 0 && <> and <b className="text-warn">{bo.coins} coins</b></>}!</>}
+                </motion.div>
+              );
+            })}
             <p className="text-muted">Share the code <b className="text-ink">{code}</b> in Discord. {mode === "2v2" ? "Up to 2 per team." : "One each."} The host starts when both sides have someone.</p>
             <div className="mt-4 flex justify-center gap-3">
               {b.host_id === meId && <button className="btn btn-primary" disabled={team(1).length === 0 || team(2).length === 0} onClick={() => rpc("start_battle", { p_battle: battleId })}>Start battle</button>}
@@ -535,6 +568,14 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
                 </motion.div>
               );
             })()}
+            {bounty.filter((e) => e.user_id === meId && e.kind !== "streak").map((e) => (
+              <motion.div key={e.kind} initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.8 }}
+                className={cn("mx-auto mt-2 max-w-md rounded border-2 p-2 text-sm font-bold", e.kind === "claim" ? "border-warn bg-warn/15" : e.kind === "hot" ? "border-xp bg-xp/10" : "border-bad bg-bad/10")}>
+                {e.kind === "claim" && <>🎯 BOUNTY CLAIMED! You ended {name(e.other_id || "")}&apos;s {e.streak}-win streak: +{e.xp} XP{e.coins > 0 && ` and +${e.coins} coins`}</>}
+                {e.kind === "hot" && <>🔥 {e.streak}-win streak! +{e.xp} bonus XP. There&apos;s a bounty on you now.</>}
+                {e.kind === "ended" && <>💔 Your {e.streak}-win streak is over. {name(e.other_id || "")} took the bounty.</>}
+              </motion.div>
+            ))}
             {(() => { const rx = players.find((p) => p.user_id === meId)?.reward_xp; return typeof rx === "number" && rx > 0
               ? <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 font-display text-3xl text-xp">+{rx} XP</motion.div> : null; })()}
             <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · {style === "race" ? "Race XP: win 60, draw 35, lose 20 (5 rewarded races a day)" : style === "duel"

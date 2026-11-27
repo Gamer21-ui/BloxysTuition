@@ -9,6 +9,7 @@ import { MessagesSquare, Users } from "lucide-react";
 import { LEVELS, pickLevel, inLevel } from "@/lib/levels";
 import { battleLabel, chapterSuffix } from "@/lib/subjects";
 import { nextRank, rankOf, STYLES, type Style } from "@/lib/ranks";
+import { MostWanted, type WantedRow } from "@/components/most-wanted";
 
 export const metadata: Metadata = { title: "Battles" };
 export const dynamic = "force-dynamic";
@@ -28,6 +29,10 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
     sb.from("battle_players").select("score, team, battle:battles!inner(code, mode, status, winner_team, created_at, course:courses(title))")
       .eq("user_id", me.id).eq("battle.status", "finished").order("joined_at", { ascending: false }).limit(10),
   ]);
+
+  // 🎯 bounties (empty until the bounty database update has been run)
+  const { data: wanted, error: wantedErr } = await sb.rpc("most_wanted", { p_limit: 6 });
+  const myStreak = (me as { win_streak?: number }).win_streak ?? 0;
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -55,6 +60,7 @@ export default async function Battles({ searchParams }: { searchParams: Promise<
           </Card>
         );
       })()}
+      {!wantedErr && <MostWanted rows={(wanted as WantedRow[]) || []} meId={me.id} myStreak={myStreak} />}
       <BattleLobbyForms courses={courses || []} myTier={me.tier} />
 
       <SectionTitle action={

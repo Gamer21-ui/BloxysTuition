@@ -501,3 +501,42 @@ end $$;
 do $$ begin
   if exists (select 1 from questions where source = 'order' and battle_ok) then raise exception 'race puzzle leaks into battles'; end if;
 end $$;
+-- Bounty: streak grows once per opponent per day, claiming pays % XP + 250 coins per 5, losers reset, draws ignored
+reset role;
+do $$
+declare ava uuid := '00000000-0000-0000-0000-000000000002'; ben uuid := '00000000-0000-0000-0000-000000000003';
+        b uuid; coins0 int; cl record; s int;
+begin
+  delete from xp_events where reason = 'battle' and created_at::date = current_date;
+  delete from bounty_events;  -- earlier tests already had Ava beat Ben today
+  update profiles set win_streak = 0 where id = ava;
+  update profiles set win_streak = 5, best_win_streak = 5 where id = ben;
+  select coins into coins0 from profiles where id = ava;
+  -- Ava beats Ben (on a 5 streak)
+  insert into battles(code, mode, host_id, status, style, course_id) values ('BNTY1', '1v1', ava, 'live', 'classic', (select id from courses where slug = 'o-computer-science')) returning id into b;
+  insert into battle_players(battle_id, user_id, team, score) values (b, ava, 1, 500), (b, ben, 2, 100);
+  perform battle_finish(b);
+  select * into cl from bounty_events where battle_id = b and kind = 'claim';
+  if cl is null or cl.user_id <> ava or cl.streak <> 5 or cl.coins <> 250 or cl.xp <= 0 then raise exception 'bounty claim wrong: %', cl; end if;
+  if (select win_streak from profiles where id = ben) <> 0 then raise exception 'loser streak not reset'; end if;
+  if (select win_streak from profiles where id = ava) <> 1 then raise exception 'winner streak not 1'; end if;
+  if not exists (select 1 from bounty_events where battle_id = b and kind = 'ended' and user_id = ben) then raise exception 'ended event missing'; end if;
+  -- calling finish again pays nothing more
+  perform battle_finish(b);
+  if (select count(*) from bounty_events where battle_id = b and kind = 'claim') <> 1 then raise exception 'bounty paid twice'; end if;
+  -- Ava beats Ben again the same day: streak must NOT grow (once per opponent per day)
+  insert into battles(code, mode, host_id, status, style) values ('BNTY2', '1v1', ava, 'live', 'classic') returning id into b;
+  insert into battle_players(battle_id, user_id, team, score) values (b, ava, 1, 500), (b, ben, 2, 100);
+  perform battle_finish(b);
+  if (select win_streak from profiles where id = ava) <> 1 then raise exception 'streak farmed on same opponent'; end if;
+  -- a draw changes nothing
+  update profiles set win_streak = 4 where id = ben;
+  insert into battles(code, mode, host_id, status, style) values ('BNTY3', '1v1', ava, 'live', 'classic') returning id into b;
+  insert into battle_players(battle_id, user_id, team, score) values (b, ava, 1, 200), (b, ben, 2, 200);
+  perform battle_finish(b);
+  if (select win_streak from profiles where id = ben) <> 4 then raise exception 'draw changed a streak'; end if;
+  raise notice 'ok: bounty claimed (+% XP, +% coins), streak once per opponent per day, draws ignored', cl.xp, cl.coins;
+end $$;
+set role authenticated; select pg_temp.as_user(:'ava');
+select display_name, win_streak from most_wanted();
+reset role;
