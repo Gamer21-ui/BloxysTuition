@@ -18,6 +18,8 @@ import { LivePoll } from "@/components/live-poll";
 import { PrestigeBadge } from "@/components/prestige-badge";
 import { emblem } from "@/lib/prestige";
 import { Heartbeat } from "@/components/heartbeat";
+import { LiveBanner } from "@/components/live-banner";
+import type { NavStyle } from "@/components/nav";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
 
@@ -40,6 +42,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     sb.from("friendships").select("requester", { count: "exact", head: true }).eq("addressee", me.id).eq("status", "pending"),
     sb.from("party_invites").select("party_id", { count: "exact", head: true }).eq("to_id", me.id),
   ]);
+  // menu style (new hubs by default; the tutor can switch everyone back to the classic menu)
+  const { data: nav } = await sb.from("site_settings").select("nav_style").maybeSingle();
+  const style: NavStyle = nav?.nav_style === "classic" ? "classic" : "new";
   // skipped homework (black market) doesn't count as to-do; table may not exist before the update
   const { data: skipped } = await sb.from("assignment_overrides").select("assignment_id").eq("user_id", me.id).eq("exempt", true);
   const skippedIds = new Set((skipped || []).map((x) => x.assignment_id));
@@ -58,12 +63,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex min-h-dvh">
-      <Sidebar isTutor={tutor} badges={badges} special={tutor || !!me.special} />
+      <Sidebar isTutor={tutor} badges={badges} special={tutor || !!me.special} style={style} />
       <div className="min-w-0 flex-1 pb-24 lg:pb-8">
         <header className="sticky top-0 z-30 border-b-2 border-line bg-surface/90 pt-[env(safe-area-inset-top)] backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
             <MobileMenu
-              isTutor={tutor} special={tutor || !!me.special} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
+              isTutor={tutor} special={tutor || !!me.special} style={style} badges={badges} avatar={avatar(60)} name={<NameTag name={me.display_name} style={me.name_style} />}
               handle={me.discord_username} level={lp.level} rank={(me.prestige ? `${emblem(me.prestige).label} · ` : "") + rankName(lp.level)} xpInto={lp.into} xpNeeded={lp.needed} xpPct={lp.pct}
               coins={me.coins} streak={me.streak} freezes={me.streak_freezes ?? 0}
             />
@@ -87,7 +92,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </header>
         <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
       </div>
-      <MobileNav isTutor={tutor} me={avatar(28)} />
+      <MobileNav isTutor={tutor} me={avatar(28)} style={style} />
+      <LiveBanner me={{ role: me.role, tier: me.tier, subjects: me.subjects }} />
       <PartyBanner meId={me.id} />
       <Heartbeat />
       {!tutor && <LivePoll meId={me.id} />}

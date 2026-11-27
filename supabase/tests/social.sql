@@ -297,3 +297,51 @@ do $$ begin
   if (select count(*) from arcade_plays where game in ('trace-as', 'trace-pro') and xp = 40) <> 2 then raise exception 'trace rewards wrong'; end if;
   raise notice 'ok: trace-as pays everyone, trace-pro only after the tutor marks the student special';
 end $$;
+-- Live lessons: only the tutor drives; answers checked server-side; one try; capped rewards
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform live_start('cpu-fde'); raise exception 'student started a lesson';
+exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
+do $$ begin perform 1 from live_keys; if found then raise exception 'student can read keys'; end if; end $$;
+reset role;
+set role authenticated; select pg_temp.as_user(:'tutor_id');
+select live_start('cpu-fde') as sid \gset
+select live_goto(:'sid', 1);
+reset role;
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform live_goto((select id from live_sessions where status = 'live'), 5); raise exception 'student moved the lesson';
+exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
+select live_answer(:'sid', 1, '1'::jsonb) ->> 'xp' as right_xp;                     -- correct: +10
+select live_answer(:'sid', 1, '1'::jsonb) ->> 'already' as second_try;              -- one try only
+do $$ begin perform live_answer((select id from live_sessions where status = 'live'), 2, '"PC"'::jsonb); raise exception 'answered a future step';
+exception when others then if sqlerrm not like '%moved on%' then raise; end if; end $$;
+reset role;
+set role authenticated; select pg_temp.as_user(:'tutor_id'); select live_goto(:'sid', 2); reset role;
+set role authenticated; select pg_temp.as_user(:'ben');
+select live_answer(:'sid', 2, '"MAR"'::jsonb) ->> 'correct' as wrong_tap;            -- wrong: no reward
+reset role;
+set role authenticated; select pg_temp.as_user(:'tutor_id'); select live_reveal(:'sid', true); reset role;
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform live_answer((select id from live_sessions where status = 'live'), 2, '"PC"'::jsonb); raise exception 'answered after reveal';
+exception when others then if sqlerrm not like '%closed%' then raise; end if; end $$;
+reset role;
+do $$ begin
+  if (select count(*) from live_answers) <> 2 then raise exception 'expected 2 answers, got %', (select count(*) from live_answers); end if;
+  if (select sum(xp) from live_answers) <> 10 then raise exception 'live xp wrong: %', (select sum(xp) from live_answers); end if;
+  raise notice 'ok: live lesson tutor-only controls, server-checked answers, one try, reveal closes answers';
+end $$;
+-- daily cap: 100 XP of live rewards
+do $$ declare b uuid := '00000000-0000-0000-0000-000000000003'; s uuid; i int; begin
+  for i in 1..12 loop
+    insert into live_sessions(viz, step) values ('cpu-fde', 1) returning id into s;
+    perform set_config('request.jwt.claim.sub', b::text, false);
+    perform live_answer(s, 1, '1'::jsonb);
+    update live_sessions set status = 'ended' where id = s;
+  end loop;
+  if (select sum(xp) from live_answers where user_id = b) > 100 then raise exception 'cap broken: %', (select sum(xp) from live_answers where user_id = b); end if;
+  raise notice 'ok: live rewards capped at % XP/day', (select sum(xp) from live_answers where user_id = b);
+end $$;
+-- menu style switch is tutor-only
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform tutor_set_nav_style('classic'); raise exception 'student changed menu';
+exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
+reset role;

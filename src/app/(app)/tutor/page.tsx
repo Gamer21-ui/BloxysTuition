@@ -7,6 +7,7 @@ import { XpLine, ScoreBars } from "./charts";
 import { LEVELS } from "@/lib/levels";
 import { TutorialControl } from "./tutorial-control";
 import { SeasonControl } from "./season-control";
+import { NavControl } from "./nav-control";
 
 export const metadata: Metadata = { title: "Tutor overview" };
 export const dynamic = "force-dynamic";
@@ -27,6 +28,8 @@ export default async function TutorHome({ searchParams }: { searchParams: Promis
     admin.from("submissions").select("id", { count: "exact", head: true }).is("graded_at", null),
   ]);
   const { data: site } = await admin.from("site_settings").select("tutorial_launched_at").maybeSingle();
+  const { data: nav } = await admin.from("site_settings").select("nav_style").maybeSingle();
+  const navStyle = (nav?.nav_style as "new" | "classic" | undefined) ?? null;
   await admin.rpc("season_tick");
   const { data: season } = await admin.from("seasons").select("id, name, starts_at, ends_at, status").in("status", ["active", "upcoming"]).order("number").limit(1).maybeSingle();
 
@@ -106,7 +109,7 @@ export default async function TutorHome({ searchParams }: { searchParams: Promis
         <Stat label="Quizzes done (30 days)" value={qa.length} />
         <Stat label="Suspiciously fast quizzes" value={flagged} />
       </div>
-      <div className="mt-6 grid gap-4 lg:grid-cols-2"><SeasonControl season={season ?? null} /><TutorialControl launchedAt={site?.tutorial_launched_at ?? null} /></div>
+      <div className="mt-6 grid gap-4 lg:grid-cols-2"><SeasonControl season={season ?? null} /><TutorialControl launchedAt={site?.tutorial_launched_at ?? null} /><NavControl current={navStyle} /></div>
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card><h2 className="mb-2 text-lg">Engagement, last 14 days</h2><XpLine data={days} /></Card>
         <Card><h2 className="mb-2 text-lg">Average quiz score by subject (30 days)</h2>{courseBars.length ? <ScoreBars data={courseBars} /> : <p className="text-muted">No quizzes yet.</p>}</Card>

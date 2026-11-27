@@ -8,6 +8,8 @@ import { Icon } from "@/components/icon";
 import { ResourceList } from "@/components/resource-list";
 import { Card, SectionTitle } from "@/components/ui";
 import { fmtDateTime, isLive } from "@/lib/utils";
+import { vizForChapter } from "@/lib/viz";
+import { gamesFor } from "@/lib/arcade";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -67,6 +69,10 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
                     {live ? `${parts} part${parts === 1 ? "" : "s"}` : ch.status === "scheduled" && ch.release_at ? `Unlocks ${fmtDateTime(ch.release_at)}` : "Locked by your tutor"}
                   </div>
                 </div>
+                {live && (() => {
+                  const nv = vizForChapter(slug, String(ch.number)).length, ng = gamesFor(slug, String(ch.number)).length;
+                  return nv + ng > 0 ? <span className="hidden shrink-0 gap-1 text-xs sm:flex">{nv > 0 && <span className="chip">✨ {nv}</span>}{ng > 0 && <span className="chip">🎮 {ng}</span>}</span> : null;
+                })()}
                 {b !== undefined && (
                   <span className={`chip ${b >= 0.5 ? "text-good" : "text-warn"}`}>{b >= 0.5 && <CheckCircle2 size={14} aria-hidden="true" />} {Math.round(b * 100)}%</span>
                 )}

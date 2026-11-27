@@ -8,6 +8,10 @@ import { renderMarkdown } from "@/lib/markdown";
 import { ResourceList } from "@/components/resource-list";
 import { Card, SectionTitle } from "@/components/ui";
 import { isLive } from "@/lib/utils";
+import { vizForChapter } from "@/lib/viz";
+import { gamesFor } from "@/lib/arcade";
+import { GameCard, VizCard } from "@/components/game-card";
+import { GoLiveButton } from "@/components/viz/go-live";
 
 export const metadata: Metadata = { title: "Chapter" };
 
@@ -29,12 +33,29 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     sb.from("quiz_attempts").select("quiz_id, score, total, flagged").eq("user_id", me.id).not("finished_at", "is", null),
   ]);
   const lib = (resources || []).filter((r) => r.section === "library");
+  const vizzes = vizForChapter(slug, String(ch.number));
+  const games = gamesFor(slug, String(ch.number));
   const cls = (resources || []).filter((r) => r.section === "class");
 
   return (
     <div>
       <Link href={`/courses/${slug}`} className="inline-flex items-center gap-1 text-sm font-bold text-muted hover:text-ink"><ArrowLeft size={16} aria-hidden="true" /> {course.title}</Link>
       <h1 className="page-title mt-2">Chapter {ch.number}: {ch.title}</h1>
+
+      {(vizzes.length > 0 || games.length > 0) && (
+        <section className="mt-4">
+          <SectionTitle>Interactive &amp; games</SectionTitle>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {vizzes.map((v) => (
+              <div key={v.id} className="space-y-2">
+                <VizCard v={v} />
+                {me.role === "tutor" && <GoLiveButton viz={v.id} />}
+              </div>
+            ))}
+            {games.map((g) => <GameCard key={g.slug} g={g} />)}
+          </div>
+        </section>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-3">

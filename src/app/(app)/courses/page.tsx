@@ -8,6 +8,8 @@ import { Bar } from "@/components/ui";
 import { LevelEmpty, LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
 import { takes } from "@/lib/subjects";
+import { VIZZES } from "@/lib/viz";
+import { gamesForCourse } from "@/lib/arcade";
 
 
 export const metadata: Metadata = { title: "Courses" };
@@ -27,6 +29,16 @@ export default async function Courses({ searchParams }: { searchParams: Promise<
     <div>
       <h1 className="page-title">Courses</h1>
       <p className="mt-1 text-muted">Pick a subject. Chapters unlock as your tutor releases them.{me.role === "student" && <> <Link href="/subjects" className="font-bold text-accent hover:underline">Change my subjects</Link></>}</p>
+      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Link href="/practice" className="card flex items-center gap-3 border-primary/50 transition hover:-translate-y-0.5">
+          <span className="text-3xl">🎓</span>
+          <span><span className="block font-display text-lg">Exam prep</span><span className="text-xs text-muted">Past-paper style practice + your &quot;Fix my mistakes&quot; deck</span></span>
+        </Link>
+        <Link href="/live" className="card flex items-center gap-3 transition hover:-translate-y-0.5">
+          <span className="text-3xl">📡</span>
+          <span><span className="block font-display text-lg">Live lesson</span><span className="text-xs text-muted">Join when your tutor goes live</span></span>
+        </Link>
+      </div>
       {tp.length > 0 && (
         <div className="card mt-5 space-y-2">
           <div className="font-bold">From your tutor</div>
@@ -54,6 +66,10 @@ export default async function Courses({ searchParams }: { searchParams: Promise<
             </div>
             <p className="mt-3 text-sm text-muted">{c.description}</p>
             <div className="mt-4 flex items-center gap-3"><Bar pct={c.pct} color={c.color} /><span className="text-sm font-bold">{c.pct}%</span></div>
+            {(() => {
+              const nv = VIZZES.filter((v) => v.course === c.slug).length, ng = gamesForCourse(c.slug).length;
+              return nv + ng > 0 ? <div className="mt-2 flex gap-2 text-xs">{nv > 0 && <span className="chip">✨ {nv} interactive</span>}{ng > 0 && <span className="chip">🎮 {ng} game{ng === 1 ? "" : "s"}</span>}</div> : null;
+            })()}
           </Link>
         ))}
       </div>
