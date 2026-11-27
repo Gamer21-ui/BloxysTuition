@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { Confetti } from "@/components/confetti";
 import { sfx } from "@/lib/battle-audio";
 import { cn } from "@/lib/utils";
@@ -124,9 +124,8 @@ export function VizStage({ viz, index, shared, setShared, tapState, children, he
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-surface2"><motion.div className="h-full bg-primary" animate={{ width: `${((index + 1) / viz.steps.length) * 100}%` }} /></div>
       <div className="card p-3">{Scene && <Scene scene={step.scene as never} shared={shared} setShared={setShared} sandbox={step.sandbox} tap={tap} />}</div>
-      <AnimatePresence mode="wait">
-        <motion.p key={index} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border-2 border-line bg-surface p-3 text-sm leading-relaxed sm:text-base">{step.caption}</motion.p>
-      </AnimatePresence>
+      {/* keyed by step so it always shows THIS step's text (no exit animation to get stuck on fast clicks) */}
+      <motion.p key={index} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="rounded-xl border-2 border-line bg-surface p-3 text-sm leading-relaxed sm:text-base">{step.caption}</motion.p>
       {children}
     </div>
   );

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { Card, Empty, SectionTitle } from "@/components/ui";
-import { fmtDateTime } from "@/lib/utils";
+import { fmtDate } from "@/lib/utils";
 import { SubmitBox } from "./submit-box";
 import { LevelTabs } from "@/components/level-tabs";
 import { inLevel, pickLevel } from "@/lib/levels";
@@ -55,7 +55,19 @@ export default async function Homework({ searchParams }: { searchParams: Promise
           <div>
             <div className="text-xs font-bold uppercase" style={{ color: a.course?.color }}>{a.course?.title} · {a.kind}</div>
             <h3 className="text-xl">{a.title}</h3>
-            <div className={`text-sm ${late ? "text-bad" : "text-muted"}`}>{due ? `Due ${fmtDateTime(due)}${extended ? " (⏳ extended)" : ""}` : "No deadline"} · up to {a.xp_reward + 20} XP</div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 font-body text-sm font-bold">
+              <span className={`inline-flex items-center gap-1.5 rounded-lg border-2 px-2.5 py-1 ${late ? "border-bad bg-bad/10 text-bad" : "border-line bg-surface2 text-ink"}`}>
+                📅 {due ? <>Due {fmtDate(due, { weekday: "short", day: "numeric", month: "short", year: "numeric" })}, {new Date(due).toLocaleTimeString("en-GB", { timeZone: "Indian/Mauritius", hour: "2-digit", minute: "2-digit" })}</> : "No deadline"}
+              </span>
+              {due && !s && !skipped(a) && (() => {
+                const ms = +new Date(due) - Date.now(), days = Math.ceil(Math.abs(ms) / 86_400_000), hrs = Math.ceil(Math.abs(ms) / 3_600_000);
+                const txt = ms < 0 ? `Overdue by ${days} day${days === 1 ? "" : "s"}` : ms < 86_400_000 ? `${hrs} hour${hrs === 1 ? "" : "s"} left!` : `${days} day${days === 1 ? "" : "s"} left`;
+                const tone = ms < 0 ? "border-bad bg-bad/10 text-bad" : ms < 3 * 86_400_000 ? "border-warn bg-warn/15 text-warn" : "border-good/60 bg-good/10 text-good";
+                return <span className={`inline-flex items-center gap-1.5 rounded-lg border-2 px-2.5 py-1 ${tone}`}>⏳ {txt}</span>;
+              })()}
+              {extended && <span className="inline-flex items-center gap-1.5 rounded-lg border-2 border-accent bg-accent/10 px-2.5 py-1 text-accent">⏰ Extended</span>}
+              <span className="inline-flex items-center gap-1.5 rounded-lg border-2 border-xp bg-xp/15 px-2.5 py-1 text-ink">🏆 Up to {a.xp_reward + 20} XP</span>
+            </div>
           </div>
           {skipped(a) && !s ? <span className="chip">🕶️ skipped</span> : s?.graded_at ? <span className="chip text-good">{s.score} / {a.max_score}</span> : s ? <span className="chip text-accent">handed in</span> : late ? <span className="chip text-bad">overdue</span> : <span className="chip text-warn">to do</span>}
         </div>
