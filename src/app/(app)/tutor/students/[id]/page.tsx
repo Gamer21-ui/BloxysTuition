@@ -54,6 +54,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
   topicCourses.sort((x, y) => x.sort - y.sort);
   const a = att || [];
   const pres = a.filter((x) => x.status === "present" || x.status === "late").length;
+  const counted = a.filter((x) => x.status !== "excused").length; // excused doesn't count against them
   const lvl = levelFromXp(p.xp);
 
   return (
@@ -106,7 +107,7 @@ export default async function Student({ params }: { params: Promise<{ id: string
             <button className="btn btn-accent btn-sm sm:col-span-3">Award</button>
           </form>
           <div className="mt-4 grid grid-cols-2 gap-2 text-center text-sm sm:grid-cols-4">
-            <div className="card p-2"><div className="font-display text-xl">{a.length ? Math.round((100 * pres) / a.length) : "–"}{a.length ? "%" : ""}</div>attendance</div>
+            <div className="card p-2"><div className="font-display text-xl">{counted ? Math.round((100 * pres) / counted) : "–"}{counted ? "%" : ""}</div>attendance</div>
             <div className="card p-2"><div className="font-display text-xl">{attempts?.length || 0}</div>recent quizzes</div>
             <div className="card p-2"><div className="font-display text-xl">{subs?.filter((x) => x.graded_at).length || 0}</div>marked HW</div>
             <div className="card p-2"><div className="font-display text-xl">{deckSize || 0}</div>mistakes to fix</div>

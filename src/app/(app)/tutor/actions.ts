@@ -184,7 +184,7 @@ export async function createReport(fd: FormData) {
   const allQs = (q || []).reduce((s, r) => s + (r.score ?? 0), 0), allQt = (q || []).reduce((s, r) => s + (r.total ?? 0), 0);
   const stats = {
     version: 2, student: p!.display_name, tier: p!.tier, days,
-    attendance: { sessions: a.length, present: count("present"), late: count("late"), absent: count("absent"), excused: count("excused"), pct: pctOf(attended, a.length) },
+    attendance: { sessions: a.length, present: count("present"), late: count("late"), absent: count("absent"), excused: count("excused"), pct: pctOf(attended, a.length - count("excused")) },
     quizzes: { count: (q || []).length, avg_pct: pctOf(allQs, allQt) },
     homework: { set: setCount, handed_in: (subs || []).length, on_time: onTime, avg_pct: hwN ? Math.round((100 * hwSum) / hwN) : null },
     study_days: new Set((act || []).map((e) => muDate(e.created_at))).size,

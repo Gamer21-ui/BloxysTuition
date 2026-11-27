@@ -6,18 +6,27 @@ import "server-only";
  * Either way the SERVER turns the score into a capped discount tier, so nothing the student types
  * (or the AI says) can give more than 50% off.
  */
+import { PERSONA, briefing, type Intel } from "./seller";
 export type Line = { from: "me" | "seller"; text: string };
 export const MAX_TURNS = 5;
 
-/** effort score → discount tier. Longer, better conversations unlock the bigger tiers. */
-export function tierOf(score: number, turns: number) {
-  const capped = Math.min(score, turns <= 1 ? 64 : turns === 2 ? 84 : 100);
-  return { score: capped, discount: capped >= 85 ? 50 : capped >= 65 ? 25 : capped >= 40 ? 15 : 0 };
+/**
+ * effort score → discount tier. Longer, better conversations unlock the bigger tiers.
+ * `cap` = the best discount this student can ever get (top of the leaderboard = smaller cap).
+ */
+export function tierOf(score: number, turns: number, cap = 50) {
+  const capped = Math.max(0, Math.min(score, turns <= 1 ? 64 : turns === 2 ? 84 : 100));
+  const raw = capped >= 85 ? 50 : capped >= 65 ? 25 : capped >= 40 ? 15 : 0;
+  return { score: capped, discount: Math.min(raw, cap) };
 }
+/** mood + studying nudge the score a little */
+export const adjust = (score: number, intel?: Intel) => !intel ? score : score + intel.mood.bonus + (intel.studiedRecently ? 6 : 0);
 
-const ITEMS = { bunk: "a Bunk Card (marks one missed class in the last 30 days as 'excused' in the game)", skip: "a Skip Homework Pass (removes one homework from the student's list in the game)" };
+const ITEMS = { bunk: "a Bunk Card (marks one missed class in the last 30 days as 'excused' in the game, so it stops hurting their attendance % and still counts for attendance quests)", skip: "a Skip Homework Pass (removes one homework from the student's list in the game)" };
 
-const SYSTEM = (item: "bunk" | "skip") => `You are "the Seller", a comedic shady character hiding in the secret Black Market of a gamified study website for teenage students (age 13-18). Students find you as an easter egg. You sell fictional in-game items paid with game coins and XP. Right now the student wants ${ITEMS[item]}.
+const SYSTEM = (item: "bunk" | "skip", intel?: Intel) => `${PERSONA}
+You hide in the secret Black Market of a gamified study website for teenage students (age 13-18); students find you as an easter egg. You sell fictional in-game items paid with game coins and XP. Right now the student wants ${ITEMS[item]}.
+${intel ? briefing(intel) : ""}
 
 The student is trying to haggle the price down. Your job:
 1. Reply IN CHARACTER: sly, smooth, funny, a bit dramatic (think a noir movie dealer in a fedora). Max 2 short sentences, under 220 characters. React to HOW they talk: politeness, charm, humour, creativity, good arguments, counter-offers, or rudeness. Never repeat yourself.
@@ -34,7 +43,7 @@ Rules: keep it PG and clean, no swearing, nothing about real crime, drugs, weapo
 Answer with ONLY this JSON: {"reply": "...", "score": <0-100>}`;
 
 /** Claude Haiku via the Messages API. Returns null on any problem so the mood engine takes over. */
-async function askClaude(item: "bunk" | "skip", history: Line[], text: string): Promise<{ reply: string; score: number } | null> {
+async function askClaude(item: "bunk" | "skip", history: Line[], text: string, intel?: Intel): Promise<{ reply: string; score: number } | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   const messages = [...history, { from: "me" as const, text }].map((l) => ({ role: l.from === "me" ? "user" : "assistant", content: l.text }));
@@ -44,7 +53,7 @@ async function askClaude(item: "bunk" | "skip", history: Line[], text: string): 
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST", signal: ctrl.signal,
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-haiku-5-5", max_tokens: 200, system: SYSTEM(item), messages }),
+      body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-haiku-5-5", max_tokens: 200, system: SYSTEM(item, intel), messages }),
     });
     if (!res.ok) return null;
     const data = await res.json() as { content?: { type: string; text?: string }[] };
@@ -111,10 +120,15 @@ function moodEngine(history: Line[], text: string): { reply: string; score: numb
   return { reply: `${opener} ${pick(mood, seed + 3)}`.slice(0, 280), score };
 }
 
-export async function sellerReply(item: "bunk" | "skip", history: Line[], text: string, prevScore: number) {
-  const ai = await askClaude(item, history, text);
+export async function sellerReply(item: "bunk" | "skip", history: Line[], text: string, prevScore: number, intel?: Intel) {
+  const ai = await askClaude(item, history, text, intel);
   if (ai) return { ...ai, ai: true };
   const m = moodEngine(history, text);
+  // the free engine also knows a few things about the student
+  const turnsSoFar = history.filter((l) => l.from === "me").length;
+  if (intel?.ownerOnline && turnsSoFar === 0) m.reply = `(whispers) The owner's online… I'd wait, kid. ${m.reply}`;
+  else if (intel?.capReason && turnsSoFar === 1) m.reply = `${m.reply} And since ${intel.capReason}, ${intel.cap}% is my ceiling. Big shots pay big.`;
+  else if (intel?.idleWeek && turnsSoFar === 0) m.reply = `${m.reply} Also… zero studying this week? Go hit a quiz, kid.`;
   // the free engine scores one message at a time, so blend it with the conversation so far
   const turnsBefore = history.filter((l) => l.from === "me").length;
   const blended = turnsBefore ? Math.round(prevScore * 0.45 + m.score * 0.55 + 6) : m.score;

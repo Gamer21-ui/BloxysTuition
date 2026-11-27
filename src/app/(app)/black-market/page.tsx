@@ -3,6 +3,7 @@ import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { takes } from "@/lib/subjects";
 import { BlackMarket } from "./black-market";
+import { greeting, intelFor } from "@/lib/seller";
 
 export const metadata: Metadata = { title: "🕳️", robots: { index: false } };
 export const dynamic = "force-dynamic";
@@ -26,8 +27,16 @@ export default async function BlackMarketPage() {
     .map((a) => ({ id: a.id, label: `${a.title}${a.course ? ` · ${a.course.title}` : ""}` }));
   type B = { session_id: string; session: { title: string; held_on: string } };
   const absences = ((abs as unknown as B[]) || []).map((b) => ({ id: b.session_id, label: `${b.session.title} · ${new Date(b.session.held_on).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}` }));
+  // Mr. Shades sizes you up: mood of the day, owner online?, your leaderboard rank, have you been studying?
+  // count this visit (and find out about overdue homework / the loiterer tax)
+  const { data: v } = me.role === "student" ? await sb.rpc("black_market_visit") : { data: null };
+  const intel = me.role === "student" ? await intelFor(me.id, (v as never) ?? { week: 0, overdue: 0, tax: 0 }) : null;
+  const shades = intel ? {
+    mood: `${intel.mood.emoji} ${intel.mood.name}`, hello: greeting(intel, me.display_name), cap: intel.cap, capReason: intel.capReason,
+    tax: intel.tax, visits: intel.visitsWeek, overdue: intel.overdue,
+  } : null;
   return (
     <BlackMarket isTutor={me.role === "tutor"} ready={!error && !!status} status={status as never} coins={me.coins} xp={me.xp}
-      homework={homework} absences={absences} />
+      homework={homework} absences={absences} shades={shades} />
   );
 }

@@ -6,10 +6,11 @@
 import { z } from "zod";
 import { requireApproved } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { MAX_TURNS, sellerReply, tierOf, type Line } from "@/lib/haggle";
+import { MAX_TURNS, adjust, sellerReply, tierOf, type Line } from "@/lib/haggle";
+import { intelFor } from "@/lib/seller";
 
 const DAILY_HAGGLES = 5;
-type Out = { ok: true; id: string; reply: string; discount: number; turnsLeft: number } | { ok: false; error: string };
+type Out = { ok: true; id: string; reply: string; discount: number; turnsLeft: number; cap: number } | { ok: false; error: string };
 
 export async function haggleSay(input: { id?: string | null; item: "bunk" | "skip"; text: string }): Promise<Out> {
   const me = await requireApproved();
@@ -39,12 +40,13 @@ export async function haggleSay(input: { id?: string | null; item: "bunk" | "ski
   }
 
   const history = (row!.messages || []) as Line[];
-  const said = await sellerReply(item, history, text, row!.score);
+  const intel = await intelFor(me.id);
+  const said = await sellerReply(item, history, text, row!.score, intel);
   const turns = row!.turns + 1;
-  const t = tierOf(said.score, turns);
+  const t = tierOf(adjust(said.score, intel), turns, intel.cap);
   const messages = [...history, { from: "me", text }, { from: "seller", text: said.reply }];
   await admin.from("black_market_haggles").update({ messages, turns, score: t.score, discount: t.discount }).eq("id", row!.id);
-  return { ok: true, id: row!.id, reply: said.reply, discount: t.discount, turnsLeft: MAX_TURNS - turns };
+  return { ok: true, id: row!.id, reply: said.reply, discount: t.discount, turnsLeft: MAX_TURNS - turns, cap: intel.cap };
 }
 
 /** Lock in the current offer: valid for 15 minutes, used once by black_market_buy. */

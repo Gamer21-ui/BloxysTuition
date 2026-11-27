@@ -369,3 +369,34 @@ do $$ declare p profiles%rowtype; begin
   if p.coins <> 5000 - 1750 or p.xp <> 5000 - 1250 then raise exception 'haggle price wrong: coins % xp %', p.coins, p.xp; end if;
   raise notice 'ok: haggled skip pass cost 1750 coins + 1250 XP (50%% off), deal single-use, expired deals rejected, bunk now % coins', (bm_price('bunk')).coins;
 end $$;
+-- Bunk Card: excused + counts for attendance quests/achievements
+insert into class_sessions(id, title, held_on) values ('bbbbbbbb-0000-0000-0000-000000000001', 'CS session', current_date - 2);
+insert into attendance(session_id, user_id, status) values ('bbbbbbbb-0000-0000-0000-000000000001', :'ben', 'absent');
+update profiles set coins = 5000, xp = 5000 where id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+select black_market_buy('bunk', 'bbbbbbbb-0000-0000-0000-000000000001') ->> 'paid_coins' as bunk_paid;
+reset role;
+do $$ declare st text; n int; begin
+  select status into st from attendance where session_id = 'bbbbbbbb-0000-0000-0000-000000000001' and user_id = '00000000-0000-0000-0000-000000000003';
+  select count(*) into n from black_market_log l join attendance x on x.session_id = l.target and x.user_id = l.user_id
+   where l.user_id = '00000000-0000-0000-0000-000000000003' and l.item = 'bunk' and x.status = 'excused';
+  if st <> 'excused' or n <> 1 then raise exception 'bunk not applied: % %', st, n; end if;
+  raise notice 'ok: bunk cost 750 coins, absence now excused and counted for attendance achievements (%)', n;
+end $$;
+-- Loiterer tax: 8+ visits in a week with overdue homework = +10%
+insert into assignments(course_id, title, kind, due_at, max_score, xp_reward, status)
+select c.id, 'HW overdue', 'homework', now() - interval '2 days', 10, 50, 'published' from courses c
+where (c.tier = 'O') = ((select tier from profiles where id = :'ben') = 'O') limit 1;
+set role authenticated; select pg_temp.as_user(:'ben');
+select black_market_visit() ->> 'tax' as tax_after_1_visit;
+reset role;
+update black_market_visits set visits = 8 where user_id = :'ben';
+update profiles set coins = 5000, xp = 5000 where id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+select black_market_visit() as visit_info;
+select black_market_buy('skip', (select id from assignments where title = 'HW 2')) ->> 'paid_coins' as taxed_skip_coins;
+reset role;
+do $$ begin
+  if (select coins from profiles where id = '00000000-0000-0000-0000-000000000003') <> 5000 - 3850 then raise exception 'tax not applied: %', (select coins from profiles where id = '00000000-0000-0000-0000-000000000003'); end if;
+  raise notice 'ok: loiterer tax +10%% (skip pass 3850 coins) after 9 visits with overdue homework';
+end $$;

@@ -36,7 +36,9 @@ export default async function Dashboard() {
   const submitted = new Set((subs || []).map((s) => s.assignment_id));
   const upcoming = ((assignments || []) as unknown as { id: string; title: string; due_at: string | null; kind: string; course: { slug: string } | null }[]).filter((a) => !submitted.has(a.id) && (!a.course || takes(me, a.course.slug))).slice(0, 4);
   const attended = (att || []).filter((a) => a.status === "present" || a.status === "late").length;
-  const attPct = att && att.length ? Math.round((attended / att.length) * 100) : null;
+  // excused sessions (incl. Bunk Cards) don't count against attendance
+  const counted = (att || []).filter((a) => a.status !== "excused").length;
+  const attPct = counted ? Math.round((attended / counted) * 100) : null;
   const daily = challenges.filter((c) => c.period === "daily");
 
   return (
