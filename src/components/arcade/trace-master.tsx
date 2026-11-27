@@ -5,6 +5,7 @@ import { sfx, unlock } from "@/lib/battle-audio";
 import { cn } from "@/lib/utils";
 import { optionsFor, traceRows, type TraceProgram, type TraceSet } from "@/lib/trace";
 import { CheatSheet, ResultScreen, StartScreen, type Lesson } from "./shared";
+import { Confetti } from "@/components/confetti";
 
 const PER_RUN = 3;
 const LIVES = 5;
@@ -120,6 +121,7 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
     return (
       <ResultScreen game={set.game} success={success} score={score} onAgain={() => setPhase("start")} lessons={lessons}
         stats={[{ label: "Level", value: set.label }, { label: "Correct", value: `${right}/${asked}` }, { label: "Score", value: String(score) }, { label: "Lives", value: "❤️".repeat(Math.max(0, lives)) || "0" }]}
+        celebrate={success && asked - right === 0}
         winText={asked - right === 0 ? "Perfect: you ran the code in your head like a real CPU. That's exactly the skill Paper 2 tests."
           : `Finished, but with ${asked - right} mistake${asked - right === 1 ? "" : "s"} (${Math.round((right / Math.max(1, asked)) * 100)}% right first time). Go through the lessons below, then try for a perfect trace.`}
         loseText="Out of lives! Read the lessons below, then trace again. Every attempt makes you faster." />
@@ -195,6 +197,7 @@ export function TraceMaster({ sets, defaultKey }: { sets: TraceSet[]; defaultKey
             return (
               <motion.div key="clear" initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ opacity: 0 }}
                 className={cn("rounded-xl border-2 p-3 text-center", grade.cls)}>
+                {m === 0 && <Confetti count={60} />}
                 <div className="font-mono text-lg font-bold tracking-wider sm:text-xl">{grade.t}</div>
                 <div className="text-sm text-muted">{grade.sub}</div>
               </motion.div>

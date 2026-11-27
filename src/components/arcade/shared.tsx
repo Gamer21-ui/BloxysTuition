@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 export type Lesson = { wrong: string; why: string };
 
 /** End screen: win or lose, what you learned from mistakes, and the rewards (sent once to the server). */
-export function ResultScreen({ game, success, score, stats, lessons, winText, loseText, onAgain }: {
+export function ResultScreen({ game, success, score, stats, lessons, winText, loseText, onAgain, celebrate }: {
   game: string; success: boolean; score: number; stats: { label: string; value: string }[];
   lessons: Lesson[]; winText: string; loseText: string; onAgain: () => void;
+  /** confetti only for a real win (defaults to success); games can turn it off for a scrappy finish */
+  celebrate?: boolean;
 }) {
   const [reward, setReward] = useState<{ xp: number; coins: number; already_paid_today?: boolean } | null>(null);
   const sent = useRef(false);
@@ -26,7 +28,7 @@ export function ResultScreen({ game, success, score, stats, lessons, winText, lo
   const uniqueLessons = lessons.filter((l, i, a) => a.findIndex((x) => x.wrong === l.wrong) === i).slice(0, 6);
   return (
     <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="card space-y-4 text-center">
-      {success && <Confetti count={80} />}
+      {(celebrate ?? success) && <Confetti count={80} />}
       <motion.div initial={{ scale: 2.2, rotate: -6 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 200, damping: 12 }}
         className={cn("font-display text-4xl sm:text-5xl", success ? "text-xp" : "text-muted")}>
         {success ? "🏆 MISSION COMPLETE!" : "💀 MISSION FAILED"}
