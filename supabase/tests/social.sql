@@ -345,3 +345,27 @@ set role authenticated; select pg_temp.as_user(:'ben');
 do $$ begin perform tutor_set_nav_style('classic'); raise exception 'student changed menu';
 exception when others then if sqlerrm not like '%tutor only%' then raise; end if; end $$;
 reset role;
+-- Black Market haggling: deals come only from the server, apply once, and expire
+insert into assignments(course_id, title, kind, due_at, max_score, xp_reward, status)
+select course_id, 'HW haggle', kind, due_at, max_score, xp_reward, status from assignments where title = 'HW 1';
+update profiles set coins = 5000, xp = 5000 where id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin insert into black_market_haggles(user_id, item, discount, status) values (auth.uid(), 'skip', 50, 'deal'); raise exception 'student wrote a deal';
+exception when insufficient_privilege then null; end $$;
+select (black_market_status() -> 'prices' -> 'bunk' ->> 'coins') as bunk_coins;
+reset role;
+insert into black_market_haggles(id, user_id, item, discount, status, expires_at)
+values ('aaaaaaaa-0000-0000-0000-000000000001', :'ben', 'skip', 50, 'deal', now() + interval '10 minutes'),
+       ('aaaaaaaa-0000-0000-0000-000000000002', :'ben', 'skip', 25, 'deal', now() - interval '1 minute');
+set role authenticated; select pg_temp.as_user(:'ben');
+do $$ begin perform black_market_buy('skip', (select id from assignments where title = 'HW haggle'), 'aaaaaaaa-0000-0000-0000-000000000002'); raise exception 'expired deal used';
+exception when others then if sqlerrm not like '%expired%' then raise; end if; end $$;
+select black_market_buy('skip', (select id from assignments where title = 'HW haggle'), 'aaaaaaaa-0000-0000-0000-000000000001') ->> 'paid_coins' as paid_coins;
+do $$ begin perform black_market_buy('skip', (select id from assignments where title = 'HW 1'), 'aaaaaaaa-0000-0000-0000-000000000001'); raise exception 'deal reused';
+exception when others then if sqlerrm not like '%expired%' then raise; end if; end $$;
+reset role;
+do $$ declare p profiles%rowtype; begin
+  select * into p from profiles where id = '00000000-0000-0000-0000-000000000003';
+  if p.coins <> 5000 - 1750 or p.xp <> 5000 - 1250 then raise exception 'haggle price wrong: coins % xp %', p.coins, p.xp; end if;
+  raise notice 'ok: haggled skip pass cost 1750 coins + 1250 XP (50%% off), deal single-use, expired deals rejected, bunk now % coins', (bm_price('bunk')).coins;
+end $$;
