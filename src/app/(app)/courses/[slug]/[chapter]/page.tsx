@@ -12,6 +12,7 @@ import { vizForChapter } from "@/lib/viz";
 import { gamesFor } from "@/lib/arcade";
 import { GameCard, VizCard } from "@/components/game-card";
 import { GoLiveButton } from "@/components/viz/go-live";
+import { DuelCard, type DuelRow } from "@/components/duel-card";
 
 export const metadata: Metadata = { title: "Chapter" };
 
@@ -32,6 +33,9 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     sb.from("quizzes").select("*").eq("chapter_id", ch.id).order("sort"),
     sb.from("quiz_attempts").select("quiz_id, score, total, flagged").eq("user_id", me.id).not("finished_at", "is", null),
   ]);
+  // Past-paper Duel ranking (empty if the duel database update hasn't been run yet)
+  const duelOpen = !!(ch as { duel_open?: boolean }).duel_open;
+  const { data: ranking } = duelOpen || me.role === "tutor" ? await sb.rpc("duel_ranking", { p_chapter: ch.id, p_limit: 10 }) : { data: null };
   const lib = (resources || []).filter((r) => r.section === "library");
   const vizzes = vizForChapter(slug, String(ch.number));
   const games = gamesFor(slug, String(ch.number));
@@ -79,6 +83,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           ))}
         </div>
         <div>
+          <DuelCard chapterId={ch.id} open={duelOpen} isTutor={me.role === "tutor"} ranking={(ranking as DuelRow[] | null) || []} meId={me.id} />
           {(quizzes || []).map((q) => {
             const live = isLive(q.status, q.release_at);
             const tries = (attempts || []).filter((a) => a.quiz_id === q.id && !a.flagged && a.total);

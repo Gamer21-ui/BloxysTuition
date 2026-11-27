@@ -400,3 +400,56 @@ do $$ begin
   if (select coins from profiles where id = '00000000-0000-0000-0000-000000000003') <> 5000 - 3850 then raise exception 'tax not applied: %', (select coins from profiles where id = '00000000-0000-0000-0000-000000000003'); end if;
   raise notice 'ok: loiterer tax +10%% (skip pass 3850 coins) after 9 visits with overdue homework';
 end $$;
+-- Past-paper Duel: chapter-only paper questions, guide hidden until reveal, winner 2x + 50, loser 15/correct, ranking
+reset role;
+update profiles set tier = 'O' where id in (:'ava', :'ben');
+delete from xp_events where reason = 'duel';
+select id as duel_ch from chapters where course_id = (select id from courses where slug = 'o-computer-science') and number = '4' \gset
+select id as closed_ch from chapters where course_id = (select id from courses where slug = 'o-computer-science') and number = '5' \gset
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ begin
+  begin perform create_battle('1v1', null, 5, null, null, false, (select id from chapters where course_id = (select id from courses where slug = 'o-computer-science') and number = '5'), 'duel');
+    raise exception 'closed chapter allowed a duel';
+  exception when others then if sqlerrm not like '%not open%' then raise; end if; end;
+  begin perform create_battle('2v2', null, 5, null, null, false, (select id from chapters where course_id = (select id from courses where slug = 'o-computer-science') and number = '4'), 'duel');
+    raise exception '2v2 duel allowed';
+  exception when others then if sqlerrm not like '%1v1%' then raise; end if; end;
+end $$;
+select create_battle('1v1', null, 5, null, null, false, :'duel_ch', 'duel') as dcode \gset
+select id as dbid from battles where code = :'dcode' \gset
+select pg_temp.as_user(:'ben'); select join_battle(:'dcode') is not null as ben_joined_duel;
+select pg_temp.as_user(:'ava'); select start_battle(:'dbid');
+select (battle_question(:'dbid') ->> 'guide') is null as guide_hidden_before_reveal;
+reset role;
+do $$ declare b uuid := (select id from battles where style = 'duel' order by created_at desc limit 1); rnd int; k int; g text;
+begin
+  if exists (select 1 from battle_rounds r join questions q on q.id = r.question_id where r.battle_id = b and (q.source <> 'paper' or q.chapter_id <> (select chapter_id from battles where id = b))) then
+    raise exception 'duel used non-paper or other-chapter questions'; end if;
+  if (select round_seconds from battles where id = b) <> 35 then raise exception 'duel round time wrong'; end if;
+  for rnd in 1..5 loop
+    select qk.correct into k from battle_rounds r join question_keys qk on qk.question_id = r.question_id where r.battle_id = b and r.round_no = rnd;
+    perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000002', true);
+    perform answer_battle(b, k);                                   -- Ava: 5/5
+    perform set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-000000000003', true);
+    perform answer_battle(b, case when rnd <= 2 then k else (k + 1) % 4 end);   -- Ben: 2/5
+    if rnd = 1 then
+      g := battle_question(b) ->> 'guide';
+      if g is null or length(g) < 20 then raise exception 'guide missing after reveal'; end if;
+    end if;
+    update battles set phase_started_at = now() - interval '6 seconds' where id = b;
+    if tick_battle(b) <> 'live' then raise exception 'duel reveal should last 12s'; end if;
+    update battles set phase_started_at = now() - interval '13 seconds' where id = b;
+    perform tick_battle(b);
+  end loop;
+  if (select status from battles where id = b) <> 'finished' then raise exception 'duel did not finish'; end if;
+  if (select sum(amount) from xp_events where reason = 'duel' and user_id = '00000000-0000-0000-0000-000000000003') is null then raise exception 'loser got nothing'; end if;
+  raise notice 'ok: duel finished. ava base 5x30+50=200 -> got % XP, ben base 2x15=30 -> got % XP',
+    (select reward_xp from battle_players where battle_id = b and user_id = '00000000-0000-0000-0000-000000000002'),
+    (select reward_xp from battle_players where battle_id = b and user_id = '00000000-0000-0000-0000-000000000003');
+end $$;
+set role authenticated; select pg_temp.as_user(:'ben');
+select display_name, wins, played, accuracy from duel_ranking(:'duel_ch');
+do $$ begin
+  perform set_duel_open((select id from chapters limit 1), true); raise exception 'student opened duels';
+exception when others then if sqlerrm not like '%tutors only%' then raise; end if; end $$;
+reset role;

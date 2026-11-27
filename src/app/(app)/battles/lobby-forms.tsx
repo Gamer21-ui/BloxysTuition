@@ -60,7 +60,7 @@ export function BattleLobbyForms({ courses, myTier = "O" }: { courses: { id: str
       <Card className="space-y-4">
         <h2 className="text-xl">Create a battle</h2>
         <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Battle style">
-          {(Object.keys(STYLES) as Style[]).map((k) => (
+          {(Object.keys(STYLES) as Style[]).filter((k) => k !== "duel").map((k) => (
             <button key={k} type="button" role="radio" aria-checked={style === k} onClick={() => { setStyle(k); if (k === "ranked" && rounds < 5) setRounds(5); }}
               className={cn("btn h-auto flex-col gap-0.5 py-2", style === k ? "btn-primary" : "btn-ghost")}>
               <span className="text-xl">{STYLES[k].emoji}</span><span className="text-sm">{STYLES[k].label}</span>

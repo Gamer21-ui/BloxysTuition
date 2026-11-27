@@ -71,7 +71,8 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
                 </div>
                 {live && (() => {
                   const nv = vizForChapter(slug, String(ch.number)).length, ng = gamesFor(slug, String(ch.number)).length;
-                  return nv + ng > 0 ? <span className="hidden shrink-0 gap-1 text-xs sm:flex">{nv > 0 && <span className="chip">✨ {nv}</span>}{ng > 0 && <span className="chip">🎮 {ng}</span>}</span> : null;
+                  const duel = !!(ch as { duel_open?: boolean }).duel_open;
+                  return nv + ng > 0 || duel ? <span className="flex shrink-0 gap-1 text-xs">{duel && <span className="chip font-bold text-accent">📜 Duel</span>}{nv > 0 && <span className="chip hidden sm:inline-flex">✨ {nv}</span>}{ng > 0 && <span className="chip hidden sm:inline-flex">🎮 {ng}</span>}</span> : null;
                 })()}
                 {b !== undefined && (
                   <span className={`chip ${b >= 0.5 ? "text-good" : "text-warn"}`}>{b >= 0.5 && <CheckCircle2 size={14} aria-hidden="true" />} {Math.round(b * 100)}%</span>

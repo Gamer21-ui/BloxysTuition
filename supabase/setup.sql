@@ -3768,6 +3768,260 @@ revoke all on function black_market_buy(text, uuid, uuid) from public, anon;
 grant execute on function black_market_buy(text, uuid, uuid) to authenticated;
 
 
+-- ===== 0024_paper_duel.sql =====
+-- Past-paper Duel: a 1v1 battle style on one chapter, using exam-style questions with an answering guide.
+-- Winner gets double XP plus a bonus, the loser still earns XP for every correct answer. Chapter rankings.
+
+alter table questions add column if not exists source text not null default 'quiz';
+alter table questions drop constraint if exists questions_source_check;
+alter table questions add constraint questions_source_check check (source in ('quiz', 'paper'));
+alter table questions add column if not exists ref text;               -- syllabus area, e.g. "3.1 Computer architecture"
+alter table question_keys add column if not exists guide text;         -- answering guide (students only see it after the reveal)
+alter table chapters add column if not exists duel_open boolean not null default false;
+alter table battle_players add column if not exists reward_xp int;      -- XP actually awarded (shown on the results screen)
+alter table battle_players add column if not exists duel_counted boolean not null default false;  -- counts for the chapter ranking
+
+alter table battles drop constraint if exists battles_style_check;
+alter table battles add constraint battles_style_check check (style in ('classic', 'ranked', 'pressure', 'duel'));
+
+-- ---------------------------------------------------------------- create (adds the duel style)
+create or replace function create_battle(p_mode text, p_course uuid default null, p_rounds int default 5, p_tier tier default null,
+                                         p_subject text default null, p_both boolean default false, p_chapter uuid default null,
+                                         p_style text default 'classic')
+returns text language plpgsql security definer set search_path = public as $$
+declare c text; b uuid; lvl tier; subj text := nullif(btrim(coalesce(p_subject, '')), ''); both_lv boolean := coalesce(p_both, false);
+        crs uuid := p_course; chap uuid := p_chapter; sty text := coalesce(p_style, 'classic'); rounds int; secs int := 20; ch chapters%rowtype;
+begin
+  if not is_approved() then raise exception 'not approved'; end if;
+  if p_mode not in ('1v1','2v2') then raise exception 'bad mode'; end if;
+  if sty not in ('classic', 'ranked', 'pressure', 'duel') then raise exception 'bad style'; end if;
+  if sty = 'ranked' then chap := null; end if;          -- ranked covers a whole subject or level, not one easy chapter
+  rounds := least(greatest(coalesce(p_rounds, 5), 3), 10);
+  if sty = 'ranked' then rounds := greatest(rounds, 5); end if;
+  if sty = 'duel' then
+    if p_mode <> '1v1' then raise exception 'duels are 1v1'; end if;
+    select * into ch from chapters where id = chap;
+    if not found then raise exception 'pick a chapter for the duel'; end if;
+    if not is_tutor() and not (ch.duel_open and is_live(ch.status, ch.release_at)) then
+      raise exception 'duels are not open for this chapter yet';
+    end if;
+    rounds := case when coalesce(p_rounds, 5) >= 7 then 7 else 5 end;
+    if (select count(*) from questions where chapter_id = chap and source = 'paper') < rounds then
+      raise exception 'not enough past-paper questions for this chapter yet';
+    end if;
+    secs := 35;                                           -- exam questions need reading time
+  end if;
+  if chap is not null then
+    select course_id into crs from chapters where id = chap;
+    if crs is null then raise exception 'chapter not found'; end if;
+  end if;
+  if crs is not null then
+    subj := null; both_lv := false;
+    select tier into lvl from courses where id = crs;
+  else
+    lvl := case when both_lv then 'A'::tier else coalesce(p_tier, (select tier from profiles where id = auth.uid())) end;
+    if lvl = 'O' then both_lv := false; end if;
+    if subj is not null and not exists (
+        select 1 from courses cc where cc.active and subject_of(cc.slug) = subj
+          and (cc.tier = lvl or (both_lv and cc.tier = 'AS'))) then
+      raise exception 'no such subject at that level';
+    end if;
+  end if;
+  loop
+    c := upper(substr(md5(random()::text), 1, 5));
+    exit when not exists (select 1 from battles where code = c);
+  end loop;
+  insert into battles(code, mode, course_id, chapter_id, host_id, round_count, round_seconds, tier, subject, both_levels, style)
+  values (c, p_mode, crs, chap, auth.uid(), rounds, secs, lvl, subj, both_lv, sty)
+  returning id into b;
+  insert into battle_players(battle_id, user_id, team) values (b, auth.uid(), 1);
+  if sty <> 'duel' then perform bring_party(b, 1); end if;
+  return c;
+end $$;
+revoke all on function create_battle(text, uuid, int, tier, text, boolean, uuid, text) from public, anon;
+grant execute on function create_battle(text, uuid, int, tier, text, boolean, uuid, text) to authenticated;
+
+-- ---------------------------------------------------------------- start: duels draw from the past-paper bank only
+create or replace function start_battle(p_battle uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare b battles%rowtype; i int := 0; q uuid;
+begin
+  select * into b from battles where id = p_battle for update;
+  if b.host_id <> auth.uid() then raise exception 'only the host can start'; end if;
+  if b.status <> 'lobby' then raise exception 'already started'; end if;
+  if (select count(distinct team) from battle_players where battle_id = b.id) < 2 then
+    raise exception 'both teams need at least one player';
+  end if;
+  for q in
+    select qq.id from questions qq join question_keys k on k.question_id = qq.id join courses cc on cc.id = qq.course_id
+    where (case when b.style = 'duel' then qq.chapter_id = b.chapter_id and qq.source = 'paper'
+                else qq.battle_ok and qq.source = 'quiz' and
+                  (case when b.chapter_id is not null then qq.chapter_id = b.chapter_id
+                        when b.course_id is not null then qq.course_id = b.course_id
+                        else (b.tier is null or cc.tier = b.tier or (b.both_levels and cc.tier = 'AS'))
+                             and (b.subject is null or subject_of(cc.slug) = b.subject) end) end)
+    order by random() limit b.round_count
+  loop
+    i := i + 1;
+    insert into battle_rounds(battle_id, round_no, question_id) values (b.id, i, q);
+  end loop;
+  if i = 0 then raise exception 'no questions available for this level yet'; end if;
+  update battles set status = 'live', round_count = i, current_round = 1, phase = 'question',
+    phase_started_at = now() where id = b.id;
+end $$;
+
+-- ---------------------------------------------------------------- question: the guide only appears once the round is revealed
+create or replace function battle_question(p_battle uuid) returns jsonb
+language sql stable security definer set search_path = public as $$
+  select jsonb_build_object('round', r.round_no, 'id', q.id, 'prompt', q.prompt, 'options', q.options, 'correct', r.correct,
+           'ref', q.ref,
+           'guide', case when r.correct is not null then k.guide end,
+           'explanation', case when r.correct is not null and b.style = 'duel' then q.explanation end)
+  from battles b join battle_rounds r on r.battle_id = b.id and r.round_no = b.current_round
+  join questions q on q.id = r.question_id
+  left join question_keys k on k.question_id = q.id
+  where b.id = p_battle and exists(select 1 from battle_players p where p.battle_id = b.id and p.user_id = auth.uid());
+$$;
+
+-- ---------------------------------------------------------------- tick: duels give 12 seconds to read the guide
+create or replace function tick_battle(p_battle uuid) returns text
+language plpgsql security definer set search_path = public as $$
+declare b battles%rowtype;
+begin
+  select * into b from battles where id = p_battle for update;
+  if not found or b.status <> 'live' then return coalesce(b.status, 'missing'); end if;
+  if not exists(select 1 from battle_players where battle_id = b.id and user_id = auth.uid()) then
+    return b.status;
+  end if;
+  if b.phase = 'question' and now() > coalesce(b.phase_ends_at, b.phase_started_at + make_interval(secs => b.round_seconds)) + interval '1 second' then
+    perform battle_reveal(b.id);
+  elsif b.phase = 'reveal' and now() > b.phase_started_at + case when b.style = 'duel' then interval '12 seconds' else interval '5 seconds' end then
+    if b.current_round >= b.round_count then
+      perform battle_finish(b.id);
+      return 'finished';
+    end if;
+    update battles set current_round = current_round + 1, phase = 'question', phase_started_at = now(), phase_ends_at = null where id = b.id;
+  end if;
+  return 'live';
+end $$;
+
+-- ---------------------------------------------------------------- finish: duel rewards, then everything as before
+create or replace function battle_finish(p_battle uuid) returns void
+language plpgsql security definer set search_path = public as $$
+declare b battles%rowtype; s1 int; s2 int; w int; pl record; c courses%rowtype; played_today int; nplayers int;
+        r1 numeric; r2 numeric; e1 numeric; res1 numeric; d int; k int; repeats int; nright int; amt int; res jsonb;
+begin
+  select * into b from battles where id = p_battle for update;
+  select coalesce(sum(score) filter (where team = 1), 0), coalesce(sum(score) filter (where team = 2), 0), count(*)
+    into s1, s2, nplayers from battle_players where battle_id = b.id;
+  w := case when s1 > s2 then 1 when s2 > s1 then 2 else 0 end;
+  update battles set status = 'finished', winner_team = w where id = b.id;
+  if b.rewarded then return; end if;
+  update battles set rewarded = true where id = b.id;
+  select * into c from courses where id = b.course_id;
+
+  if b.style = 'duel' then
+    for pl in select * from battle_players where battle_id = b.id loop
+      select count(*) into nright from battle_answers where battle_id = b.id and user_id = pl.user_id and correct;
+      -- anti-farming: 5 rewarded duels a day, and only 3 a day against the same opponent count
+      select count(*) into played_today from xp_events
+        where user_id = pl.user_id and reason = 'duel' and (created_at at time zone 'Indian/Mauritius')::date = today_local();
+      select count(*) into repeats from battles ob join battle_players me on me.battle_id = ob.id and me.user_id = pl.user_id
+      where ob.style = 'duel' and ob.status = 'finished' and ob.id <> b.id and me.duel_counted
+        and (ob.created_at at time zone 'Indian/Mauritius')::date = today_local()
+        and exists (select 1 from battle_players o join battle_players cur on cur.user_id = o.user_id and cur.battle_id = b.id and cur.team <> pl.team
+                    where o.battle_id = ob.id and o.team <> me.team);
+      if nplayers = 2 and repeats < 3 then
+        update battle_players set duel_counted = true where battle_id = b.id and user_id = pl.user_id;
+        if played_today < 5 then
+          -- 15 XP per correct answer; the winner's is doubled plus a 50 XP bonus; a draw adds 20
+          amt := case when w = pl.team then nright * 30 + 50 when w = 0 then nright * 15 + 20 else nright * 15 end;
+          res := award_xp(pl.user_id, amt, 'duel', b.id::text, c.tier, case when w = pl.team then 20 when w = 0 then 8 else 5 end, true);
+          update battle_players set reward_xp = coalesce((res->>'xp')::int, 0) where battle_id = b.id and user_id = pl.user_id;
+        end if;
+      end if;
+      perform bump_challenge(pl.user_id, 'battle_play', 1, null);
+      if w = pl.team then perform bump_challenge(pl.user_id, 'battle_win', 1, null); end if;
+      perform check_achievements(pl.user_id);
+    end loop;
+    return;
+  end if;
+
+  for pl in select * from battle_players where battle_id = b.id loop
+    select count(*) into played_today from xp_events
+      where user_id = pl.user_id and reason = 'battle' and (created_at at time zone 'Indian/Mauritius')::date = today_local();
+    if nplayers >= 2 and played_today < 5 then
+      res := award_xp(pl.user_id, case when w = 0 then 35 when w = pl.team then 60 else 20 end,
+                      'battle', b.id::text, c.tier, case when w = pl.team then 10 else 3 end, true);
+      update battle_players set reward_xp = coalesce((res->>'xp')::int, 0) where battle_id = b.id and user_id = pl.user_id;
+    end if;
+    perform bump_challenge(pl.user_id, 'battle_play', 1, null);
+    if w = pl.team then perform bump_challenge(pl.user_id, 'battle_win', 1, null); end if;
+    perform check_achievements(pl.user_id);
+  end loop;
+
+  -- ranked: Elo on team averages. Students only; tutors play unrated.
+  if b.style = 'ranked' and exists (select 1 from battle_players where battle_id = b.id and team = 1)
+     and exists (select 1 from battle_players where battle_id = b.id and team = 2) then
+    select avg(p.rating) filter (where bp.team = 1), avg(p.rating) filter (where bp.team = 2) into r1, r2
+    from battle_players bp join profiles p on p.id = bp.user_id where bp.battle_id = b.id;
+    e1 := 1 / (1 + power(10, (r2 - r1) / 400));
+    res1 := case w when 1 then 1 when 2 then 0 else 0.5 end;
+    for pl in select bp.*, p.ranked_played, p.role from battle_players bp join profiles p on p.id = bp.user_id where bp.battle_id = b.id loop
+      if pl.role <> 'student' then continue; end if;
+      k := case when pl.ranked_played < 10 then 40 else 28 end;           -- placement games move faster
+      d := round(k * (case when pl.team = 1 then res1 - e1 else (1 - res1) - (1 - e1) end));
+      -- anti-farming: after 3 ranked games today against the same opponent(s), no more rating changes
+      select count(*) into repeats from battles ob join battle_players me on me.battle_id = ob.id and me.user_id = pl.user_id
+      where ob.style = 'ranked' and ob.status = 'finished' and ob.id <> b.id
+        and (ob.created_at at time zone 'Indian/Mauritius')::date = today_local()
+        and exists (select 1 from battle_players o join battle_players cur on cur.user_id = o.user_id and cur.battle_id = b.id and cur.team <> pl.team
+                    where o.battle_id = ob.id and o.team <> me.team);
+      if repeats >= 3 then d := 0; end if;
+      update profiles set rating = greatest(0, rating + d), ranked_played = ranked_played + 1,
+        ranked_wins = ranked_wins + case when w = pl.team then 1 else 0 end where id = pl.user_id;
+      update battle_players set rating_delta = d where battle_id = b.id and user_id = pl.user_id;
+    end loop;
+  end if;
+end $$;
+revoke execute on function battle_finish(uuid) from public, anon, authenticated;
+
+-- ---------------------------------------------------------------- chapter ranking
+create or replace function duel_ranking(p_chapter uuid, p_limit int default 10) returns table(
+  id uuid, display_name text, avatar_mode text, discord_avatar_url text, roblox_headshot_url text, blocky jsonb,
+  name_style text, frame text, wins bigint, played bigint, accuracy int)
+language sql stable security definer set search_path = public as $$
+  with games as (
+    select bp.user_id, (b.winner_team = bp.team) as won, b.id
+    from battles b join battle_players bp on bp.battle_id = b.id
+    where b.style = 'duel' and b.status = 'finished' and b.chapter_id = p_chapter and bp.duel_counted
+  ), stats as (
+    select g.user_id, count(*) filter (where g.won) wins, count(*) played,
+      (select round(100.0 * count(*) filter (where a.correct) / nullif(count(*), 0))::int
+         from battle_answers a where a.user_id = g.user_id and a.battle_id in (select id from games x where x.user_id = g.user_id)) accuracy
+    from games g group by g.user_id
+  )
+  select p.id, p.display_name, p.avatar_mode, p.discord_avatar_url, p.roblox_headshot_url, p.blocky, p.name_style, p.frame,
+         s.wins, s.played, coalesce(s.accuracy, 0)
+  from stats s join profiles p on p.id = s.user_id
+  where is_approved() and p.role = 'student'
+  order by s.wins desc, s.accuracy desc nulls last, s.played asc
+  limit least(greatest(coalesce(p_limit, 10), 1), 50);
+$$;
+revoke all on function duel_ranking(uuid, int) from public, anon;
+grant execute on function duel_ranking(uuid, int) to authenticated;
+
+-- ---------------------------------------------------------------- tutor opens duels for a chapter once it has been taught
+create or replace function set_duel_open(p_chapter uuid, p_open boolean) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not is_tutor() then raise exception 'tutors only'; end if;
+  update chapters set duel_open = coalesce(p_open, false) where id = p_chapter;
+end $$;
+revoke all on function set_duel_open(uuid, boolean) from public, anon;
+grant execute on function set_duel_open(uuid, boolean) to authenticated;
+
+
 -- ===== seed.sql =====
 -- Generated by scripts/build-seed.mjs. Do not edit by hand.
 begin;
@@ -6425,6 +6679,41 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('8875ff65-97d3-5ac0-acad-a906853df708', 2) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b1f910ef-5ab6-505a-a6cb-1282b2fa3570', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', '243cec3b-95b0-53cf-a228-568b3d470450', 'Which statement about an IP address is true?', '["It is exactly the same as the device''s MAC address","It is set permanently by the device''s manufacturer","It is stored in ROM and can never be changed at all","It identifies a device on a network and can change"]'::jsonb, 'IP addresses are assigned by the network (and can be dynamic). The MAC address is the one fixed by the manufacturer.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('b1f910ef-5ab6-505a-a6cb-1282b2fa3570', 3) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('fb13cdfc-a8e3-5414-abdc-15342952201b', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'State the name of the register that holds the address of the next instruction to be fetched.', '["Memory Address Register (MAR)","Program Counter (PC)","Current Instruction Register (CIR)","Memory Data Register (MDR)"]'::jsonb, 'The PC always points to the next instruction. The MAR holds the address being accessed right now.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('fb13cdfc-a8e3-5414-abdc-15342952201b', 1, '''State'' = a short answer, no explanation needed. Write the full name and the abbreviation: ''Program Counter (PC)''. Just ''counter'' gets no mark.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('27b6948e-f478-5eb9-a574-b7d8ee832c8c', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'In the fetch stage of the fetch–decode–execute cycle, what happens first?', '["The control unit decodes the instruction","The instruction in the MDR is copied to the CIR","The address in the PC is copied to the MAR","The value in the PC is incremented by 1"]'::jsonb, 'Fetch starts by copying the PC into the MAR so the CPU knows which memory location to read.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('27b6948e-f478-5eb9-a574-b7d8ee832c8c', 2, 'For a ''Describe the fetch stage'' question, give the steps in order, one mark each: PC → MAR, address sent on the address bus, instruction comes back on the data bus into the MDR, MDR → CIR, PC incremented. Name the buses for full marks.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('b110aea3-0f32-56a4-a2d7-c8f2fa265442', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Identify the bus that carries data in one direction only, from the CPU to memory.', '["Data bus","Address bus","Serial bus","Control bus"]'::jsonb, 'Addresses only go from the CPU (MAR) to memory, so the address bus is one-way.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('b110aea3-0f32-56a4-a2d7-c8f2fa265442', 1, '''Identify'' = name it. If asked to explain, add the reason: the CPU only ever sends addresses to memory, so the address bus is unidirectional. The data and control buses are bidirectional.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('bca75f3b-6e4d-5884-a711-da4e22c621e2', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Which register stores the data or instruction that has just been fetched from memory?', '["Memory Address Register (MAR)","Accumulator (ACC)","Memory Data Register (MDR)","Program Counter (PC)"]'::jsonb, 'The MDR holds whatever has just been read from, or is about to be written to, memory.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('bca75f3b-6e4d-5884-a711-da4e22c621e2', 2, 'Mark schemes accept ''MDR'' or ''memory data register''. A common lost mark: mixing up MAR (an address) with MDR (the data at that address). Address = A, Data = D.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('0b0cd6ca-9530-5936-a148-30fc40d948df', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Describe the role of the Arithmetic Logic Unit (ALU).', '["It holds frequently used data close to the CPU","It sends control signals to the other components","It stores the address of the next instruction","It carries out calculations and logical comparisons"]'::jsonb, 'The ALU does the maths and the logic. The control unit is the one that sends control signals.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('0b0cd6ca-9530-5936-a148-30fc40d948df', 3, 'For 2 marks give two separate points: performs arithmetic (add, subtract) AND performs logic operations (comparisons such as AND, OR, greater than). It can also be credited for using the accumulator to hold results.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('9d840483-0d07-5048-ae82-e5cdd8219418', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Explain why increasing the size of the cache can improve the performance of a CPU.', '["The CPU can carry out more cycles every second","More frequently used data can be read without going to RAM","Secondary storage can be accessed more quickly","Each core can process two instructions at once"]'::jsonb, 'Cache is much faster than RAM. A bigger cache means more of what the CPU needs is already there.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('9d840483-0d07-5048-ae82-e5cdd8219418', 1, '''Explain'' needs a point plus a reason. Point: more data/instructions can be stored in cache. Reason: cache is faster to access than RAM, so the CPU waits less. One-word answers like ''faster'' score nothing.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('38f73964-e177-5ed6-a244-4813ab250f8f', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'A computer''s processor is upgraded from 2 cores to 4 cores. Explain why its performance may not double.', '["Cores share one register, so only one can run","Some programs cannot be split to run on several cores","Extra cores reduce the amount of cache available","Each extra core makes the clock speed slower"]'::jsonb, 'If a task can''t be split into parallel parts, extra cores sit idle.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('38f73964-e177-5ed6-a244-4813ab250f8f', 1, 'Examiners want the limitation, not just ''more cores = faster''. Good points: software must be written to use multiple cores, and cores must communicate, which takes time.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('255fa4d5-75fc-5388-aa5f-a7bc436b8471', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Which device is most likely to contain an embedded system?', '["A school file server","A laptop computer","A washing machine","A desktop gaming PC"]'::jsonb, 'An embedded system does one dedicated job inside a bigger device, like controlling a wash cycle.', false, 'paper', '3.1 Computer architecture', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('255fa4d5-75fc-5388-aa5f-a7bc436b8471', 2, 'When asked to describe an embedded system, say it is a computer system built into a larger device, with a dedicated function. Then give a clear example such as a washing machine, microwave or car engine management system. General-purpose computers are not embedded.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('f4b9c463-efd8-5788-a385-35c34cbead90', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Describe how a capacitive touch screen detects where it has been touched.', '["The finger changes the electrostatic field at that point","A grid of infrared beams is broken by the finger","Pressure sensors measure how hard the screen is pressed","Two layers are pressed together to complete a circuit"]'::jsonb, 'Your finger is conductive, so it disturbs the screen''s electrostatic field. The processor works out where.', false, 'paper', '3.2 Input and output devices', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('f4b9c463-efd8-5788-a385-35c34cbead90', 0, 'Typical 3-mark answer: the screen has a conductive layer and an electrostatic field; touching it changes the field/charge at that point; the change is measured to calculate the coordinates. Pressing layers together describes a resistive screen.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('eb90df7a-c982-5f6a-a179-cd77e5785fa5', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Identify the most suitable sensor to switch street lights on automatically when it gets dark.', '["Pressure sensor","Light sensor","Humidity sensor","Moisture sensor"]'::jsonb, 'The amount of light is what changes at dusk, so a light sensor is used.', false, 'paper', '3.2 Input and output devices', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('eb90df7a-c982-5f6a-a179-cd77e5785fa5', 1, 'For sensor questions, link the sensor to what it measures: light level. If asked how the system works, say the sensor sends data to a microprocessor, which compares it with a stored value and switches the light (actuator) on when it is below the value.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('1dc6576b-bb43-5772-aa06-f18c9eb02874', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Which statement describes ROM?', '["Non-volatile and stores the start-up (bootstrap) instructions","Volatile and holds the programs that are currently running","Volatile memory used as a cache inside the CPU","Secondary storage that holds the user''s saved files"]'::jsonb, 'ROM keeps its contents when power is off and holds the instructions used to start the computer.', false, 'paper', '3.3 Data storage', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('1dc6576b-bb43-5772-aa06-f18c9eb02874', 0, 'RAM vs ROM questions: one mark per difference. Use the key words volatile / non-volatile, read and write / read only, and what each stores (currently running data and programs / the bootstrap).') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('64142a54-7b0c-55af-a0bf-fba901326868', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Describe how data is stored on a magnetic hard disk drive.', '["Capacitors in memory chips are charged","Areas of a spinning platter are magnetised","Pits are burnt into a reflective layer","Electrons are trapped in NAND flash cells"]'::jsonb, 'A read/write head magnetises tiny areas of the spinning platter; the direction represents 1 or 0.', false, 'paper', '3.3 Data storage', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('64142a54-7b0c-55af-a0bf-fba901326868', 1, 'Key words that score: platters, spin, read/write head moves across, tracks and sectors, magnetised to represent 1 or 0. Flash cells describe SSDs and pits describe optical discs, so don''t mix them up.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('243066b4-1789-5496-a1ae-2f3a4a716d1a', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'A photographer uses a laptop outdoors. Explain why solid-state storage is suitable.', '["It has no moving parts, so it is less likely to be damaged","It is volatile, so data is wiped if the laptop is stolen","It has a much larger capacity than any hard disk drive","It is cheaper per gigabyte than a magnetic hard disk"]'::jsonb, 'With no moving parts, solid-state storage survives knocks much better than a spinning hard disk.', false, 'paper', '3.3 Data storage', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('243066b4-1789-5496-a1ae-2f3a4a716d1a', 0, 'Always tie the reason to the scenario: no moving parts, so it is not damaged if the laptop is knocked or dropped outdoors; it also uses less power, so the battery lasts longer. A generic ''it is faster'' without context scores less.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('d6d44298-12b8-55cd-a432-699502d5b114', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Explain what is meant by virtual memory.', '["Cache memory that is built into the processor itself","ROM that is used to store the computer''s start-up instructions","Part of secondary storage used as extra RAM when RAM is full","A copy of RAM saved in the cloud in case of power failure"]'::jsonb, 'When RAM runs out, the OS moves unused pages to the hard disk or SSD to free space.', false, 'paper', '3.3 Data storage', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('d6d44298-12b8-55cd-a432-699502d5b114', 2, 'For 3 marks: it is an area of secondary storage, used when RAM is full, and data not needed right now is moved there (paged out) and swapped back when needed. Mention that it is slower than RAM.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('fb013dd3-7724-5406-aa2f-adc2851ca250', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Which statement describes a MAC address?', '["A unique address given to the NIC by the manufacturer","The address of a web page that is typed into a browser","An address given by the router that can change over time","An address that identifies a whole network on the internet"]'::jsonb, 'A MAC address is set on the network interface card when it is made.', false, 'paper', '3.4 Network hardware', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('fb013dd3-7724-5406-aa2f-adc2851ca250', 0, 'MAC vs IP is a favourite. MAC: assigned by the manufacturer, unique, identifies the device''s NIC, usually does not change, written in hexadecimal. IP: assigned by the network, can change, identifies the device on a network or the internet.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('7c4197c2-0d62-5c7f-a196-e29f8392fa41', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Describe the role of a router in a network.', '["It stores web pages so that they load faster for users","It connects devices in one network using MAC addresses only","It converts digital signals to analogue for a telephone line","It forwards data packets between networks using IP addresses"]'::jsonb, 'Routers look at the destination IP address and send each packet on towards the right network.', false, 'paper', '3.4 Network hardware', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('7c4197c2-0d62-5c7f-a196-e29f8392fa41', 3, 'Router answers that score: receives data packets, reads the destination IP address, forwards packets to the next network/router, and can assign IP addresses to devices. ''Connects to the internet'' alone is too vague.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('c24f345a-d0af-5944-accc-c3d5f051a26a', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '370a13a2-14d8-5bde-a83e-93460980a1aa', null, 'Explain the difference between a static IP address and a dynamic IP address.', '["Static is assigned each time a device connects; dynamic does not change","Static is used for home devices; dynamic is only used by web servers","Dynamic is set by the manufacturer; static is chosen by the user","Dynamic is assigned each time a device connects; static does not change"]'::jsonb, 'A dynamic address can change each time you connect. A static one stays fixed.', false, 'paper', '3.4 Network hardware', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('c24f345a-d0af-5944-accc-c3d5f051a26a', 3, 'Describe both sides of the difference: static stays the same / is permanently assigned; dynamic is assigned by the network each time the device connects and can change. A use case helps: web servers often use static addresses.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+update chapters set duel_open = true where id = '370a13a2-14d8-5bde-a83e-93460980a1aa';
 insert into chapters (id, course_id, number, title, sort) values ('b4554ed1-9472-5f54-af1e-bd8fb51a7b78', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '4', 'Software', 3) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('f0926a55-fe6a-5ca2-ab32-b9c39480363c', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '4.1', 'Types of software and interrupts', 0, '## Software and interrupts
 ## Types of software
@@ -6494,6 +6783,39 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('cb0b9eb3-e39c-5c78-ac07-f20254417281', 0) on conflict (question_id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('66633dae-cbab-55a7-a1c5-2d952ce0ed9e', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', '0ff3576b-79aa-5896-aae9-b89095034ab4', 'What is machine code?', '["Structured English used to plan algorithms","Binary instructions the CPU can run directly","A high-level language that is easy to read","Short mnemonics like LDA that need assembling"]'::jsonb, 'All programs must end up as machine code, because that is the only language the processor understands.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('66633dae-cbab-55a7-a1c5-2d952ce0ed9e', 1) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('b7b70310-b28c-5171-ac78-3310b58c58b4', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Identify which of these is system software.', '["Operating system","Photo editor","Web browser","Spreadsheet"]'::jsonb, 'The operating system manages the hardware and runs other software, so it is system software.', false, 'paper', '4.1 Types of software', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('b7b70310-b28c-5171-ac78-3310b58c58b4', 0, 'System software runs and manages the computer (operating system, utility software). Application software lets the user do a task (spreadsheet, browser). In a tick-table question, read every row before ticking.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('bb069a84-a5bc-5a37-a789-817b88f9f195', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which of these is a function of an operating system?', '["Translating source code into machine code","Checking documents for spelling mistakes","Managing the memory used by programs","Compressing photos before they are emailed"]'::jsonb, 'Allocating and managing memory is one of the OS''s core jobs. Translation is done by a translator.', false, 'paper', '4.1 Types of software', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('bb069a84-a5bc-5a37-a789-817b88f9f195', 2, 'For ''Describe three functions'', name each function AND say what it does: memory management (allocates RAM to programs), file management (creates, saves, deletes files), security (user accounts), peripheral management (drivers), multitasking, providing an interface, interrupt handling.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('dd227ecd-1a58-517a-aec9-9d128a27138d', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Explain what is meant by an interrupt.', '["A program that removes viruses from the hard disk","An instruction that is written in assembly language","An error that stops the computer from working forever","A signal sent to the processor to ask for its attention"]'::jsonb, 'An interrupt is a signal asking the CPU to stop and deal with something.', false, 'paper', '4.1 Interrupts', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('dd227ecd-1a58-517a-aec9-9d128a27138d', 3, 'Two marks: it is a signal (from hardware or software) and it tells the processor that something needs attention. Adding an example such as ''a key is pressed'' can earn a further mark.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('f2015190-bfcc-5d3d-af74-1d2b502d65b8', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which event would cause a software interrupt?', '["A program tries to divide a number by zero","A key is pressed on the keyboard","The printer runs out of paper","The mouse is moved by the user"]'::jsonb, 'Division by zero comes from a running program, so it is a software interrupt. The others come from hardware.', false, 'paper', '4.1 Interrupts', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('f2015190-bfcc-5d3d-af74-1d2b502d65b8', 0, 'Know examples of both types. Hardware: a key press, a mouse move, the printer is out of paper. Software: division by zero, two programs trying to use the same memory. The examiner will not accept the same example twice.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('e2212e9a-9ac9-5ba5-adab-4144da122156', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'An interrupt is received. What does the processor do at the end of the current fetch–decode–execute cycle?', '["It ignores it until the program has ended","It restarts the computer straight away","It saves the current state of the running task","It deletes the program that was running"]'::jsonb, 'The CPU saves where it was, runs the interrupt service routine, then restores the state and continues.', false, 'paper', '4.1 Interrupts', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('e2212e9a-9ac9-5ba5-adab-4144da122156', 2, 'Describe the full sequence for 3–4 marks: checks for interrupts at the end of each FDE cycle, checks the priority, saves the current task''s state (registers), runs the interrupt service routine (ISR), then restores the state and carries on.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('d23de070-a63a-544a-a094-1892b6216d37', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Explain how firmware is used when a computer is switched on.', '["It translates assembly code into machine code","It is installed by the user to edit documents","It is hardware that holds the operating system","It is stored in ROM and loads the operating system"]'::jsonb, 'The firmware, or bootloader, in ROM starts the hardware and loads the OS into RAM.', false, 'paper', '4.1 Types of software', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('d23de070-a63a-544a-a094-1892b6216d37', 3, 'Hardware, firmware, OS and applications questions want the chain: firmware (the bootloader, held in ROM) loads the operating system; the OS provides the environment that applications run in; applications run on top of the OS.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('a1a558b9-8443-57b5-a841-be5337c3eef9', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Give an advantage of writing a program in a high-level language.', '["It gives direct control of the hardware","It is easier to read, write and debug","It always runs faster than machine code","It does not need a translator to run"]'::jsonb, 'English-like keywords make high-level code easier for people to read and fix.', false, 'paper', '4.2 Programming languages', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('a1a558b9-8443-57b5-a841-be5337c3eef9', 1, 'Good high-level points: easier to understand, debug and maintain, uses English-like statements, and is portable to different types of machine. ''Easier'' alone is too vague; say what is easier.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('6cec1f86-835e-5447-ad5d-af59f527f4e7', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Give a reason why a programmer might choose to write in assembly language.', '["To have direct control of specific hardware","So that beginners find the code easier to read","To make the code portable to any type of CPU","So that the code needs no translation at all"]'::jsonb, 'Assembly maps closely to machine code, so it gives precise control over the hardware.', false, 'paper', '4.2 Programming languages', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('6cec1f86-835e-5447-ad5d-af59f527f4e7', 0, 'Assembly language reasons that score: direct manipulation of hardware or registers, code can be made more efficient (faster, uses less memory), and it is useful for embedded systems. Remember: assembly still needs an assembler.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('7bdf6e86-2572-5894-a236-b0d5eea758a9', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which statement describes a compiler?', '["It translates and runs the program one line at a time","It translates assembly language into machine code","It translates the whole program into an executable file","It checks the program for logic errors only"]'::jsonb, 'A compiler translates the whole program once and creates an executable that runs without the compiler.', false, 'paper', '4.2 Translators', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('7bdf6e86-2572-5894-a236-b0d5eea758a9', 2, 'Compiler: translates all the code in one go, produces an executable file, and reports all errors at the end. Interpreter: translates and runs line by line, and stops at the first error. Assembler: assembly to machine code.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('3897c252-0696-5950-a226-b31d7f75438d', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'A programmer is writing a game. Explain why she uses an interpreter while writing it.', '["It produces an executable file she can share with users","The final game will run faster than compiled code","It hides the source code so nobody can copy the game","It stops at the first error, so she can fix it straight away"]'::jsonb, 'An interpreter stops where the error is, which makes debugging during development quick.', false, 'paper', '4.2 Translators', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('3897c252-0696-5950-a226-b31d7f75438d', 3, 'Scenario questions need the reason linked to development: errors are reported line by line or one at a time, she can test and debug part of the program, and there''s no need to recompile after every change.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('691e31d1-4280-5d6c-aabd-6ddfdf161b4f', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Explain why the programmer uses a compiler when the game is released to customers.', '["Errors are shown to customers one line at a time as it runs","Customers can easily edit the code to change the game","The game will only work on the programmer''s own computer","Customers can run it without the source code or a translator"]'::jsonb, 'The executable runs on its own and keeps the source code private.', false, 'paper', '4.2 Translators', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('691e31d1-4280-5d6c-aabd-6ddfdf161b4f', 3, 'Release reasons that score: it produces an executable, so users don''t need a translator; the source code is not shared, so it can''t be copied or edited; the compiled program runs faster.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('15824ae0-ab19-5788-a14b-e2be9a9d3b70', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which translator converts assembly language into machine code?', '["Debugger","Interpreter","Compiler","Assembler"]'::jsonb, 'An assembler translates each assembly mnemonic into its machine code instruction.', false, 'paper', '4.2 Translators', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('15824ae0-ab19-5788-a14b-e2be9a9d3b70', 3, 'This is a one-mark ''State'' question. For translator tables, assembler = assembly → machine code; compilers and interpreters translate high-level languages. A debugger is a tool, not a translator.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('76d3edf1-452d-5d01-a03d-6b4157b1d26a', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which IDE feature lets a programmer run a program one line at a time to find an error?', '["A built-in code editor","Stepping through with breakpoints","Prettyprinting the code","Auto-completion of keywords"]'::jsonb, 'Breakpoints pause the program and stepping runs it line by line, so you can watch variables change.', false, 'paper', '4.2 IDEs', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('76d3edf1-452d-5d01-a03d-6b4157b1d26a', 1, 'For ''Describe four features of an IDE'', name the feature and say how it helps: code editor (write code), run-time environment (run it), translator (compile or interpret), error diagnostics (highlight errors), auto-completion, auto-correction, prettyprint (colours and indents code).') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('4855f731-1757-5250-a27c-b55c094b11e7', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Describe what error diagnostics in an IDE do.', '["They complete keywords as the programmer types them","They highlight errors and suggest where the problem is","They translate the program into an executable file","They colour-code keywords and indent the code neatly"]'::jsonb, 'Error diagnostics point out mistakes and where they are.', false, 'paper', '4.2 IDEs', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('4855f731-1757-5250-a27c-b55c094b11e7', 1, 'Don''t just repeat the name of the feature. Describe it: it highlights or underlines errors, shows the line number, and gives a message explaining the error so it can be corrected.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('a845f48d-aafb-560e-a285-27510a5d206b', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which is an example of utility software?', '["Word processing software","Presentation software","Anti-virus software","Web browsing software"]'::jsonb, 'Anti-virus protects the computer, so it is a utility. The others are application software.', false, 'paper', '4.1 Types of software', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('a845f48d-aafb-560e-a285-27510a5d206b', 2, 'Utility software maintains or protects the computer. Examples: anti-virus, defragmentation, backup, compression. If asked to describe one, say what it does, for example ''scans files and quarantines or deletes viruses''.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation, battle_ok, source, ref, difficulty) values ('fe485352-5ba5-571e-a049-c6a0539e7058', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78', null, 'Which order is correct when a computer starts up and a user opens an application?', '["The OS loads the firmware, then firmware runs the application","The application runs directly without needing an OS","The application loads the OS, then the OS runs firmware","Firmware loads the OS, then the OS runs the application"]'::jsonb, 'Applications rely on the OS, and the OS is loaded by the firmware.', false, 'paper', '4.1 Types of software', 2) on conflict (id) do update set prompt = excluded.prompt, options = excluded.options, explanation = excluded.explanation, ref = excluded.ref, source = 'paper', battle_ok = false;
+insert into question_keys (question_id, correct, guide) values ('fe485352-5ba5-571e-a049-c6a0539e7058', 3, 'This links all four layers. Write it as a chain in your answer: hardware → firmware (bootloader) → operating system → applications. Each layer depends on the one below it.') on conflict (question_id) do update set correct = excluded.correct, guide = excluded.guide;
+update chapters set duel_open = true where id = 'b4554ed1-9472-5f54-af1e-bd8fb51a7b78';
 insert into chapters (id, course_id, number, title, sort) values ('a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', 'fde0dc5c-cf56-5890-ab53-3152e2c4fc37', '5', 'The internet and its uses', 4) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('75756aee-a9de-556f-aa25-d39518dc5bd3', 'a2caa4b0-2816-5d4e-a1af-2e0a91a3745a', '5.1', 'The internet and the world wide web', 0, '## The internet and the web
 - **Internet**: the global network of networks (the infrastructure)

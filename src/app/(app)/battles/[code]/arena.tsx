@@ -22,11 +22,11 @@ type Floater = { key: number; uid: string; idx: number };
 type Battle = {
   status: "lobby" | "live" | "finished" | "cancelled"; phase: "question" | "reveal"; current_round: number; round_count: number;
   round_seconds: number; phase_started_at: string | null; winner_team: number | null; host_id: string;
-  style?: "classic" | "ranked" | "pressure"; phase_ends_at?: string | null;
+  style?: "classic" | "ranked" | "pressure" | "duel"; phase_ends_at?: string | null;
 };
-type Player = { user_id: string; team: number; score: number; rating_delta?: number | null };
+type Player = { user_id: string; team: number; score: number; rating_delta?: number | null; reward_xp?: number | null };
 type Answer = { round_no: number; user_id: string; choice: number | null; correct: boolean | null; points: number };
-type Q = { round: number; id: string; prompt: string; options: string[]; correct: number | null };
+type Q = { round: number; id: string; prompt: string; options: string[]; correct: number | null; ref?: string | null; guide?: string | null; explanation?: string | null };
 
 const LETTERS = ["A", "B", "C", "D", "E"];
 
@@ -87,7 +87,8 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
       // newer columns (style, rating) need the ranked database update; fall back so battles still work without it
       sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id, style, phase_ends_at").eq("id", battleId).single()
         .then(async (r) => (r.error ? await sb.from("battles").select("status, phase, current_round, round_count, round_seconds, phase_started_at, winner_team, host_id").eq("id", battleId).single() as unknown as typeof r : r)),
-      sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at")
+      sb.from("battle_players").select("user_id, team, score, rating_delta, reward_xp").eq("battle_id", battleId).order("joined_at")
+        .then(async (r) => (r.error ? await sb.from("battle_players").select("user_id, team, score, rating_delta").eq("battle_id", battleId).order("joined_at") as unknown as typeof r : r))
         .then(async (r) => (r.error ? await sb.from("battle_players").select("user_id, team, score").eq("battle_id", battleId).order("joined_at") as unknown as typeof r : r)),
       sb.from("battle_answers").select("round_no, user_id, choice, correct, points").eq("battle_id", battleId),
     ]);
@@ -329,7 +330,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
         <div className="min-w-0">
           <Link href="/battles" className="text-sm text-muted hover:underline">← Battles</Link>
           <h1 className="flex items-center gap-2 font-display text-xl leading-tight sm:text-3xl"><Swords className="shrink-0" size={22} /> <span className="min-w-0">{mode} · {courseTitle}</span></h1>
-          {style !== "classic" && <span className={cn("chip mt-1 text-xs font-bold", style === "ranked" ? "text-xp" : "text-warn")}>{STYLES[style].emoji} {STYLES[style].label}</span>}
+          {style !== "classic" && <span className={cn("chip mt-1 text-xs font-bold", style === "ranked" ? "text-xp" : style === "duel" ? "text-accent" : "text-warn")}>{STYLES[style].emoji} {STYLES[style].label}</span>}
         </div>
         <div className="flex items-center gap-2">
           <button className="chip" aria-label={sound ? "Mute music and sounds" : "Turn on music and sounds"} onClick={() => { unlock(); setSoundOn(!sound); setSound(!sound); }}>
@@ -422,6 +423,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
             <div className="bar mb-4"><i style={{ width: `${reveal ? 100 : (left / b.round_seconds) * 100}%`, background: reveal ? "rgb(var(--muted))" : style === "pressure" && duration < b.round_seconds ? "rgb(var(--warn))" : "rgb(var(--xp))", transition: "width 0.4s linear" }} /></div>
             <AnimatePresence mode="wait">
               <motion.div key={q.round} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}>
+                {style === "duel" && q.ref && <div className="mb-1 text-xs font-bold uppercase tracking-wide text-accent">📜 Past-paper style · {q.ref}</div>}
                 <h2 className="mb-4 text-xl">{q.prompt}</h2>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {q.options.map((o, i) => {
@@ -443,6 +445,12 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
                   })}
                 </div>
                 {!reveal && mine && <p className="mt-3 text-center text-sm text-muted">Locked in. Waiting for the others…</p>}
+                {reveal && style === "duel" && (q.guide || q.explanation) && (
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-4 rounded border-2 border-accent/40 bg-accent/10 p-3 text-left text-sm">
+                    {q.explanation && <p><b>Why:</b> {q.explanation}</p>}
+                    {q.guide && <p className="mt-2"><b>📝 How to score it in the exam:</b> {q.guide}</p>}
+                  </motion.div>
+                )}
               </motion.div>
             </AnimatePresence>
           </div>
@@ -467,7 +475,11 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
                 </motion.div>
               );
             })()}
-            <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · XP added to your profile (5 rewarded battles a day)</p>
+            {(() => { const rx = players.find((p) => p.user_id === meId)?.reward_xp; return typeof rx === "number" && rx > 0
+              ? <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 font-display text-3xl text-xp">+{rx} XP</motion.div> : null; })()}
+            <p className="mt-1 text-muted">{teamScore(1)} – {teamScore(2)} · {style === "duel"
+              ? "Duel XP: 15 per correct answer, winner doubled + 50 bonus (5 rewarded duels a day, 3 per opponent)"
+              : "XP added to your profile (5 rewarded battles a day)"}</p>
             <div className="mt-4 flex justify-center gap-3">
               <button className="btn btn-primary" onClick={rematch}>New lobby</button>
               <Link className="btn btn-ghost" href="/battles">Back</Link>
