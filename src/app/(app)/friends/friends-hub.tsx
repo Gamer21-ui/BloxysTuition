@@ -63,7 +63,9 @@ export function FriendsHub({ meId }: { meId: string }) {
   }
 
   const byId = (id: string) => people.find((p) => p.id === id);
-  const friends = fr.filter((f) => f.status === "accepted").map((f) => (f.requester === meId ? f.addressee : f.requester));
+  // only MY friendships: the tutor can read everyone's, which used to list other students' friends (and duplicates)
+  const mine = fr.filter((f) => f.requester === meId || f.addressee === meId);
+  const friends = [...new Set(mine.filter((f) => f.status === "accepted").map((f) => (f.requester === meId ? f.addressee : f.requester)))];
   const requestsIn = fr.filter((f) => f.status === "pending" && f.addressee === meId).map((f) => f.requester);
   const requestsOut = fr.filter((f) => f.status === "pending" && f.requester === meId).map((f) => f.addressee);
   const iLead = !party || party.leader_id === meId;
@@ -73,13 +75,13 @@ export function FriendsHub({ meId }: { meId: string }) {
     const p = byId(id);
     if (!p) return null;
     return (
-      <div className="flex items-center gap-3 py-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
         <Avatar name={p.display_name} mode={p.avatar_mode} discordUrl={p.discord_avatar_url} robloxUrl={p.roblox_headshot_url} blocky={p.blocky} size={44} frame={p.frame} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[7rem] flex-1">
           <div className="truncate font-bold"><NameTag name={p.display_name} style={p.name_style} /> {party?.leader_id === id && <Crown size={14} className="inline text-xp" aria-label="Party leader" />}</div>
           <div className="text-xs text-muted">Lv {p.level} · {p.role === "tutor" ? "Tutor" : `${p.tier === "O" ? "O" : p.tier} Level`}{p.title ? ` · ${p.title}` : ""}</div>
         </div>
-        <div className="flex shrink-0 flex-wrap justify-end gap-1.5">{children}</div>
+        {children && <div className="ml-auto flex flex-wrap justify-end gap-1.5">{children}</div>}
       </div>
     );
   };
@@ -149,7 +151,7 @@ export function FriendsHub({ meId }: { meId: string }) {
           {friends.map((id) => (
             <Person key={id} id={id}>
               {iLead && !members.includes(id) && !sent.some((s) => s.to_id === id) && (
-                <button className="btn btn-accent btn-sm" onClick={() => rpc("party_invite", { p_user: id }, "Party invite sent")}><Users size={14} aria-hidden="true" /> Invite to party</button>
+                <button className="btn btn-accent btn-sm" onClick={() => rpc("party_invite", { p_user: id }, "Party invite sent")}><Users size={14} aria-hidden="true" /> Invite</button>
               )}
               <button className="btn btn-ghost btn-sm" title="Remove friend" onClick={() => { if (confirm("Remove this friend?")) rpc("remove_friend", { p_user: id }); }}><UserMinus size={14} aria-hidden="true" /></button>
             </Person>
