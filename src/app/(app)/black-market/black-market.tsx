@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { ShadySeller } from "@/components/shady-seller";
 import { cn } from "@/lib/utils";
 import { haggleSay, haggleShake, haggleWalk } from "./haggle-actions";
+import { Heist } from "./heist";
 
 type Status = { owner_online: boolean; uses: { bunk: number; skip: number }; max_uses: number; prices: Record<"bunk" | "skip", { coins: number; xp: number }> };
 type Opt = { id: string; label: string };
@@ -27,7 +28,7 @@ const TIERS = [0, 15, 25, 50];
 type Haggle = { id: string | null; lines: { from: "me" | "seller"; text: string }[]; discount: number; turnsLeft: number; deal: boolean };
 const NO_HAGGLE: Haggle = { id: null, lines: [], discount: 0, turnsLeft: 5, deal: false };
 
-type Shades = { mood: string; hello: string; cap: number; capReason: string | null; tax?: number; visits?: number; overdue?: number } | null;
+type Shades = { mood: string; hello: string; cap: number; capReason: string | null; tax?: number; visits?: number; overdue?: number; grudge?: boolean } | null;
 export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absences, shades = null }: {
   isTutor: boolean; ready: boolean; status: Status | null; coins: number; xp: number; homework: Opt[]; absences: Opt[]; shades?: Shades;
 }) {
@@ -100,6 +101,11 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
               {line.startsWith("\"") ? line : `"${line}"`}
             </motion.div>
           </AnimatePresence>
+          {shades?.grudge && (
+            <div className="mt-2 rounded-lg border border-red-500/50 bg-red-500/10 px-3 py-1.5 text-xs font-bold text-red-200">
+              (!) Grudge: +50% on everything since he caught you in his vault. Apologise below to make it go away.
+            </div>
+          )}
           {!!shades?.tax && (
             <div className="mt-2 rounded-lg border border-orange-400/50 bg-orange-500/10 px-3 py-1.5 text-xs font-bold text-orange-200">
               🧾 Loiterer tax: +{shades.tax}% on everything. {shades.visits} visits this week with {shades.overdue} overdue homework. Hand it in and the tax disappears.
@@ -116,8 +122,8 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
 
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {(Object.keys(GOODS) as Good[]).map((g) => {
-          const used = status.uses[g]; const broken = used >= status.max_uses; const tax = shades?.tax || 0;
-          const price = { coins: Math.round(status.prices[g].coins * (100 + tax) / 100), xp: Math.round(status.prices[g].xp * (100 + tax) / 100) };
+          const used = status.uses[g]; const broken = used >= status.max_uses; const tax = shades?.tax || 0; const gm = shades?.grudge ? 1.5 : 1;
+          const price = { coins: Math.round(Math.round(status.prices[g].coins * (100 + tax) / 100) * gm), xp: Math.round(Math.round(status.prices[g].xp * (100 + tax) / 100) * gm) };
           const opts = g === "bunk" ? absences : homework;
           const afford = coins >= price.coins && xp >= price.xp;
           return (
@@ -132,7 +138,7 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
               </div>
               <div className="mt-2 font-display text-lg">{GOODS[g].name}{broken && " · BROKEN"}</div>
               <div className="text-xs text-white/60">{broken ? "You've used all 3. The seller won't sell you another." : GOODS[g].blurb}</div>
-              <div className={cn("mt-2 text-sm font-bold", afford ? "text-yellow-300" : "text-red-400")}>🪙 {price.coins.toLocaleString()} + ✨ {price.xp.toLocaleString()} XP{tax ? <span className="ml-1 text-orange-300">(+{tax}% tax)</span> : null}</div>
+              <div className={cn("mt-2 text-sm font-bold", afford ? "text-yellow-300" : "text-red-400")}>🪙 {price.coins.toLocaleString()} + ✨ {price.xp.toLocaleString()} XP{tax ? <span className="ml-1 text-orange-300">(+{tax}% tax)</span> : null}{gm > 1 ? <span className="ml-1 text-red-300">(+50% grudge)</span> : null}</div>
               {!broken && !opts.length && <div className="mt-1 text-xs text-white/40">{GOODS[g].empty}</div>}
             </button>
           );
@@ -179,9 +185,9 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
           </div>
 
           {(() => {
-            const tax = shades?.tax || 0, off = hag.deal ? hag.discount : 0;
-            const base = { coins: Math.round(status.prices[pick].coins * (100 + tax) / 100), xp: Math.round(status.prices[pick].xp * (100 + tax) / 100) };
-            const c = Math.round(Math.round(status.prices[pick].coins * (100 - off) / 100) * (100 + tax) / 100), x = Math.round(Math.round(status.prices[pick].xp * (100 - off) / 100) * (100 + tax) / 100);
+            const tax = shades?.tax || 0, off = hag.deal ? hag.discount : 0, gm = shades?.grudge ? 1.5 : 1;
+            const base = { coins: Math.round(Math.round(status.prices[pick].coins * (100 + tax) / 100) * gm), xp: Math.round(Math.round(status.prices[pick].xp * (100 + tax) / 100) * gm) };
+            const c = Math.round(Math.round(Math.round(status.prices[pick].coins * (100 - off) / 100) * (100 + tax) / 100) * gm), x = Math.round(Math.round(Math.round(status.prices[pick].xp * (100 - off) / 100) * (100 + tax) / 100) * gm);
             return (
               <p className="text-xs text-white/50">
                 Costs {off > 0 && <s className="mr-1 text-white/30">🪙 {base.coins.toLocaleString()} + {base.xp.toLocaleString()} XP</s>}
@@ -195,6 +201,7 @@ export function BlackMarket({ isTutor, ready, status, coins, xp, homework, absen
           </div>
         </div>
       )}
+      {shades && <Heist onLine={(l) => { setBad(false); setLine(l); }} />}
       <div className="mt-8 text-center"><Link href="/shop" className="inline-block px-3 py-2.5 text-xs text-white/40 hover:text-white/80">← sneak back to the normal shop</Link></div>
     </Shell>
   );

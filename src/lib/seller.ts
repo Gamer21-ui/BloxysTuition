@@ -33,9 +33,9 @@ export function moodFor(ownerOnline: boolean, now = new Date()) {
 export type Intel = {
   rank: number | null; players: number; level: number; streak: number; studiedRecently: boolean; idleWeek: boolean;
   ownerOnline: boolean; cap: number; capReason: string | null; mood: Mood;
-  visitsWeek: number; overdue: number; tax: number;
+  visitsWeek: number; overdue: number; tax: number; grudge: boolean;
 };
-export type Visit = { week: number; overdue: number; tax: number } | null;
+export type Visit = { week: number; overdue: number; tax: number; grudge?: boolean } | null;
 
 /** What Mr. Shades knows about this student (server-side only). */
 export async function intelFor(userId: string, visit: Visit = null): Promise<Intel> {
@@ -63,17 +63,18 @@ export async function intelFor(userId: string, visit: Visit = null): Promise<Int
     rank, players: sorted.length, level: levelFromXp(xp), streak: me?.streak ?? 0,
     studiedRecently: (q3 || 0) + (h3 || 0) > 0 || (me?.streak ?? 0) >= 5, idleWeek: (q7 || 0) + (h7 || 0) === 0 && (me?.streak ?? 0) === 0,
     ownerOnline, cap, capReason, mood: moodFor(ownerOnline),
-    ...(visit ? { visitsWeek: visit.week, overdue: visit.overdue, tax: visit.tax } : await visitInfo(userId)),
+    ...(visit ? { visitsWeek: visit.week, overdue: visit.overdue, tax: visit.tax, grudge: !!visit.grudge } : await visitInfo(userId)),
   };
 }
 
 /** visits this week / overdue homework / loiterer tax, straight from the database helpers */
 async function visitInfo(userId: string) {
   const admin = createAdminClient();
-  const [{ data: w }, { data: o }, { data: t }] = await Promise.all([
+  const [{ data: w }, { data: o }, { data: t }, { data: g }] = await Promise.all([
     admin.rpc("bm_week_visits", { p_user: userId }), admin.rpc("overdue_homework", { p_user: userId }), admin.rpc("bm_tax", { p_user: userId }),
+    admin.rpc("bm_grudge", { p_user: userId }),
   ]);
-  return { visitsWeek: (w as number) ?? 0, overdue: (o as number) ?? 0, tax: (t as number) ?? 0 };
+  return { visitsWeek: (w as number) ?? 0, overdue: (o as number) ?? 0, tax: (t as number) ?? 0, grudge: !!g };
 }
 
 /** Free greeting built from mood + what he knows (no AI call). */
@@ -82,6 +83,7 @@ export function greeting(i: Intel, name: string) {
   const seed = new Date().getUTCDate() + first.length;
   const lines = [i.mood.hello[seed % i.mood.hello.length]];
   if (i.ownerOnline) return lines[0];
+  if (i.grudge) return `YOU. ${first}. Hand in my vault, hand on my heart… I trusted you. Prices are 50% more for you until I hear a REAL apology.`;
   const hw = `${i.overdue} overdue homework${i.overdue === 1 ? "" : "s"}`;
   if (i.tax > 0) return `${lines[0]} ${first}. Visit #${i.visitsWeek} this week and ${hw}? You LIVE here now. Alright: for you, 10% more. Do your homework and maybe I'll forget.`;
   if (i.overdue > 0 && i.visitsWeek >= 4) return `${lines[0]} Back AGAIN, ${first}? ${hw} and you're in MY alley? Go do it. Keep loitering and prices go up.`;
@@ -104,6 +106,7 @@ export function briefing(i: Intel) {
     i.idleWeek ? "They haven't done any quizzes or homework this week: roast them a little and tell them to go study (still haggle)." : "",
     i.overdue > 0 ? `They have ${i.overdue} OVERDUE homework${i.overdue === 1 ? "" : "s"}: roast them about it and tell them to go do it.` : "",
     i.visitsWeek >= 4 ? `They've visited your alley ${i.visitsWeek} times this week${i.overdue ? " instead of doing homework" : ""}; comment on it.` : "",
+    i.grudge ? "This student tried to ROB your vault and got caught. You're hurt and holding a grudge: their prices are 50% higher until they properly apologise (in the apology box, not here). Be cold and dramatic, and make them work hard for any discount." : "",
     i.tax > 0 ? "Because they loiter here with overdue homework, you charge them 10% MORE (the loiterer tax); tell them it goes away if they do their homework." : "",
   ].filter(Boolean).join(" ");
 }

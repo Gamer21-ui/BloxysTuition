@@ -44,6 +44,11 @@ Answer with ONLY this JSON: {"reply": "...", "score": <0-100>}`;
 
 /** Claude Haiku via the Messages API. Returns null on any problem so the mood engine takes over. */
 async function askClaude(item: "bunk" | "skip", history: Line[], text: string, intel?: Intel): Promise<{ reply: string; score: number } | null> {
+  return askClaudeJson(SYSTEM(item, intel), history, text);
+}
+
+/** Any Mr. Shades conversation: the system prompt must ask for {"reply": "...", "score": 0-100}. */
+export async function askClaudeJson(system: string, history: Line[], text: string): Promise<{ reply: string; score: number } | null> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return null;
   const messages = [...history, { from: "me" as const, text }].map((l) => ({ role: l.from === "me" ? "user" : "assistant", content: l.text }));
@@ -53,7 +58,7 @@ async function askClaude(item: "bunk" | "skip", history: Line[], text: string, i
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST", signal: ctrl.signal,
       headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-      body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-haiku-5-5", max_tokens: 200, system: SYSTEM(item, intel), messages }),
+      body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-haiku-5-5", max_tokens: 200, system, messages }),
     });
     if (!res.ok) return null;
     const data = await res.json() as { content?: { type: string; text?: string }[] };

@@ -540,3 +540,63 @@ end $$;
 set role authenticated; select pg_temp.as_user(:'ava');
 select display_name, win_streak from most_wanted();
 reset role;
+-- Heist: locked until customer + regular + trusted, 3 questions, loot 50-75% of the vault or caught -> +50% prices, 7-day cooldown
+reset role;
+update profiles set last_seen_at = null where role = 'tutor';
+set role authenticated; select pg_temp.as_user(:'ava');
+do $$ begin
+  perform heist_start(); raise exception 'heist allowed while locked';
+exception when others then if sqlerrm not like '%buy something first%' and sqlerrm not like '%never in class%' then raise; end if; end $$;
+reset role;
+insert into class_sessions(id, title, held_on) values
+  ('bbbbbbbb-0000-0000-0000-000000000011', 'CS a', current_date - 3), ('bbbbbbbb-0000-0000-0000-000000000012', 'CS b', current_date - 5),
+  ('bbbbbbbb-0000-0000-0000-000000000013', 'CS c', current_date - 7) on conflict do nothing;
+insert into attendance(session_id, user_id, status) values
+  ('bbbbbbbb-0000-0000-0000-000000000011', :'ben', 'present'), ('bbbbbbbb-0000-0000-0000-000000000012', :'ben', 'present'),
+  ('bbbbbbbb-0000-0000-0000-000000000013', :'ben', 'late') on conflict do nothing;
+delete from black_market_haggles where user_id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+select heist_status() - 'next_at' - 'last' as ben_heist_status_before_trust;
+do $$ begin
+  perform heist_start(); raise exception 'HEIST OPENED EARLY';
+exception when others then if sqlerrm not like '%doesn''t trust you%' then raise; end if; end $$;
+reset role;
+insert into black_market_haggles(user_id, item, discount, score, status) values (:'ben', 'skip', 25, 70, 'used');
+update profiles set coins = 100 where id = :'ben';
+set role authenticated; select pg_temp.as_user(:'ben');
+select heist_start() as hs \gset
+select jsonb_array_length(:'hs'::jsonb -> 'questions') = 3 as three_questions, (:'hs'::jsonb -> 'questions' -> 0 ? 'correct') as leaks_answer;
+reset role;
+do $$ declare h bm_heists%rowtype; ans int[]; r jsonb; v int; c0 int; c1 int; begin
+  select * into h from bm_heists order by started_at desc limit 1;
+  select array_agg(k.correct order by array_position(h.question_ids, k.question_id)) into ans from question_keys k where k.question_id = any(h.question_ids);
+  v := bm_vault(); c0 := (select coins from profiles where id = h.user_id);
+  perform set_config('request.jwt.claim.sub', h.user_id::text, true);
+  r := heist_finish(h.id, ans);
+  if (r->>'correct')::int <> 3 or (r->>'chance')::int <> 85 then raise exception 'odds wrong: %', r; end if;
+  c1 := (select coins from profiles where id = h.user_id);
+  if (r->>'success')::boolean then
+    if c1 - c0 < floor(v * 0.5) or c1 - c0 > ceil(v * 0.75) then raise exception 'loot out of range: % of %', c1 - c0, v; end if;
+    raise notice 'ok: heist escaped with % of % vault coins (85%% odds)', c1 - c0, v;
+  else
+    if not bm_grudge(h.user_id) then raise exception 'caught but no grudge'; end if;
+    raise notice 'ok: heist caught at 85%% odds (grudge set)';
+  end if;
+  begin perform heist_finish(h.id, ans); raise exception 'heist finished twice';
+  exception when others then if sqlerrm not like '%already over%' then raise; end if; end;
+  begin perform heist_start(); raise exception 'no cooldown';
+  exception when others then if sqlerrm not like '%lie low%' and sqlerrm not like '%hawk%' then raise; end if; end;
+end $$;
+-- a grudge makes everything +50% (bunk 750 -> 1125), forgiving removes it
+reset role;
+insert into bm_grudges(user_id) values (:'ava') on conflict (user_id) do update set forgiven_at = null;
+update profiles set coins = 5000, xp = 5000 where id = :'ava';
+insert into class_sessions(id, title, held_on) values ('bbbbbbbb-0000-0000-0000-000000000021', 'Ava miss', current_date - 1) on conflict do nothing;
+insert into attendance(session_id, user_id, status) values ('bbbbbbbb-0000-0000-0000-000000000021', :'ava', 'absent') on conflict do nothing;
+delete from black_market_visits where user_id = :'ava';
+set role authenticated; select pg_temp.as_user(:'ava');
+select (black_market_buy('bunk', 'bbbbbbbb-0000-0000-0000-000000000021') ->> 'paid_coins')::int = 1125 as grudge_price_plus_50;
+do $$ begin
+  insert into bm_grudges(user_id) values (auth.uid()); raise exception 'student wrote a grudge row';
+exception when insufficient_privilege then null; end $$;
+reset role;

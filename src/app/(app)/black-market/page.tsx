@@ -30,10 +30,10 @@ export default async function BlackMarketPage() {
   // Mr. Shades sizes you up: mood of the day, owner online?, your leaderboard rank, have you been studying?
   // count this visit (and find out about overdue homework / the loiterer tax)
   const { data: v } = me.role === "student" ? await sb.rpc("black_market_visit") : { data: null };
-  const intel = me.role === "student" ? await intelFor(me.id, (v as never) ?? { week: 0, overdue: 0, tax: 0 }) : null;
+  const intel = me.role === "student" ? await intelFor(me.id, (v as never) ?? { week: 0, overdue: 0, tax: 0, grudge: false }) : null;
   const shades = intel ? {
     mood: `${intel.mood.emoji} ${intel.mood.name}`, hello: greeting(intel, me.display_name), cap: intel.cap, capReason: intel.capReason,
-    tax: intel.tax, visits: intel.visitsWeek, overdue: intel.overdue,
+    tax: intel.tax, visits: intel.visitsWeek, overdue: intel.overdue, grudge: intel.grudge,
   } : null;
   return (
     <BlackMarket isTutor={me.role === "tutor"} ready={!error && !!status} status={status as never} coins={me.coins} xp={me.xp}
