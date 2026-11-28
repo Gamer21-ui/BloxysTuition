@@ -2,6 +2,12 @@
 export type Game = { slug: string; ids: string[]; emoji: string; name: string; genre: string; topic: string; blurb: string; where: { course: string; chapters: string[] }[] };
 
 export const ARCADE: Game[] = [
+  { slug: "bit-patrol", ids: ["bit-patrol"], emoji: "📡", name: "Bit Patrol", genre: "Puzzle", topic: "Data transmission · parity · error checks",
+    blurb: "Guard a data link: spot corrupted bytes with parity checks, set parity bits, and name each transmission method.", where: [{ course: "o-computer-science", chapters: ["2"] }] },
+  { slug: "cyber-defender", ids: ["cyber-defender"], emoji: "🛡️", name: "Cyber Defender", genre: "Detective", topic: "Internet · cyber threats · protection",
+    blurb: "Run the security desk: spot scam messages, name threats and protections, and know your DNS from your HTTPS.", where: [{ course: "o-computer-science", chapters: ["5"] }] },
+  { slug: "control-room", ids: ["control-room"], emoji: "🎛️", name: "Control Room", genre: "Builder", topic: "Automated systems · sensors · actuators",
+    blurb: "Build automated systems: pick the right sensor and actuator for greenhouses, alarms, barriers and more.", where: [{ course: "o-computer-science", chapters: ["6"] }] },
   { slug: "order-race", ids: ["order-race"], emoji: "🏁", name: "Order Race 1v1", genre: "Versus", topic: "Processes in the right order",
     blurb: "Challenge a friend: PC → MAR → MDR → CIR, packet switching, DNS lookups… Fastest correct order wins.",
     where: [{ course: "o-computer-science", chapters: ["1", "2", "3", "4", "5", "6", "7"] }] },
