@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { BRAND } from "@/lib/brand";
 import { PwaRegister } from "@/components/pwa-register";
+import { themeColor } from "@/lib/theme-color";
 
 const site = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -19,12 +20,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = {
-  themeColor: "#58cc02",
-  width: "device-width",
-  initialScale: 1,
-  viewportFit: "cover",
-};
+// the phone's status bar matches the page instead of a bright green band
+export async function generateViewport(): Promise<Viewport> {
+  const c = await cookies();
+  return { themeColor: themeColor(c.get("fb_theme")?.value, c.get("fb_mode")?.value), width: "device-width", initialScale: 1, viewportFit: "cover" };
+}
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const c = await cookies();

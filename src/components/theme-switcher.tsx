@@ -4,6 +4,7 @@ import { Moon, Sun } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { THEMES, type ThemeId } from "@/lib/brand";
 import { cn } from "@/lib/utils";
+import { applyThemeColor } from "@/lib/theme-color";
 
 function setCookie(name: string, value: string) {
   document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
@@ -17,6 +18,7 @@ export function ThemeSwitcher({ userId, initial }: { userId: string; initial: Th
     setTheme(t);
     document.documentElement.dataset.theme = t;
     setCookie("fb_theme", t);
+    applyThemeColor(t, document.documentElement.dataset.mode);
     await createClient().from("profiles").update({ theme: t }).eq("id", userId);
   }
   function toggleMode() {
@@ -24,6 +26,7 @@ export function ThemeSwitcher({ userId, initial }: { userId: string; initial: Th
     setMode(m);
     document.documentElement.dataset.mode = m;
     setCookie("fb_mode", m);
+    applyThemeColor(document.documentElement.dataset.theme, m);
   }
 
   return (

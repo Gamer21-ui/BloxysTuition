@@ -3,6 +3,7 @@ import Link from "next/link";
 import { CalendarCheck, ChevronRight, Coins, Flame, GraduationCap, Megaphone, NotebookPen, Sparkles, Swords } from "lucide-react";
 import { requireApproved } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { renderMarkdown } from "@/lib/markdown";
 import { getChallenges, getCourseProgress } from "@/lib/data";
 import { levelProgress, rankName } from "@/lib/xp";
 import { Avatar } from "@/components/avatar";
@@ -83,7 +84,7 @@ export default async function Dashboard() {
           {ann.map((a) => (
             <Card key={a.id} className="flex gap-3 border-accent">
               <Megaphone className="mt-0.5 shrink-0 text-accent" size={20} aria-hidden="true" />
-              <div><div className="font-display">{a.title}</div><p className="text-sm text-muted">{a.body}</p><div className="mt-1 text-xs text-muted">{timeAgo(a.created_at)}</div></div>
+              <div><div className="font-display">{a.title}</div><div className="prose-notes text-sm text-muted" dangerouslySetInnerHTML={{ __html: renderMarkdown(a.body || "") }} /><div className="mt-1 text-xs text-muted">{timeAgo(a.created_at)}</div></div>
             </Card>
           ))}
         </div>
