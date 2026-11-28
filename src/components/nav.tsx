@@ -36,8 +36,10 @@ export const HUBS: Item[] = [
   { href: "/dashboard", label: "Home", icon: House },
   { href: "/courses", label: "Courses", icon: BookOpen, also: ["/practice", "/quiz", "/viz", "/live"] },
   { href: "/homework", label: "Homework", icon: NotebookPen },
-  { href: "/play", label: "Play", icon: Gamepad2, also: ["/battles", "/arcade", "/challenges", "/leaderboard", "/shop", "/black-market"] },
-  { href: "/me", label: "Me", icon: UserRound, also: ["/profile", "/friends", "/chat", "/notifications", "/achievements", "/reports"] },
+  { href: "/play", label: "Play", icon: Gamepad2, also: ["/battles", "/arcade", "/challenges", "/shop", "/black-market"] },
+  { href: "/leaderboard", label: "Leaderboard", icon: Trophy },
+  { href: "/chat", label: "Chat", icon: MessagesSquare },
+  { href: "/me", label: "Me", icon: UserRound, also: ["/profile", "/friends", "/notifications", "/achievements", "/reports"] },
 ];
 export const hubItems = (special?: boolean) => (special ? HUBS.flatMap((i) => (i.href === "/homework" ? [i, SPECIAL] : [i])) : HUBS);
 export const menuItems = (style: NavStyle, special?: boolean) => (style === "classic" ? studentItems(special) : hubItems(special));
@@ -104,7 +106,7 @@ export function MobileNav({ isTutor, me, style = "new" }: { isTutor: boolean; me
   const path = usePathname();
   const tabs: Item[] = style === "classic"
     ? [STUDENT[0], STUDENT[1], STUDENT[2], isTutor ? TUTOR[0] : STUDENT.find((i) => i.href === "/battles")!]
-    : [HUBS[0], HUBS[1], HUBS[3], isTutor ? TUTOR[0] : HUBS[2]];
+    : ["/dashboard", "/courses", "/play"].map((h) => HUBS.find((i) => i.href === h)!).concat(isTutor ? TUTOR[0] : HUBS.find((i) => i.href === "/homework")!);
   const on = (h: string) => { const it = [...HUBS, ...STUDENT, ...TUTOR].find((x) => x.href === h)!; return h === "/tutor" ? path.startsWith("/tutor") : isActive(it, path); };
   const meHref = style === "classic" ? "/profile" : "/me";
 const meOn = path === "/profile";
