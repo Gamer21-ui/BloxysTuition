@@ -310,7 +310,10 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
         </div>
         <AnimatePresence>
           {floats.map((f) => (
-            <motion.div key={f.key} initial={{ y: 0, opacity: 0, scale: 0.5 }} animate={{ y: -70, opacity: [0, 1, 1, 0], scale: 1 }} transition={{ duration: 2.4, ease: "easeOut" }}
+            // pop in, jitter while it rises, then fade at the top: one full cycle, no restarts
+            <motion.div key={f.key} initial={{ y: 0, opacity: 0, scale: 0.4 }}
+              animate={{ y: [0, -18, -40, -62, -80], x: [0, -4, 4, -3, 0], rotate: [0, -8, 7, -5, 0], opacity: [0, 1, 1, 1, 0], scale: [0.4, 1.25, 1, 1, 0.9] }}
+              transition={{ duration: 2.4, times: [0, 0.15, 0.45, 0.8, 1], ease: "easeOut" }}
               className={cn("pointer-events-none absolute top-0 z-20 whitespace-nowrap rounded-full border-2 border-line bg-surface px-2 py-0.5 font-bold shadow-chunky",
                 side === 1 ? "left-3" : "right-3", EMOTES[f.idx].length <= 2 ? "text-2xl" : "text-sm")}>
               {EMOTES[f.idx]}
@@ -327,7 +330,7 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
         <span className={cn("font-display text-base sm:text-lg", t === 1 ? "text-accent" : "text-bad")}>{t === 1 ? "Blue" : "Red"}<span className="hidden sm:inline"> team</span></span>
         <motion.span key={teamScore(t)} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="font-display text-2xl tabular-nums sm:text-3xl">{teamScore(t)}</motion.span>
       </div>
-      {team(t).map((p) => <PlayerTile key={p.user_id} p={p} side={t} />)}
+      {team(t).map((p) => <div key={p.user_id}>{PlayerTile({ p, side: t })}</div>)}
       {b.status === "lobby" && Array.from({ length: cap - team(t).length }).map((_, i) => (
         <div key={i} className="card grid h-[68px] place-items-center border-dashed text-muted">
           {amPlayer && myTeam !== t ? <button className="btn btn-ghost btn-sm" onClick={() => { unlock(); rpc("join_battle", { p_code: code, p_team: t }); }}>Switch</button>
@@ -372,12 +375,12 @@ export function Arena({ battleId, code, mode, courseTitle, meId }: { battleId: s
 
       {/* split arena: side by side even on phones */}
       <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-start gap-2 sm:gap-4">
-        <TeamCol t={1} />
+        {TeamCol({ t: 1 })}
         <div className="grid place-items-center self-center pt-6">
           <motion.div animate={b.status === "live" ? { scale: [1, 1.12, 1] } : {}} transition={{ repeat: Infinity, duration: b.current_round >= b.round_count ? 0.8 : 1.6 }}
             className="grid h-10 w-10 place-items-center rounded-full bg-primary font-display text-base text-primary-ink shadow-chunky sm:h-16 sm:w-16 sm:text-2xl">VS</motion.div>
         </div>
-        <TeamCol t={2} />
+        {TeamCol({ t: 2 })}
       </div>
 
       {/* emotes: both teams */}
