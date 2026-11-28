@@ -20,6 +20,7 @@ import rewritesAEco from "./questions/rewrites-a-economics.mjs";
 import rewritesABus from "./questions/rewrites-a-business.mjs";
 import papersOCs from "./questions/papers-o-cs.mjs";
 import racesOCs from "./questions/races-o-cs.mjs";
+import papersOBus from "./questions/papers-o-business.mjs";
 import { SHOP_ITEMS } from "./shop-items.mjs";
 import notesAccounting from "./notes/accounting.mjs";
 import notesBusiness from "./notes/business.mjs";
@@ -37,11 +38,11 @@ const EXTRA = { "o-accounting": accounting, "o-business": business, "o-economics
 
 // fairer prompts/options (no "pick the longest answer" pattern), keyed by course:chapter:index
 // Past-paper Duel banks (exam-style MCQs with an answering guide), by course slug then chapter number.
-export const PAPERS = { ...papersOCs };
+export const PAPERS = { ...papersOCs, ...papersOBus };
 // Order Race puzzles (put the items in order), by course slug then chapter number.
 export const RACES = { ...racesOCs };
 // chapters whose duels open straight away (already taught)
-const DUEL_OPEN = ["o-computer-science:3", "o-computer-science:4"];
+const DUEL_OPEN = ["o-computer-science:3", "o-computer-science:4", "o-business:1"];
 export const REWRITES = { ...rewritesOCs, ...rewritesAsCs, ...rewritesACs, ...rewritesOAcc, ...rewritesOBus, ...rewritesOEco, ...rewritesAEco, ...rewritesABus };
 
 // timed practice per course. Accounting & Economics match the real Paper 1 (2027 syllabus);
