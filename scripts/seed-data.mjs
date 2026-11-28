@@ -58,7 +58,7 @@ export const COURSES = [
   {
     slug: "o-business", code: "7081", title: "O Level Business", tier: "O", color: "#f59e0b", icon: "briefcase",
     exam_label: "Cambridge O Level Business 7081 · Nov 2027",
-    description: "Replaces Business Studies 7115 from 2027. Paper 1: short answer and data response (1h30). Paper 2: case study (1h30).",
+    description: "Replaces Business Studies 7115 from 2027. Paper 1: short answer and data response, 4 questions (1h30, 50%). Paper 2: case study, 4 questions (1h30, 50%). Application now carries more marks: always use the case. Full formula list in 5.5.",
     chapters: [
       { n: "1", t: "Understanding business activity", parts: ["1.1 Business activity", "1.2 Economic sectors", "1.3 Enterprise, business growth and size", "1.4 Types of business organisation", "1.5 Business objectives and stakeholder objectives"], q: [
         ["Which business is in the secondary sector?", ["Car manufacturer", "Bank", "Fishing company", "Hairdresser"], 0, "Secondary = manufacturing and construction."],

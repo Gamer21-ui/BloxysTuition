@@ -793,7 +793,7 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('cfb20ad2-e96e-5fb9-aaf7-97f887c4a84f', 0) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('6952c6df-8a54-58b1-acfc-6d0ca17b21cb', '8b591152-0acf-5fe4-a902-2af189f81c0f', '65da8d2b-1f72-5a8b-a1b6-cb095adcad6a', '6ac9e97d-7d95-59b4-a6bb-75abb3c1887d', 'Which is a risk of storing accounting records online in the cloud?', '["Data could be hacked if security is weak","Records can be accessed from anywhere","Hardware costs are lower","Backups are automatic"]'::jsonb, 'Cloud storage is convenient, but online data needs strong passwords and access controls. The other options are benefits.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('6952c6df-8a54-58b1-acfc-6d0ca17b21cb', 0) on conflict (question_id) do nothing;
-insert into courses (id, slug, code, title, tier, exam_label, description, color, icon, sort) values ('e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'o-business', '7081', 'O Level Business', 'O', 'Cambridge O Level Business 7081 · Nov 2027', 'Replaces Business Studies 7115 from 2027. Paper 1: short answer and data response (1h30). Paper 2: case study (1h30).', '#f59e0b', 'briefcase', 1) on conflict (id) do nothing;
+insert into courses (id, slug, code, title, tier, exam_label, description, color, icon, sort) values ('e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'o-business', '7081', 'O Level Business', 'O', 'Cambridge O Level Business 7081 · Nov 2027', 'Replaces Business Studies 7115 from 2027. Paper 1: short answer and data response, 4 questions (1h30, 50%). Paper 2: case study, 4 questions (1h30, 50%). Application now carries more marks: always use the case. Full formula list in 5.5.', '#f59e0b', 'briefcase', 1) on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, sort) values ('1528e6d0-a484-5d00-ae74-bf90a326b560', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', null, 'O Level Business Speedrun', 'speedrun', 60, 150, 999) on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('d7d9bfb8-4bc4-5523-ad96-9e59b9f0703c', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', null, 'Mixed topic test (25 questions, 30m)', 'exam', 100, 1800, 25, 1000, 'locked') on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('7b2a7cdb-c9af-5fb8-a344-760937bab6a9', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', null, 'Fix my mistakes', 'review', 0, 1001) on conflict (id) do nothing;
@@ -856,6 +856,7 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('9bec721a-
 | **Public limited company (plc)** | Shareholders; shares sold on the stock exchange | Limited | Can raise large amounts | Risk of takeover, published accounts |
 | **Franchise** | Franchisee buys the right to use a brand | Depends | Proven brand, support | Fees and royalties, little freedom |
 | **Joint venture** | Two businesses share a project | Depends | Shared costs and risks | Shared profits, possible conflicts |
+| **Social enterprise** | Owners/members | Depends on legal form | Social and environmental aims as well as profit; customers like it | Profit and social aims can conflict |
 | **Public corporation** | Government | n/a | Provides essential services | May be inefficient |
 
 **Limited liability**: owners can only lose what they invested. **Unlimited liability**: personal assets can be taken to pay business debts.
@@ -878,6 +879,7 @@ Objectives change over time, e.g. survival at first, then growth.
 | Employees | Fair pay, job security, good conditions |
 | Customers | Quality, low prices, service |
 | Suppliers | Regular orders, paid on time |
+| Lenders (banks) | Loans repaid on time with interest |
 | Government | Taxes, jobs, following the law |
 | Local community | Jobs, low pollution |
 
@@ -915,6 +917,10 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('e5521f9e-8b77-53f4-a848-527d892c61e0', 3) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('2d9c29c0-6256-5ded-a424-a1b7195719b5', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '904d6d01-c7b4-5c32-aef2-186694669f10', 'What is a benefit of a business staying small?', '["Closer contact with customers and quicker decisions","Lower average costs from economies of scale","Easier access to large loans from the major banks","Bigger discounts from buying in very large quantities"]'::jsonb, 'Small firms can offer a personal service and react quickly. The other options are advantages of being large.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('2d9c29c0-6256-5ded-a424-a1b7195719b5', 0) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('e984028a-4844-50ea-ade2-eeb6fb04d1a1', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '904d6d01-c7b4-5c32-aef2-186694669f10', 'What is a social enterprise?', '["A business owned by its customers who share the profits","A business owned and run by the government for the public","A business that is not allowed to make any profit at all","A business with social or environmental aims as well as profit"]'::jsonb, 'Social enterprises trade like normal businesses but also aim to help society or the environment. They can make a profit.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('e984028a-4844-50ea-ade2-eeb6fb04d1a1', 3) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('01040393-478f-50f3-a4f0-b1043117a83a', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'f4c81869-c3cc-50d3-a177-dabf0bad1718', '904d6d01-c7b4-5c32-aef2-186694669f10', 'Which stakeholder mainly wants loans repaid on time with interest?', '["Lenders such as banks","The local community","Customers of the business","Employees of the business"]'::jsonb, 'Lenders are external stakeholders whose main objective is getting their money back with interest.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('01040393-478f-50f3-a4f0-b1043117a83a', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('d85278ab-73c3-5282-a46a-813d3130834d', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '2', 'People in business', 1) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('24e3f1a2-b425-5abb-a556-18fdb62c2746', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.1', 'Human resource management (HRM)', 0, '## Human resource management (HRM)
 HRM covers recruitment, selection, training, motivation, and dismissal or redundancy.
@@ -924,6 +930,10 @@ HRM covers recruitment, selection, training, motivation, and dismissal or redund
 2. **Job description** (duties of the job) and **person specification** (skills and qualities wanted)
 3. Advertise: **internal** (cheaper, known worker, motivates staff) or **external** (new ideas, wider choice)
 4. Applications (CV/application form), shortlist, interview/tests, appoint
+
+## Employment contracts
+A legal agreement between employer and employee: job title, duties, hours, pay, holidays, notice period, start date.
+**Benefits**: both sides know their rights and duties, which reduces disputes; it gives the worker security.
 
 ## Training
 - **Induction**: introduces new staff to the business
@@ -960,7 +970,15 @@ Planning, organising, coordinating, commanding and controlling.
 - **Democratic**: staff are involved (better ideas, motivation, slower)
 - **Laissez-faire**: staff decide (suits skilled, self-motivated workers)
 
-**Trade unions** represent workers in negotiations on pay and conditions.
+## Flexible working and contracts
+- **Full-time** vs **part-time** staff: part-time gives flexibility to cover busy periods, but less commitment and more training per hour worked.
+- **Flexible working**: flexi-time, working from home, job sharing. Better work-life balance and motivation, but harder to coordinate.
+
+## Reducing the workforce (downsizing)
+Reasons: **automation**, **falling demand**, **cutting costs**. **Redundancy** = the job is no longer needed (not the worker''s fault), usually with compensation. Handle it fairly to keep remaining staff motivated.
+
+## Trade unions
+A group of workers who join together to protect their interests. Member benefits: stronger voice when negotiating pay and conditions (**collective bargaining**), legal support, help with disputes and job security.
 
 > Exam tip: link leadership style to the situation, e.g. "laissez-faire suits a team of experienced designers".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('10d3d840-86db-5fad-afe3-273b32a9a94f', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.3', 'Methods of communication', 2, '## Communication
@@ -972,6 +990,9 @@ Communication: sender → message → medium → receiver → feedback.
 | Written (letters, reports, email) | Permanent record, detailed | Slower, no body language |
 | Visual (charts, posters) | Easy to understand | May oversimplify |
 | Electronic (email, messaging, video calls) | Quick, reaches many | Information overload, needs equipment |
+| **Text messages** | Instant, read quickly, good for short updates | Too short for detail, easy to miss |
+| **Social media** (business pages, groups) | Reaches customers and staff fast, cheap, two-way | Public mistakes spread fast, hard to control |
+| **Noticeboards** | Cheap, everyone can see it | One-way, may be ignored or out of date |
 
 - **One-way**: no reply possible (notice board)
 - **Two-way**: feedback (meeting)
@@ -1004,7 +1025,7 @@ Wages (time rate), **salary**, **piece rate**, **commission**, **bonus**, **prof
 - **Job rotation**: moving between tasks (variety)
 - **Job enlargement**: more tasks at the same level
 - **Job enrichment**: more challenging, responsible work
-- **Teamworking**, training, promotion, **recognition**
+- **Teamworking**, training, promotion, **recognition** (praise, **employee of the month**)
 
 > Exam tip: recommend motivation methods that fit the job, e.g. commission for sales staff, piece rate for factory output.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'Chapter 2 quiz', 'quiz', 60, 1) on conflict (id) do nothing;
@@ -1038,6 +1059,14 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('47a4ea77-cad1-5fe8-a471-4d839f75961a', 2) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('3e5a7b34-a995-52e3-a6d0-65649231e1f5', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'What is one-way communication?', '["Two people talk to each other on the phone","There is a meeting where people ask questions","The receiver cannot respond, e.g. a notice board","There is a video call with several people in it"]'::jsonb, 'In one-way communication there is no feedback, so the sender can''t check the message was understood.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('3e5a7b34-a995-52e3-a6d0-65649231e1f5', 2) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('0293021f-2d35-57ce-aec4-06c166527eed', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'Which is a benefit of an employment contract for the worker?', '["Their pay, hours and duties are clearly set out","They no longer need any training from the business","They can never be made redundant by the business","They can choose their own working hours each day"]'::jsonb, 'A contract sets out the terms of the job, so both sides know their rights and duties.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('0293021f-2d35-57ce-aec4-06c166527eed', 0) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('008d2d12-4972-5662-a6df-d8e1697145ab', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'Why might a business reduce its workforce (downsize)?', '["It wants to raise its spans of control","It has automated part of its production","It has just won a large new order","Its employees are highly motivated"]'::jsonb, 'Automation, falling demand and cost-cutting are the main reasons for downsizing.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('008d2d12-4972-5662-a6df-d8e1697145ab', 1) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('fd610d2c-d8a9-5bef-a92a-c08159d545e3', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'What is a disadvantage of using social media to communicate with customers?', '["Mistakes are public and spread very fast","It is always slower than writing a letter","It cannot reach customers outside the area","Customers have no way to reply to it"]'::jsonb, 'Social media is fast, cheap and two-way, but a mistake or complaint can spread publicly in minutes.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('fd610d2c-d8a9-5bef-a92a-c08159d545e3', 0) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('195e9b61-ee93-58a2-a485-6ad78d1dafcb', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'd85278ab-73c3-5282-a46a-813d3130834d', 'bbcbecad-5dfa-500e-aebc-dc33eeb82e66', 'Which is an example of flexible working?', '["Working some days from home","Being paid a fixed monthly salary","Receiving a bonus for good sales","Moving between tasks on the line"]'::jsonb, 'Flexible working includes flexi-time, working from home and job sharing. Job rotation is a motivation method.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('195e9b61-ee93-58a2-a485-6ad78d1dafcb', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('4a6917c9-553e-55e8-aa82-87402390ef15', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '3', 'Marketing', 2) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('5364794a-48f3-5350-a459-5544673e71ec', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.1', 'Marketing and the market', 0, '## Marketing and the market
 **Marketing** identifies customer needs and satisfies them profitably.
@@ -1091,17 +1120,32 @@ Design, quality, features, packaging, brand. **Product life cycle**: introductio
 | **Competitive** | Match rivals'' prices |
 | **Penetration** | Low price to enter a market and win share |
 | **Skimming** | High price for a new, unique product |
+| **Dynamic** | Price changes with demand in real time (flights, hotels, ride apps) |
 | **Promotional** | Short-term low price |
 | **Psychological** | $9.99 instead of $10 |
 
 **Price elasticity**: if demand is elastic, cutting price raises revenue.
 
 ## Place
-Distribution channels: producer → consumer; producer → retailer → consumer; producer → wholesaler → retailer → consumer. Plus **e-commerce** (online, 24/7, global reach, but delivery costs and security worries).
+Distribution channels: producer → consumer (direct); producer → retailer → consumer; producer → wholesaler → retailer → consumer; producer → **agent** → consumer (agents sell for the producer, often abroad, for a commission).
+
+## Ecommerce (buying and selling online)
+Examples: online shops, marketplaces, apps, social media shops.
+| | Advantages | Disadvantages |
+|---|---|---|
+| **Business** | Sells 24/7 to a global market, lower shop costs, data on customers | Delivery and returns costs, website costs, online competition, security risks |
+| **Customer** | Convenient, wider choice, easy price comparison | Can''t see or try the product, delivery waits, fraud worries |
 
 ## Promotion
 - **Above the line**: paid media advertising (TV, radio, social media ads)
 - **Below the line**: sales promotions (BOGOF, coupons, free samples), personal selling, sponsorship, PR
+
+## Marketing strategy
+The 4Ps must work together for the target market. In the exam you may have to **recommend a marketing mix** and justify each P using the case.
+
+## Entering new overseas markets
+**Advantages**: more customers and sales, spreading risk, growth when the home market is saturated.
+**Disadvantages**: different language, culture and laws; transport costs; exchange-rate risk; less knowledge of the market. Often done through agents, joint ventures or franchising to reduce risk.
 
 > Exam tip: the mix must be consistent. A luxury product needs high price, exclusive place and image-led promotion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('73d4c489-4e09-5630-a840-733edaae7110', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.4', 'Legal controls', 3, '## Legal controls on marketing
@@ -1152,6 +1196,12 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('7e39ad27-d922-5e3b-a7ff-77217f1b50c8', 1) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('471390f4-1f20-526a-ab34-9f7e8bc2ca3f', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'In market research, what is a sample?', '["A low price set for a short time to boost sales","A free product given away to attract new customers","A smaller group chosen to represent the population","Every single person in the whole target population"]'::jsonb, 'Asking everyone is too costly, so a representative sample is used instead.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('471390f4-1f20-526a-ab34-9f7e8bc2ca3f', 2) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('c9387396-0ed4-550f-ae23-676b694ff9e3', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'A ride-sharing app charges more when demand is high. Which pricing strategy is this?', '["Competitive pricing","Cost-plus pricing","Dynamic pricing","Penetration pricing"]'::jsonb, 'Dynamic pricing changes the price in real time according to demand, as with flights, hotels and ride apps.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('c9387396-0ed4-550f-ae23-676b694ff9e3', 2) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('9ff5992d-e09f-5def-a04a-38890b04a8b9', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'Which is an advantage of ecommerce for customers?', '["They pay no money until the business has made a profit","They never have to wait for any delivery to arrive","They can compare prices easily and shop at any time","They can always touch and try products before buying"]'::jsonb, 'Online shopping is convenient and makes price comparison easy, but customers can''t try products first and must wait for delivery.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('9ff5992d-e09f-5def-a04a-38890b04a8b9', 2) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('76712802-a20c-56e5-aa85-dc23d08a38ba', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4a6917c9-553e-55e8-aa82-87402390ef15', '0944761e-b220-5635-aeec-975153efb1f8', 'What is a disadvantage of entering a new overseas market?', '["Different laws, language and culture","It allows growth when home sales stop","It gives access to more customers","It spreads the business''s risks"]'::jsonb, 'Overseas markets bring more customers and spread risk, but differences in laws, language and culture make it harder.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('76712802-a20c-56e5-aa85-dc23d08a38ba', 0) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('acfcb10e-2017-5def-aeb1-7d978feeb433', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '4', 'Operations management', 3) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('efec63cc-847c-534c-a880-b02155a0a062', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.1', 'Production of goods and services', 0, '## Production
 Production turns inputs into goods and services. **Productivity** = output ÷ input (e.g. units per worker per day). Raise it with training, better technology, motivation and better methods.
@@ -1172,7 +1222,9 @@ Buffer inventory protects against delays; too much ties up cash and costs storag
 
 > Exam tip: recommend a production method based on demand and product type.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('887a8abf-ec80-5f33-ae68-6c8297cb2c9a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.2', 'Technology and production of goods and services', 1, '## Technology in production
-- **Automation and robots**: faster, consistent quality, can work 24/7
+- **Mechanisation**: machines help workers do the job (workers still operate them)
+- **Automation and robots**: machines do the job with little human input; faster, consistent quality, can work 24/7
+- **3D printing**: builds products layer by layer from a digital design; good for prototypes and customised products
 - **CAD** (computer-aided design) and **CAM** (computer-aided manufacturing)
 - **Electronic point of sale (EPOS)**: tracks sales and inventory
 - **Online ordering and contactless payments** in services
@@ -1190,7 +1242,8 @@ Producing in a way that meets today''s needs without harming future generations.
 
 ## Methods
 - **Renewable energy** (solar, wind)
-- **Recycling** and using recycled materials
+- **Reducing** resources and waste, **reusing** materials and packaging (e.g. refill schemes), **recycling** and using recycled materials
+- **Eco-friendly products and packaging**
 - **Less packaging**, biodegradable packaging
 - Reducing water and energy use
 - **Responsible sourcing** of materials
@@ -1258,8 +1311,9 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('cde68957-
 ## Services
 Retailers need footfall, visibility, parking and nearby customers. Online businesses are less tied to location.
 
-## Moving abroad
-Cheaper labour, access to new markets, avoiding trade barriers. Risks: language, culture, exchange rates and political instability.
+## Choosing a country (moving abroad)
+Factors: cost of labour and land, size of the market, trade barriers (tariffs and quotas), government incentives, political stability, exchange rates, language and culture, skills available.
+Reasons: cheaper labour, access to new markets, avoiding trade barriers. Risks: language, culture, exchange rates and political instability.
 
 > Exam tip: give a recommendation for the specific business and say which factor matters most for it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('b1843aa4-56cf-5714-a55a-5d14084a03e9', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'Chapter 4 quiz', 'quiz', 60, 3) on conflict (id) do nothing;
@@ -1293,6 +1347,12 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('be194840-223f-5500-a3cc-ade3036245c2', 1) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b00da646-d917-5f1e-adba-e754699c573f', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'Fixed costs $6 000, contribution per unit $3, sales 2 500 units. What is the profit?', '["$1 500","$7 500","−$1 500","$6 000"]'::jsonb, 'Total contribution = 2 500 × $3 = $7 500. Profit = $7 500 − $6 000 = $1 500.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('b00da646-d917-5f1e-adba-e754699c573f', 0) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('b8572082-823f-546b-a84a-db5dff798aad', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'What is 3D printing in production?', '["Using three machines in a row to make each product","Building a product layer by layer from a digital design","Printing three copies of every design for the factory","Designing products on paper before making them by hand"]'::jsonb, '3D printing builds objects layer by layer from a computer design. It suits prototypes and customised products.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('b8572082-823f-546b-a84a-db5dff798aad', 1) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('9a14642c-54ea-5c77-ab05-aa7fa408398b', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'Which is an example of reusing in sustainable production?', '["Burning waste to get rid of it","Using more packaging for safety","Refilling customers'' own bottles","Moving the factory to a cheaper area"]'::jsonb, 'Reusing means using items again, such as refill schemes. Reducing, reusing and recycling all cut waste.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('9a14642c-54ea-5c77-ab05-aa7fa408398b', 2) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('8857b725-1d70-56b9-ad1e-debe57b6b2dd', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'acfcb10e-2017-5def-aeb1-7d978feeb433', 'b1843aa4-56cf-5714-a55a-5d14084a03e9', 'What is the difference between mechanisation and automation?', '["Automation helps workers; mechanisation needs no human input","Mechanisation is used in services; automation only on farms","Mechanisation helps workers; automation needs little human input","There is no difference: both mean using robots for everything"]'::jsonb, 'With mechanisation, workers still operate the machines. With automation, machines do the job with little human input.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('8857b725-1d70-56b9-ad1e-debe57b6b2dd', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('e645c134-7320-552e-a820-0ae824153b0c', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '5', 'Financial information and decisions', 4) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('a05ad1c1-a128-5c27-a7a7-c4db8c9585e0', 'e645c134-7320-552e-a820-0ae824153b0c', '5.1', 'Business finance', 0, '## Sources of finance
 **Why businesses need finance**: start-up, working capital, expansion, replacing assets.
@@ -1301,9 +1361,10 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('a05ad1c1-
 |---|---|
 | Retained profit | Bank loans |
 | Selling assets | Overdrafts |
-| Owner''s savings | Share issue (companies) |
+| Owners'' investment (savings) | Share issue (companies) |
 | Reducing inventory | Trade credit, leasing, hire purchase |
-| | Grants, **microfinance**, **crowdfunding**, debt factoring |
+| Working capital (cash already in the business) | **Venture capital** (investors in risky new firms, for a share of ownership) |
+| | Grants, **microfinance**, **crowdfunding** (many people each give small amounts online), debt factoring |
 
 ## Short-term vs long-term
 - **Short-term** (working capital): overdraft, trade credit, factoring
@@ -1367,7 +1428,10 @@ A snapshot of what a business **owns** and **owes** on one date.
 - **Non-current liabilities**: owed after a year (long-term loans)
 - **Equity / capital**: owners'' investment plus retained profits
 
+**Total assets** = non-current assets + current assets
+**Total liabilities** = non-current liabilities + current liabilities
 **Total assets − total liabilities = equity**
+**Capital employed** = equity + non-current liabilities (the long-term money used in the business). It''s used for ROCE.
 
 ## Working capital
 Current assets − current liabilities. Too little means trouble paying bills; too much means idle resources.
@@ -1392,6 +1456,27 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('c624fffb-
 Owners (profit, ROCE), banks (liquidity), suppliers (liquidity), employees (profit and security), government (profit for tax).
 
 **Limitations**: past data, no non-financial factors, different accounting methods.
+
+## All the 7081 formulas (Cambridge''s list for 2027 onwards)
+| Formula | Unit |
+|---|---|
+| Market share = sales revenue of business ÷ total market sales revenue × 100 | % |
+| Labour productivity = output per period ÷ number of employees | units per employee |
+| Total variable cost = variable cost per unit × number of units | $ |
+| Total cost = total fixed costs + total variable costs | $ |
+| Average cost = total cost ÷ number of units | $ |
+| Contribution per unit = selling price per unit − variable cost per unit | $ |
+| Break-even output = fixed costs ÷ contribution per unit | units |
+| Margin of safety = actual sales − break-even sales | units |
+| Revenue = selling price per unit × number of units sold | $ |
+| Gross profit = revenue − cost of sales | $ |
+| Profit = total revenue − total costs (or gross profit − expenses) | $ |
+| Working capital = current assets − current liabilities | $ |
+| Gross profit margin = gross profit ÷ revenue × 100 | % |
+| Profit margin = profit ÷ revenue × 100 | % |
+| ROCE = profit ÷ capital employed × 100 | % |
+| Current ratio = current assets : current liabilities | ratio : 1 |
+| Acid test ratio = (current assets − inventory) : current liabilities | ratio : 1 |
 
 > Exam tip: calculate, then interpret in context, then suggest an improvement.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, sort) values ('1a56a715-38e1-551e-a307-65dccf8ba076', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', 'Chapter 5 quiz', 'quiz', 60, 4) on conflict (id) do nothing;
@@ -1425,6 +1510,12 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('d36b2b00-3446-508e-a389-805b4301dc89', 1) on conflict (question_id) do update set correct = excluded.correct;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('5d6ab4d8-d1a5-5e5a-ac3d-5d0173069178', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'Who would use a business''s accounts to decide whether to lend it money?', '["A customer","A bank","A competitor","A pressure group"]'::jsonb, 'A bank checks profitability and liquidity to judge whether the loan can be repaid.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
 insert into question_keys (question_id, correct) values ('5d6ab4d8-d1a5-5e5a-ac3d-5d0173069178', 1) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('f931faa4-c8e9-5772-af5a-6a08168c8edb', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'What is venture capital?', '["Money from investors in risky new firms, for a share of ownership","Money raised by selling assets the business no longer needs","A long-term bank loan that is repaid with a fixed interest rate","Profit that is kept in the business instead of paid to owners"]'::jsonb, 'Venture capitalists invest in new, risky businesses in return for part-ownership.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('f931faa4-c8e9-5772-af5a-6a08168c8edb', 0) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('0cc460ce-6762-5286-ad8b-4082b7a545bf', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'Equity is $60 000 and non-current liabilities are $40 000. What is the capital employed?', '["$60 000","$100 000","$40 000","$20 000"]'::jsonb, 'Capital employed = equity + non-current liabilities = $60 000 + $40 000 = $100 000.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('0cc460ce-6762-5286-ad8b-4082b7a545bf', 1) on conflict (question_id) do nothing;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('f3c2e067-4d5d-52cd-ac27-fe5901e00fc4', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'e645c134-7320-552e-a820-0ae824153b0c', '1a56a715-38e1-551e-a307-65dccf8ba076', 'Profit is $15 000 and capital employed is $100 000. What is the ROCE?', '["1.5%","6.7%","15%","85%"]'::jsonb, 'ROCE = profit ÷ capital employed × 100 = 15 000 ÷ 100 000 × 100 = 15%.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('f3c2e067-4d5d-52cd-ac27-fe5901e00fc4', 2) on conflict (question_id) do nothing;
 insert into chapters (id, course_id, number, title, sort) values ('b482d586-3417-5d4e-a2b0-bb5c0cac4090', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', '6', 'External influences on business activity', 5) on conflict (id) do nothing;
 insert into parts (id, chapter_id, number, title, sort, body) values ('84efa6da-fc94-51de-a571-73d088c76ba7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.1', 'Economic issues', 0, '## Economic issues and business
 **Business cycle**: growth → boom → recession → slump → recovery.
@@ -1462,6 +1553,9 @@ Operate in more than one country.
 
 ## Protectionism
 **Tariffs** (taxes on imports), **quotas** (limits), **subsidies** to local firms. It protects local jobs, but raises prices and limits choice.
+
+## External costs and benefits
+Business decisions affect third parties. **External costs**: pollution, congestion, noise (e.g. a new factory). **External benefits**: jobs, training, better roads. (See 6.3 for how governments control external costs.)
 
 ## Exchange rates
 - **Appreciation**: exports dearer, imports cheaper
@@ -1555,6 +1649,8 @@ insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, expl
 insert into question_keys (question_id, correct) values ('0af3a3af-b94d-58fd-a5d8-1d41f687dbc2', 3) on conflict (question_id) do nothing;
 insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('ee95c941-8fe8-5774-a8ef-1ff6573adbba', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '42a85e8c-ef58-57d9-af58-90a23dce0205', 'Why might a business use environmentally friendly methods even if they cost more?', '["To improve its image and avoid fines or boycotts","To reduce its sales so it can produce less","To increase the pollution it makes each year","Because they are always cheaper than old ways"]'::jsonb, 'Customers and pressure groups reward responsible firms; breaking environmental laws can lead to fines.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation, options = excluded.options;
 insert into question_keys (question_id, correct) values ('ee95c941-8fe8-5774-a8ef-1ff6573adbba', 0) on conflict (question_id) do update set correct = excluded.correct;
+insert into questions (id, course_id, chapter_id, quiz_id, prompt, options, explanation) values ('8154ed3e-9e93-58a4-a1bd-6416d4ee661c', 'e4b4abea-0bf2-5180-affe-2a0ac83e65e7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '42a85e8c-ef58-57d9-af58-90a23dce0205', 'Which is an external cost of building a new factory?', '["New jobs created for local people","Higher wages paid to the factory workers","More profit for the factory''s owners","More traffic and noise for local people"]'::jsonb, 'External costs fall on third parties, such as local residents suffering noise, traffic and pollution. New jobs are an external benefit.') on conflict (id) do update set prompt = excluded.prompt, explanation = excluded.explanation;
+insert into question_keys (question_id, correct) values ('8154ed3e-9e93-58a4-a1bd-6416d4ee661c', 3) on conflict (question_id) do nothing;
 insert into courses (id, slug, code, title, tier, exam_label, description, color, icon, sort) values ('1cfd38e6-861e-579b-a83a-d236a693b94a', 'o-economics', '2281', 'O Level Economics', 'O', 'Cambridge O Level Economics 2281 · Nov 2027', 'Revised syllabus for 2027. Paper 1: 40 MCQs (1h). Paper 2: one compulsory question + three from four (2h).', '#3b82f6', 'trending-up', 2) on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, sort) values ('151ac03f-0b1f-5e4c-a1b2-6e8b6d0198aa', '1cfd38e6-861e-579b-a83a-d236a693b94a', null, 'O Level Economics Speedrun', 'speedrun', 60, 150, 999) on conflict (id) do nothing;
 insert into quizzes (id, course_id, chapter_id, title, kind, xp_reward, time_limit_sec, question_count, sort, status) values ('824a68c7-4e2a-51f6-ab50-e88508603368', '1cfd38e6-861e-579b-a83a-d236a693b94a', null, 'Paper 1 practice (40 questions, 1h)', 'exam', 150, 3600, 40, 1000, 'locked') on conflict (id) do nothing;

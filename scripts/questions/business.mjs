@@ -19,6 +19,8 @@ export default {
       ["Which organisation is owned by the government?", ["A public corporation", "A public limited company", "A partnership", "A cooperative"], 0, "Public corporations are in the public sector. A public limited company (plc) is privately owned by shareholders, even though its shares are sold to the public."],
       ["A social enterprise mainly aims to…", ["Meet social or environmental objectives as well as make a surplus", "Maximise profit for shareholders only", "Avoid paying tax", "Sell only abroad"], 0, "Social enterprises use business methods to achieve social or environmental aims and reinvest most of their surplus."],
       ["A benefit of a business staying small is…", ["Closer contact with customers and quicker decisions", "Bigger bulk-buying discounts", "Easier access to large bank loans", "Lower average costs from economies of scale"], 0, "Small firms can offer a personal service and react quickly. The other options are advantages of being large."],
+      ["What is a social enterprise?", ["A business with social or environmental aims as well as profit", "A business owned and run by the government for the public", "A business that is not allowed to make any profit at all", "A business owned by its customers who share the profits"], 0, "Social enterprises trade like normal businesses but also aim to help society or the environment. They can make a profit."],
+      ["Which stakeholder mainly wants loans repaid on time with interest?", ["Lenders such as banks", "Employees of the business", "Customers of the business", "The local community"], 0, "Lenders are external stakeholders whose main objective is getting their money back with interest."],
     ],
   },
   "2": {
@@ -40,6 +42,10 @@ export default {
       ["Which describes an autocratic leader?", ["Makes decisions alone and expects them to be followed", "Involves staff in all decisions", "Lets staff make their own decisions", "Never gives instructions"], 0, "Autocratic leaders keep control; democratic leaders involve staff; laissez-faire leaders leave staff to decide."],
       ["A trade union…", ["Represents workers in negotiations with employers", "Is owned by shareholders", "Sets interest rates", "Is a type of franchise"], 0, "Unions bargain collectively for better pay, conditions and job security."],
       ["One-way communication is when…", ["The receiver cannot respond, e.g. a notice board", "There is a meeting with questions", "Two people talk on the phone", "There is a video call"], 0, "In one-way communication there is no feedback, so the sender can't check the message was understood."],
+      ["Which is a benefit of an employment contract for the worker?", ["Their pay, hours and duties are clearly set out", "They can never be made redundant by the business", "They no longer need any training from the business", "They can choose their own working hours each day"], 0, "A contract sets out the terms of the job, so both sides know their rights and duties."],
+      ["Why might a business reduce its workforce (downsize)?", ["It has automated part of its production", "It wants to raise its spans of control", "It has just won a large new order", "Its employees are highly motivated"], 0, "Automation, falling demand and cost-cutting are the main reasons for downsizing."],
+      ["What is a disadvantage of using social media to communicate with customers?", ["Mistakes are public and spread very fast", "It cannot reach customers outside the area", "It is always slower than writing a letter", "Customers have no way to reply to it"], 0, "Social media is fast, cheap and two-way, but a mistake or complaint can spread publicly in minutes."],
+      ["Which is an example of flexible working?", ["Working some days from home", "Being paid a fixed monthly salary", "Moving between tasks on the line", "Receiving a bonus for good sales"], 0, "Flexible working includes flexi-time, working from home and job sharing. Job rotation is a motivation method."],
     ],
   },
   "3": {
@@ -61,6 +67,9 @@ export default {
       ["Selling directly to customers through a website is an example of…", ["E-commerce", "Wholesaling", "Penetration pricing", "Market segmentation"], 0, "E-commerce is buying and selling online, a 'place' (distribution) decision in the marketing mix."],
       ["Brand loyalty means customers…", ["Keep buying the same brand", "Always buy the cheapest product", "Never shop online", "Avoid advertised products"], 0, "Loyal customers keep coming back, so the business can often charge more and spend less winning them."],
       ["In market research, a sample is…", ["A smaller group chosen to represent the whole population", "The whole population", "A free product", "A type of price"], 0, "Asking everyone is too costly, so a representative sample is used instead."],
+      ["A ride-sharing app charges more when demand is high. Which pricing strategy is this?", ["Dynamic pricing", "Cost-plus pricing", "Penetration pricing", "Competitive pricing"], 0, "Dynamic pricing changes the price in real time according to demand, as with flights, hotels and ride apps."],
+      ["Which is an advantage of ecommerce for customers?", ["They can compare prices easily and shop at any time", "They can always touch and try products before buying", "They never have to wait for any delivery to arrive", "They pay no money until the business has made a profit"], 0, "Online shopping is convenient and makes price comparison easy, but customers can't try products first and must wait for delivery."],
+      ["What is a disadvantage of entering a new overseas market?", ["Different laws, language and culture", "It spreads the business's risks", "It gives access to more customers", "It allows growth when home sales stop"], 0, "Overseas markets bring more customers and spread risk, but differences in laws, language and culture make it harder."],
     ],
   },
   "4": {
@@ -82,6 +91,9 @@ export default {
       ["Which is an example of sustainable production?", ["Using renewable energy and recycling waste", "Using more plastic packaging", "Dumping waste in rivers", "Using more energy"], 0, "Sustainable production reduces harm to the environment so future generations can meet their needs."],
       ["Automation in a factory is likely to…", ["Raise productivity but may reduce the number of jobs", "Always lower quality", "Increase labour costs", "Slow down production"], 0, "Machines work faster and more consistently, but some workers may lose their jobs or need retraining."],
       ["Fixed costs $6 000, contribution per unit $3, sales 2 500 units. Profit is…", ["$1 500", "$7 500", "−$1 500", "$6 000"], 0, "Total contribution = 2 500 × $3 = $7 500. Profit = $7 500 − $6 000 = $1 500."],
+      ["What is 3D printing in production?", ["Building a product layer by layer from a digital design", "Printing three copies of every design for the factory", "Using three machines in a row to make each product", "Designing products on paper before making them by hand"], 0, "3D printing builds objects layer by layer from a computer design. It suits prototypes and customised products."],
+      ["Which is an example of reusing in sustainable production?", ["Refilling customers' own bottles", "Burning waste to get rid of it", "Using more packaging for safety", "Moving the factory to a cheaper area"], 0, "Reusing means using items again, such as refill schemes. Reducing, reusing and recycling all cut waste."],
+      ["What is the difference between mechanisation and automation?", ["Mechanisation helps workers; automation needs little human input", "Automation helps workers; mechanisation needs no human input", "Mechanisation is used in services; automation only on farms", "There is no difference: both mean using robots for everything"], 0, "With mechanisation, workers still operate the machines. With automation, machines do the job with little human input."],
     ],
   },
   "5": {
@@ -103,6 +115,9 @@ export default {
       ["Microfinance is…", ["Small loans for people on low incomes who can't get normal bank loans", "A large share issue", "A government grant to big firms", "A type of insurance"], 0, "Microfinance helps people start small businesses, often in developing countries."],
       ["Crowdfunding means…", ["Raising small amounts of money from many people, usually online", "Borrowing from one bank", "Selling non-current assets", "Using retained profit"], 0, "Many people each give a little, often in return for a reward or a share in the business."],
       ["Who would use a business's accounts to decide whether to lend it money?", ["A bank", "A customer", "A competitor", "A pressure group"], 0, "A bank checks profitability and liquidity to judge whether the loan can be repaid."],
+      ["What is venture capital?", ["Money from investors in risky new firms, for a share of ownership", "A long-term bank loan that is repaid with a fixed interest rate", "Money raised by selling assets the business no longer needs", "Profit that is kept in the business instead of paid to owners"], 0, "Venture capitalists invest in new, risky businesses in return for part-ownership."],
+      ["Equity is $60 000 and non-current liabilities are $40 000. What is the capital employed?", ["$100 000", "$20 000", "$60 000", "$40 000"], 0, "Capital employed = equity + non-current liabilities = $60 000 + $40 000 = $100 000."],
+      ["Profit is $15 000 and capital employed is $100 000. What is the ROCE?", ["15%", "6.7%", "85%", "1.5%"], 0, "ROCE = profit ÷ capital employed × 100 = 15 000 ÷ 100 000 × 100 = 15%."],
     ],
   },
   "6": {
@@ -124,6 +139,7 @@ export default {
       ["Globalisation gives businesses…", ["Access to bigger markets but more foreign competition", "Fewer customers", "No competition", "Higher tariffs everywhere"], 0, "Trade barriers are lower, so firms can sell abroad but also face competitors from abroad."],
       ["Which government policy could reduce unemployment?", ["Cutting taxes to increase spending", "Raising interest rates sharply", "Reducing government spending", "Increasing income tax"], 0, "Lower taxes leave people and firms more to spend, increasing demand and so the need for workers."],
       ["Why might a business use environmentally friendly methods even if they cost more?", ["To improve its image and avoid fines or boycotts", "To reduce sales", "To increase pollution", "Because they are always cheaper"], 0, "Customers and pressure groups reward responsible firms; breaking environmental laws can lead to fines."],
+      ["Which is an external cost of building a new factory?", ["More traffic and noise for local people", "Higher wages paid to the factory workers", "More profit for the factory's owners", "New jobs created for local people"], 0, "External costs fall on third parties, such as local residents suffering noise, traffic and pollution. New jobs are an external benefit."],
     ],
   },
 };

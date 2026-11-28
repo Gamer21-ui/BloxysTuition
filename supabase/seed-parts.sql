@@ -623,6 +623,7 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('9bec721a-
 | **Public limited company (plc)** | Shareholders; shares sold on the stock exchange | Limited | Can raise large amounts | Risk of takeover, published accounts |
 | **Franchise** | Franchisee buys the right to use a brand | Depends | Proven brand, support | Fees and royalties, little freedom |
 | **Joint venture** | Two businesses share a project | Depends | Shared costs and risks | Shared profits, possible conflicts |
+| **Social enterprise** | Owners/members | Depends on legal form | Social and environmental aims as well as profit; customers like it | Profit and social aims can conflict |
 | **Public corporation** | Government | n/a | Provides essential services | May be inefficient |
 
 **Limited liability**: owners can only lose what they invested. **Unlimited liability**: personal assets can be taken to pay business debts.
@@ -645,6 +646,7 @@ Objectives change over time, e.g. survival at first, then growth.
 | Employees | Fair pay, job security, good conditions |
 | Customers | Quality, low prices, service |
 | Suppliers | Regular orders, paid on time |
+| Lenders (banks) | Loans repaid on time with interest |
 | Government | Taxes, jobs, following the law |
 | Local community | Jobs, low pollution |
 
@@ -659,6 +661,10 @@ HRM covers recruitment, selection, training, motivation, and dismissal or redund
 2. **Job description** (duties of the job) and **person specification** (skills and qualities wanted)
 3. Advertise: **internal** (cheaper, known worker, motivates staff) or **external** (new ideas, wider choice)
 4. Applications (CV/application form), shortlist, interview/tests, appoint
+
+## Employment contracts
+A legal agreement between employer and employee: job title, duties, hours, pay, holidays, notice period, start date.
+**Benefits**: both sides know their rights and duties, which reduces disputes; it gives the worker security.
 
 ## Training
 - **Induction**: introduces new staff to the business
@@ -695,7 +701,15 @@ Planning, organising, coordinating, commanding and controlling.
 - **Democratic**: staff are involved (better ideas, motivation, slower)
 - **Laissez-faire**: staff decide (suits skilled, self-motivated workers)
 
-**Trade unions** represent workers in negotiations on pay and conditions.
+## Flexible working and contracts
+- **Full-time** vs **part-time** staff: part-time gives flexibility to cover busy periods, but less commitment and more training per hour worked.
+- **Flexible working**: flexi-time, working from home, job sharing. Better work-life balance and motivation, but harder to coordinate.
+
+## Reducing the workforce (downsizing)
+Reasons: **automation**, **falling demand**, **cutting costs**. **Redundancy** = the job is no longer needed (not the worker''s fault), usually with compensation. Handle it fairly to keep remaining staff motivated.
+
+## Trade unions
+A group of workers who join together to protect their interests. Member benefits: stronger voice when negotiating pay and conditions (**collective bargaining**), legal support, help with disputes and job security.
 
 > Exam tip: link leadership style to the situation, e.g. "laissez-faire suits a team of experienced designers".') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('10d3d840-86db-5fad-afe3-273b32a9a94f', 'd85278ab-73c3-5282-a46a-813d3130834d', '2.3', 'Methods of communication', 2, '## Communication
@@ -707,6 +721,9 @@ Communication: sender → message → medium → receiver → feedback.
 | Written (letters, reports, email) | Permanent record, detailed | Slower, no body language |
 | Visual (charts, posters) | Easy to understand | May oversimplify |
 | Electronic (email, messaging, video calls) | Quick, reaches many | Information overload, needs equipment |
+| **Text messages** | Instant, read quickly, good for short updates | Too short for detail, easy to miss |
+| **Social media** (business pages, groups) | Reaches customers and staff fast, cheap, two-way | Public mistakes spread fast, hard to control |
+| **Noticeboards** | Cheap, everyone can see it | One-way, may be ignored or out of date |
 
 - **One-way**: no reply possible (notice board)
 - **Two-way**: feedback (meeting)
@@ -739,7 +756,7 @@ Wages (time rate), **salary**, **piece rate**, **commission**, **bonus**, **prof
 - **Job rotation**: moving between tasks (variety)
 - **Job enlargement**: more tasks at the same level
 - **Job enrichment**: more challenging, responsible work
-- **Teamworking**, training, promotion, **recognition**
+- **Teamworking**, training, promotion, **recognition** (praise, **employee of the month**)
 
 > Exam tip: recommend motivation methods that fit the job, e.g. commission for sales staff, piece rate for factory output.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('5364794a-48f3-5350-a459-5544673e71ec', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.1', 'Marketing and the market', 0, '## Marketing and the market
@@ -794,17 +811,32 @@ Design, quality, features, packaging, brand. **Product life cycle**: introductio
 | **Competitive** | Match rivals'' prices |
 | **Penetration** | Low price to enter a market and win share |
 | **Skimming** | High price for a new, unique product |
+| **Dynamic** | Price changes with demand in real time (flights, hotels, ride apps) |
 | **Promotional** | Short-term low price |
 | **Psychological** | $9.99 instead of $10 |
 
 **Price elasticity**: if demand is elastic, cutting price raises revenue.
 
 ## Place
-Distribution channels: producer → consumer; producer → retailer → consumer; producer → wholesaler → retailer → consumer. Plus **e-commerce** (online, 24/7, global reach, but delivery costs and security worries).
+Distribution channels: producer → consumer (direct); producer → retailer → consumer; producer → wholesaler → retailer → consumer; producer → **agent** → consumer (agents sell for the producer, often abroad, for a commission).
+
+## Ecommerce (buying and selling online)
+Examples: online shops, marketplaces, apps, social media shops.
+| | Advantages | Disadvantages |
+|---|---|---|
+| **Business** | Sells 24/7 to a global market, lower shop costs, data on customers | Delivery and returns costs, website costs, online competition, security risks |
+| **Customer** | Convenient, wider choice, easy price comparison | Can''t see or try the product, delivery waits, fraud worries |
 
 ## Promotion
 - **Above the line**: paid media advertising (TV, radio, social media ads)
 - **Below the line**: sales promotions (BOGOF, coupons, free samples), personal selling, sponsorship, PR
+
+## Marketing strategy
+The 4Ps must work together for the target market. In the exam you may have to **recommend a marketing mix** and justify each P using the case.
+
+## Entering new overseas markets
+**Advantages**: more customers and sales, spreading risk, growth when the home market is saturated.
+**Disadvantages**: different language, culture and laws; transport costs; exchange-rate risk; less knowledge of the market. Often done through agents, joint ventures or franchising to reduce risk.
 
 > Exam tip: the mix must be consistent. A luxury product needs high price, exclusive place and image-led promotion.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('73d4c489-4e09-5630-a840-733edaae7110', '4a6917c9-553e-55e8-aa82-87402390ef15', '3.4', 'Legal controls', 3, '## Legal controls on marketing
@@ -843,7 +875,9 @@ Buffer inventory protects against delays; too much ties up cash and costs storag
 
 > Exam tip: recommend a production method based on demand and product type.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('887a8abf-ec80-5f33-ae68-6c8297cb2c9a', 'acfcb10e-2017-5def-aeb1-7d978feeb433', '4.2', 'Technology and production of goods and services', 1, '## Technology in production
-- **Automation and robots**: faster, consistent quality, can work 24/7
+- **Mechanisation**: machines help workers do the job (workers still operate them)
+- **Automation and robots**: machines do the job with little human input; faster, consistent quality, can work 24/7
+- **3D printing**: builds products layer by layer from a digital design; good for prototypes and customised products
 - **CAD** (computer-aided design) and **CAM** (computer-aided manufacturing)
 - **Electronic point of sale (EPOS)**: tracks sales and inventory
 - **Online ordering and contactless payments** in services
@@ -861,7 +895,8 @@ Producing in a way that meets today''s needs without harming future generations.
 
 ## Methods
 - **Renewable energy** (solar, wind)
-- **Recycling** and using recycled materials
+- **Reducing** resources and waste, **reusing** materials and packaging (e.g. refill schemes), **recycling** and using recycled materials
+- **Eco-friendly products and packaging**
 - **Less packaging**, biodegradable packaging
 - Reducing water and energy use
 - **Responsible sourcing** of materials
@@ -929,8 +964,9 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('cde68957-
 ## Services
 Retailers need footfall, visibility, parking and nearby customers. Online businesses are less tied to location.
 
-## Moving abroad
-Cheaper labour, access to new markets, avoiding trade barriers. Risks: language, culture, exchange rates and political instability.
+## Choosing a country (moving abroad)
+Factors: cost of labour and land, size of the market, trade barriers (tariffs and quotas), government incentives, political stability, exchange rates, language and culture, skills available.
+Reasons: cheaper labour, access to new markets, avoiding trade barriers. Risks: language, culture, exchange rates and political instability.
 
 > Exam tip: give a recommendation for the specific business and say which factor matters most for it.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('a05ad1c1-a128-5c27-a7a7-c4db8c9585e0', 'e645c134-7320-552e-a820-0ae824153b0c', '5.1', 'Business finance', 0, '## Sources of finance
@@ -940,9 +976,10 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('a05ad1c1-
 |---|---|
 | Retained profit | Bank loans |
 | Selling assets | Overdrafts |
-| Owner''s savings | Share issue (companies) |
+| Owners'' investment (savings) | Share issue (companies) |
 | Reducing inventory | Trade credit, leasing, hire purchase |
-| | Grants, **microfinance**, **crowdfunding**, debt factoring |
+| Working capital (cash already in the business) | **Venture capital** (investors in risky new firms, for a share of ownership) |
+| | Grants, **microfinance**, **crowdfunding** (many people each give small amounts online), debt factoring |
 
 ## Short-term vs long-term
 - **Short-term** (working capital): overdraft, trade credit, factoring
@@ -1006,7 +1043,10 @@ A snapshot of what a business **owns** and **owes** on one date.
 - **Non-current liabilities**: owed after a year (long-term loans)
 - **Equity / capital**: owners'' investment plus retained profits
 
+**Total assets** = non-current assets + current assets
+**Total liabilities** = non-current liabilities + current liabilities
 **Total assets − total liabilities = equity**
+**Capital employed** = equity + non-current liabilities (the long-term money used in the business). It''s used for ROCE.
 
 ## Working capital
 Current assets − current liabilities. Too little means trouble paying bills; too much means idle resources.
@@ -1031,6 +1071,27 @@ insert into parts (id, chapter_id, number, title, sort, body) values ('c624fffb-
 Owners (profit, ROCE), banks (liquidity), suppliers (liquidity), employees (profit and security), government (profit for tax).
 
 **Limitations**: past data, no non-financial factors, different accounting methods.
+
+## All the 7081 formulas (Cambridge''s list for 2027 onwards)
+| Formula | Unit |
+|---|---|
+| Market share = sales revenue of business ÷ total market sales revenue × 100 | % |
+| Labour productivity = output per period ÷ number of employees | units per employee |
+| Total variable cost = variable cost per unit × number of units | $ |
+| Total cost = total fixed costs + total variable costs | $ |
+| Average cost = total cost ÷ number of units | $ |
+| Contribution per unit = selling price per unit − variable cost per unit | $ |
+| Break-even output = fixed costs ÷ contribution per unit | units |
+| Margin of safety = actual sales − break-even sales | units |
+| Revenue = selling price per unit × number of units sold | $ |
+| Gross profit = revenue − cost of sales | $ |
+| Profit = total revenue − total costs (or gross profit − expenses) | $ |
+| Working capital = current assets − current liabilities | $ |
+| Gross profit margin = gross profit ÷ revenue × 100 | % |
+| Profit margin = profit ÷ revenue × 100 | % |
+| ROCE = profit ÷ capital employed × 100 | % |
+| Current ratio = current assets : current liabilities | ratio : 1 |
+| Acid test ratio = (current assets − inventory) : current liabilities | ratio : 1 |
 
 > Exam tip: calculate, then interpret in context, then suggest an improvement.') on conflict (id) do update set body = coalesce(parts.body, excluded.body);
 insert into parts (id, chapter_id, number, title, sort, body) values ('84efa6da-fc94-51de-a571-73d088c76ba7', 'b482d586-3417-5d4e-a2b0-bb5c0cac4090', '6.1', 'Economic issues', 0, '## Economic issues and business
@@ -1069,6 +1130,9 @@ Operate in more than one country.
 
 ## Protectionism
 **Tariffs** (taxes on imports), **quotas** (limits), **subsidies** to local firms. It protects local jobs, but raises prices and limits choice.
+
+## External costs and benefits
+Business decisions affect third parties. **External costs**: pollution, congestion, noise (e.g. a new factory). **External benefits**: jobs, training, better roads. (See 6.3 for how governments control external costs.)
 
 ## Exchange rates
 - **Appreciation**: exports dearer, imports cheaper
