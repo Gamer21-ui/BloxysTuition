@@ -27,6 +27,13 @@ export async function announceLevelUp() {
   }]);
 }
 
+/** Mark one of MY notifications as read (RLS keeps it to the user's own rows). */
+export async function markRead(id: number) {
+  await requireApproved();
+  const sb = await createClient();
+  await sb.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", Math.trunc(Number(id))).is("read_at", null);
+}
+
 export async function markAllRead() {
   await requireApproved();
   const sb = await createClient();
