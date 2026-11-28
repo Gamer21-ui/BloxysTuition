@@ -13,6 +13,8 @@ import { gamesFor } from "@/lib/arcade";
 import { GameCard, VizCard } from "@/components/game-card";
 import { GoLiveButton } from "@/components/viz/go-live";
 import { DuelCard, type DuelRow } from "@/components/duel-card";
+import { AnswerMethod } from "@/components/answer-method";
+import { subjectOf } from "@/lib/subjects";
 
 export const metadata: Metadata = { title: "Chapter" };
 
@@ -63,6 +65,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <div className="space-y-3">
+          {subjectOf(slug) === "business" && <AnswerMethod compact />}
           {(parts || []).map((p) => (
             <details key={p.id} className="card" open={(parts || []).length === 1}>
               <summary className="flex cursor-pointer items-center gap-3">

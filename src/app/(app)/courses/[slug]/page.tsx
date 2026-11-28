@@ -10,6 +10,8 @@ import { Card, SectionTitle } from "@/components/ui";
 import { fmtDateTime, isLive } from "@/lib/utils";
 import { vizForChapter } from "@/lib/viz";
 import { gamesFor } from "@/lib/arcade";
+import { AnswerMethod } from "@/components/answer-method";
+import { subjectOf } from "@/lib/subjects";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -44,6 +46,8 @@ export default async function CoursePage({ params, searchParams }: { params: Pro
         </div>
         {speedrun && <Link href={`/quiz/${speedrun.id}`} className="btn btn-accent"><Timer size={18} aria-hidden="true" /> Speedrun</Link>}
       </div>
+
+      {subjectOf(slug) === "business" && <div className="mt-5"><AnswerMethod compact /></div>}
 
       <div className="mt-6 flex gap-2" role="tablist">
         {tabs.map(([k, l]) => (
