@@ -19,6 +19,7 @@ import { PrestigeBadge } from "@/components/prestige-badge";
 import { emblem } from "@/lib/prestige";
 import { Heartbeat } from "@/components/heartbeat";
 import { LiveBanner } from "@/components/live-banner";
+import { WhatsNew } from "@/components/whats-new";
 import type { NavStyle } from "@/components/nav";
 
 export const metadata: Metadata = { robots: { index: false, follow: false } };
@@ -97,6 +98,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <PartyBanner meId={me.id} />
       <Heartbeat />
       {!tutor && <LivePoll meId={me.id} />}
+      {/* thank-you + what's new, once per update; brand-new students (first 2 days) get the site tour instead */}
+      <WhatsNew skip={!tutor && Date.now() - new Date(me.created_at).getTime() < 2 * 86_400_000} />
       {/* site tour: new students, or everyone after the tutor relaunches it (skipped until the database update is in) */}
       {site && me.tutorial_version !== undefined && (
         <Tutorial show={!tutor && me.tutorial_version < site.tutorial_version} isStudent={!tutor} seen={me.tutorial_version} />
